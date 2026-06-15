@@ -1,17 +1,20 @@
 {
+  "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "target": "ES2021",
-    "module": "CommonJS",
-    "moduleResolution": "node",
-    "lib": ["ES2021"],
     "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
     "noUncheckedIndexedAccess": true,
-    "resolveJsonModule": true,
-    "types": ["node", "jest"]
+    "forceConsistentCasingInFileNames": true,
+    "paths": {
+      "@/*": ["./*"]
+    }
   },
-  "include": ["lib", "db", "services"],
-  "exclude": ["node_modules"]
+  "include": [
+    "app",
+    "lib",
+    "db",
+    "services",
+    "adapters",
+    "expo-env.d.ts",
+    ".expo/types/**/*.ts"
+  ]
 }

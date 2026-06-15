@@ -3,3 +3,7 @@ node_modules/
 .DS_Store
 coverage/
 dist/
+dist/
+.expo/
+web-build/
+*.tsbuildinfo

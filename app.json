@@ -1,8 +1,37 @@
 {
-  "plugins": [
-    "expo-router",
-    "expo-sqlite",
-    "expo-secure-store",
-    "expo-status-bar"
-  ]
+  "expo": {
+    "name": "Tet",
+    "slug": "tet",
+    "version": "0.1.0",
+    "scheme": "tet",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.doubletimeonly.tet"
+    },
+    "android": {
+      "package": "com.doubletimeonly.tet"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-sqlite",
+      "expo-secure-store",
+      [
+        "expo-notifications",
+        {
+          "color": "#1f6feb"
+        }
+      ],
+      "expo-sharing"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
 }

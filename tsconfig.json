@@ -12,6 +12,6 @@
     "resolveJsonModule": true,
     "types": ["node", "jest"]
   },
-  "include": ["lib", "db"],
+  "include": ["lib", "db", "services"],
   "exclude": ["node_modules"]
 }

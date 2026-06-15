@@ -8,7 +8,25 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@expo/metro-runtime": "~56.0.15",
+    "expo": "^56.0.12",
+    "expo-constants": "~56.0.18",
+    "expo-file-system": "~56.0.8",
+    "expo-linking": "~56.0.14",
+    "expo-notifications": "~56.0.18",
+    "expo-router": "~56.2.11",
+    "expo-secure-store": "~56.0.4",
+    "expo-sqlite": "~56.0.5",
+    "expo-status-bar": "~56.0.4",
     "luxon": "^3.5.0",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-native": "0.85.3",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-screens": "4.25.2",
+    "react-native-web": "^0.21.2",
+    "react-native-webview": "13.16.1",
+    "react-native-youtube-iframe": "^2.4.1",
     "ts-fsrs": "^5.4.1"
   },
   "devDependencies": {

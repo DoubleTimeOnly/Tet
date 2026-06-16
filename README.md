@@ -40,19 +40,38 @@ Click through the whole app in a browser. Data is **in-memory** (resets on refre
 and a Starter deck is auto-seeded so it's not empty. Push notifications and the native
 YouTube embed are stubbed on web — YouTube falls back to "Open in YouTube".
 
-### On your phone — Expo Go
+### On your phone — development build (recommended)
+
+This project is on **Expo SDK 56**. The stock **Expo Go** app usually can't run it
+("incompatible SDK version") because Expo Go only ships the latest *stable* SDK
+runtime. Use a **development build** instead — a custom app with this exact runtime
+baked in. It also gives you reliable push (Expo Go can't).
+
+Build it in the cloud with [EAS](https://docs.expo.dev/build/introduction/) (no Xcode /
+Android Studio needed locally):
 
 ```bash
-npm run start      # then scan the QR code with the Expo Go app
+npm install -g eas-cli      # or use: npx eas-cli@latest <cmd>
+eas login                   # free Expo account
+eas init                    # creates the EAS project id (first time)
+
+# Android (e.g. Motorola Razr): builds an installable APK
+eas build --profile development --platform android
+# iOS:
+eas build --profile development --platform ios
 ```
 
-Real SQLite persistence, secure-store, Readwise checks, and the embedded YouTube
-player all work here.
+When the build finishes, open the link on your phone and install the app. Then start
+the bundler and open the dev build (scan the QR from *this* app, not Expo Go):
 
-> **Note:** the daily reminder is a local notification. It works in Expo Go for a quick
-> try, but reminder reliability is only fully trustworthy in a **dev build** (below).
+```bash
+npx expo start --dev-client
+```
 
-### Native dev build (full fidelity, incl. push)
+A development build gives you real SQLite persistence, secure-store, Readwise checks,
+the embedded YouTube player, and reliable notifications.
+
+### Local native build (if you have the toolchains)
 
 ```bash
 npm run ios        # needs Xcode

@@ -23,9 +23,19 @@ export interface ReadingProgress {
   isComplete: boolean;
 }
 
+/** A Readwise Reader document, trimmed to what Tet needs. */
+export interface ReadwiseDocument {
+  id: string;
+  title: string;
+}
+
 export interface ReadwiseClient {
   /** @param target completion threshold (defaults to the client's default). */
   getProgress(documentId: string, target?: number): Promise<ReadingProgress>;
+  /** All documents (paged through), so callers can resolve a title -> id. */
+  listDocuments(): Promise<ReadwiseDocument[]>;
+  /** Documents whose title contains `query` (case-insensitive). */
+  findDocumentsByTitle(query: string): Promise<ReadwiseDocument[]>;
 }
 
 /** Secure store of the Readwise API token (expo-secure-store in the app). */
@@ -64,9 +74,14 @@ export interface RealReadwiseClientOptions {
 interface ReadwiseListResponse {
   results?: Array<{
     id?: string;
+    title?: string;
     reading_progress?: number;
   }>;
+  nextPageCursor?: string | null;
 }
+
+/** Guard so a huge library can't spin the device through unbounded requests. */
+const MAX_LIST_PAGES = 10;
 
 export class RealReadwiseClient implements ReadwiseClient {
   private readonly tokenStore: TokenStore;
@@ -81,17 +96,18 @@ export class RealReadwiseClient implements ReadwiseClient {
     this.timeoutMs = opts.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   }
 
-  async getProgress(
-    documentId: string,
-    target?: number,
-  ): Promise<ReadingProgress> {
+  /** One GET against v3/list with the given query params. Shared auth/error path. */
+  private async fetchJson(
+    params: Record<string, string>,
+  ): Promise<ReadwiseListResponse> {
     const token = await this.tokenStore.getToken();
     if (!token) {
       // Missing secure-store token: prompt re-auth rather than crash.
       throw new ReadwiseAuthError("No Readwise token stored");
     }
 
-    const url = `${READWISE_LIST_URL}?id=${encodeURIComponent(documentId)}`;
+    const qs = new URLSearchParams(params).toString();
+    const url = qs ? `${READWISE_LIST_URL}?${qs}` : READWISE_LIST_URL;
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), this.timeoutMs);
 
@@ -120,15 +136,20 @@ export class RealReadwiseClient implements ReadwiseClient {
       throw new ReadwiseNetworkError(`Readwise responded ${res.status}`);
     }
 
-    let body: ReadwiseListResponse;
     try {
-      body = (await res.json()) as ReadwiseListResponse;
+      return (await res.json()) as ReadwiseListResponse;
     } catch (err) {
       throw new ReadwiseNetworkError(
         `Readwise returned invalid JSON: ${(err as Error).message}`,
       );
     }
+  }
 
+  async getProgress(
+    documentId: string,
+    target?: number,
+  ): Promise<ReadingProgress> {
+    const body = await this.fetchJson({ id: documentId });
     const doc = body.results?.[0];
     // Absent doc/progress => treat as 0 read, not an error (doc may be unopened).
     const fraction = clampFraction(doc?.reading_progress ?? 0);
@@ -139,6 +160,27 @@ export class RealReadwiseClient implements ReadwiseClient {
       fraction,
       isComplete: fraction >= t,
     };
+  }
+
+  async listDocuments(): Promise<ReadwiseDocument[]> {
+    const docs: ReadwiseDocument[] = [];
+    let cursor: string | undefined;
+    for (let page = 0; page < MAX_LIST_PAGES; page++) {
+      const body = await this.fetchJson(cursor ? { pageCursor: cursor } : {});
+      for (const r of body.results ?? []) {
+        if (r.id && r.title) docs.push({ id: r.id, title: r.title });
+      }
+      if (!body.nextPageCursor) break;
+      cursor = body.nextPageCursor;
+    }
+    return docs;
+  }
+
+  async findDocumentsByTitle(query: string): Promise<ReadwiseDocument[]> {
+    const needle = query.trim().toLowerCase();
+    if (!needle) return [];
+    const docs = await this.listDocuments();
+    return docs.filter((d) => d.title.toLowerCase().includes(needle));
   }
 }
 

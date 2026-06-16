@@ -41,6 +41,23 @@ describe("FakeReadwiseClient (offline happy path)", () => {
     const client = new FakeReadwiseClient({ failWith: new ReadwiseNetworkError() });
     await expect(client.getProgress("doc1")).rejects.toBeInstanceOf(ReadwiseNetworkError);
   });
+
+  it("resolves a document id from a title (case-insensitive substring)", async () => {
+    const client = new FakeReadwiseClient({
+      documents: [
+        { id: "01a", title: "Deep Work" },
+        { id: "02b", title: "The Beginning of Infinity" },
+        { id: "03c", title: "Working in Public" },
+      ],
+    });
+    const matches = await client.findDocumentsByTitle("work");
+    expect(matches.map((d) => d.id)).toEqual(["01a", "03c"]);
+  });
+
+  it("returns no matches for a blank query", async () => {
+    const client = new FakeReadwiseClient({ documents: [{ id: "01a", title: "Deep Work" }] });
+    expect(await client.findDocumentsByTitle("   ")).toEqual([]);
+  });
 });
 
 describe("RealReadwiseClient — request shape (resolved spike)", () => {
@@ -140,5 +157,49 @@ describe("RealReadwiseClient — error paths", () => {
       ({ status: 200, ok: true, json: async () => { throw new Error("bad json"); } }) as unknown as Response) as unknown as typeof fetch;
     const client = new RealReadwiseClient({ tokenStore: new FakeTokenStore("tok"), fetchImpl });
     await expect(client.getProgress("doc1")).rejects.toBeInstanceOf(ReadwiseNetworkError);
+  });
+});
+
+describe("RealReadwiseClient — document listing by title", () => {
+  it("pages through nextPageCursor and filters by title", async () => {
+    const pages: Record<string, unknown> = {
+      // no cursor -> page 1
+      "": { results: [{ id: "01a", title: "Deep Work" }], nextPageCursor: "p2" },
+      p2: { results: [{ id: "02b", title: "Working in Public" }], nextPageCursor: null },
+    };
+    const seen: string[] = [];
+    const fetchImpl = (async (url: string) => {
+      const cursor = new URL(url).searchParams.get("pageCursor") ?? "";
+      seen.push(cursor);
+      return { status: 200, ok: true, json: async () => pages[cursor] } as Response;
+    }) as unknown as typeof fetch;
+
+    const client = new RealReadwiseClient({ tokenStore: new FakeTokenStore("tok"), fetchImpl });
+    const matches = await client.findDocumentsByTitle("work");
+
+    expect(matches).toEqual([
+      { id: "01a", title: "Deep Work" },
+      { id: "02b", title: "Working in Public" },
+    ]);
+    expect(seen).toEqual(["", "p2"]); // followed the cursor exactly once
+  });
+
+  it("skips results missing id or title", async () => {
+    const client = new RealReadwiseClient({
+      tokenStore: new FakeTokenStore("tok"),
+      fetchImpl: jsonFetch(200, {
+        results: [{ id: "01a" }, { title: "no id" }, { id: "02b", title: "Keep me" }],
+        nextPageCursor: null,
+      }),
+    });
+    expect(await client.listDocuments()).toEqual([{ id: "02b", title: "Keep me" }]);
+  });
+
+  it("401 while listing -> ReadwiseAuthError", async () => {
+    const client = new RealReadwiseClient({
+      tokenStore: new FakeTokenStore("expired"),
+      fetchImpl: jsonFetch(401, {}),
+    });
+    await expect(client.findDocumentsByTitle("x")).rejects.toBeInstanceOf(ReadwiseAuthError);
   });
 });

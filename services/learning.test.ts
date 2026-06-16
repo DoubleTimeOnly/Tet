@@ -1,6 +1,6 @@
 import { MemoryStore } from "../db/memoryStore";
 import { getTodayView, gradeCard, completeTask } from "./learning";
-import { seedStarterDeck, createTask, addCard, createDeck } from "./authoring";
+import { seedStarterDeck, createTask, addCard, createDeck, addCardFromTask, findOrCreateDeck } from "./authoring";
 import { exportBackup, restoreBackup, importAnki } from "./backupService";
 import { DateTime } from "luxon";
 import type { AnkiNoteReader } from "../lib/ankiImport";
@@ -60,6 +60,35 @@ describe("full loop: read -> make cards -> review later", () => {
     // Reviewed cards are no longer due same-day.
     const after = await getTodayView(store, d1, LA);
     expect(after.slice.reviewCards.length).toBe(0);
+  });
+});
+
+describe("addCardFromTask (make cards after watching)", () => {
+  it("lands cards in a per-task deck and satisfies the make-cards gate", async () => {
+    const store = new MemoryStore();
+    const now = day("2026-06-15T10:00");
+    const task = await createTask(
+      store,
+      { type: "youtube", title: "Lecture", sourceRef: "https://youtu.be/x", makesCardsCount: 2 },
+      now,
+    );
+
+    // Watched, gate still open.
+    let completion = await completeTask(store, task, { type: "youtube", manual: true }, now, LA);
+    expect(completion.verified).toBe(false);
+
+    // Author two cards straight from the task — no deck setup needed.
+    await addCardFromTask(store, task, "q1", "a1", now);
+    await addCardFromTask(store, task, "q2", "a2", now);
+
+    expect(await store.countCardsBySourceTask(task.id)).toBe(2);
+    const deck = await findOrCreateDeck(store, "From: Lecture", now);
+    const snap = await store.exportAll();
+    expect(snap.cards.every((c) => c.deck_id === deck.id && c.source_task_id === task.id)).toBe(true);
+
+    // Now completing verifies.
+    completion = await completeTask(store, task, { type: "youtube", manual: true }, now, LA);
+    expect(completion.verified).toBe(true);
   });
 });
 

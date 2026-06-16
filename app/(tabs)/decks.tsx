@@ -4,6 +4,7 @@ import { useFocusEffect } from "expo-router";
 import { useStore } from "../../ui/StoreProvider";
 import { addCard, createTask, createDeck } from "../../services/authoring";
 import { Screen, Card, Title, Subtitle, Body, Muted, Button } from "../../ui/components";
+import { ReadwiseDocPicker } from "../../ui/ReadwiseDocPicker";
 import { colors, radius, space } from "../../ui/theme";
 import type { Deck, Task, TaskType } from "../../db/schema";
 
@@ -103,21 +104,26 @@ function AddTaskForm({ onDone }: { onDone: () => void }) {
   const [title, setTitle] = useState("");
   const [type, setType] = useState<TaskType>("youtube");
   const [sourceRef, setSourceRef] = useState("");
+  const [pickedDoc, setPickedDoc] = useState<{ id: string; title: string } | null>(null);
   const [cadence, setCadence] = useState("1");
   const [makes, setMakes] = useState("0");
+
+  // For reading tasks the source_ref is the Readwise doc id picked below.
+  const resolvedSourceRef = type === "reading" ? (pickedDoc?.id ?? "") : sourceRef;
 
   const submit = async () => {
     if (!title.trim()) return;
     await createTask(store, {
       type,
       title: title.trim(),
-      sourceRef: sourceRef.trim() || null,
+      sourceRef: resolvedSourceRef.trim() || null,
       cadence: Math.max(1, parseInt(cadence, 10) || 1),
       makesCardsCount: Math.max(0, parseInt(makes, 10) || 0),
       readingTarget: type === "reading" ? 0.9 : null,
     });
     setTitle("");
     setSourceRef("");
+    setPickedDoc(null);
     onDone();
   };
 
@@ -130,11 +136,16 @@ function AddTaskForm({ onDone }: { onDone: () => void }) {
         ))}
       </View>
       <Field placeholder="Title" value={title} onChangeText={setTitle} />
-      {type !== "flashcard" && (
-        <Field
-          placeholder={type === "youtube" ? "YouTube URL" : "Readwise document id"}
-          value={sourceRef}
-          onChangeText={setSourceRef}
+      {type === "youtube" && (
+        <Field placeholder="YouTube URL" value={sourceRef} onChangeText={setSourceRef} />
+      )}
+      {type === "reading" && (
+        <ReadwiseDocPicker
+          selected={pickedDoc}
+          onPick={(doc) => {
+            setPickedDoc(doc);
+            if (!title.trim()) setTitle(doc.title);
+          }}
         />
       )}
       <View style={styles.row}>

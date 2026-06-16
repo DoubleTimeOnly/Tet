@@ -4,6 +4,7 @@ import { useStore } from "../../ui/StoreProvider";
 import { completeTask } from "../../services/learning";
 import { createReadwiseClient } from "../../services/readwiseService";
 import { ReadwiseAuthError, ReadwiseNetworkError } from "../../lib/readwise";
+import { MakeCardsSection } from "../../ui/MakeCardsSection";
 import { Screen, Card, Title, Subtitle, Body, Muted, Button } from "../../ui/components";
 import type { Task } from "../../db/schema";
 
@@ -65,6 +66,8 @@ export default function ReadingTaskScreen() {
         {status.kind === "error" && <Body>{status.message}</Body>}
         <Button label="Check Readwise" onPress={check} />
       </Card>
+
+      {task.makes_cards_count > 0 && <MakeCardsSection task={task} />}
 
       {status.kind === "auth" && (
         <Button label="Go to Settings" kind="neutral" onPress={() => router.replace("/settings")} />

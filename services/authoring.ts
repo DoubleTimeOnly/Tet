@@ -3,6 +3,32 @@ import type { Deck, Task, Card, TaskType } from "../db/schema";
 import { createCard } from "../lib/fsrs";
 import { newId } from "../lib/id";
 
+/** Find a deck by exact name, or create it. Used to land cards made from a task. */
+export async function findOrCreateDeck(
+  store: Store,
+  name: string,
+  now: number = Date.now(),
+): Promise<Deck> {
+  const existing = (await store.listDecks()).find((d) => d.name === name);
+  return existing ?? createDeck(store, name, now);
+}
+
+/**
+ * Author a card from a youtube/reading task so it counts toward that task's
+ * makes_cards_count gate. Cards land in a per-task deck ("From: <title>") and
+ * carry source_task_id so completeTask can verify once enough exist.
+ */
+export async function addCardFromTask(
+  store: Store,
+  task: Task,
+  front: string,
+  back: string,
+  now: number = Date.now(),
+): Promise<Card> {
+  const deck = await findOrCreateDeck(store, `From: ${task.title}`, now);
+  return addCard(store, { deckId: deck.id, front, back, sourceTaskId: task.id }, now);
+}
+
 /** Deck / task / card creation used by the editor screens and seeding. */
 
 export async function createDeck(

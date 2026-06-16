@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
-import { Linking, View } from "react-native";
+import { Alert, Linking, Platform, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { YoutubeEmbed } from "../../ui/YoutubeEmbed";
 import { useStore } from "../../ui/StoreProvider";
+import { MakeCardsSection } from "../../ui/MakeCardsSection";
 import { completeTask } from "../../services/learning";
 import { parseYouTubeId } from "../../lib/youtube";
 import { Screen, Card, Title, Subtitle, Body, Muted, Button } from "../../ui/components";
@@ -15,6 +16,7 @@ export default function YoutubeTaskScreen() {
   const router = useRouter();
   const [task, setTask] = useState<Task | null>(null);
   const [blocked, setBlocked] = useState(false);
+  const [cardsTick, setCardsTick] = useState(0);
 
   useEffect(() => {
     if (taskId) store.getTask(taskId).then(setTask);
@@ -25,8 +27,10 @@ export default function YoutubeTaskScreen() {
     const completion = await completeTask(store, task, { type: "youtube", manual: true }, Date.now(), tz);
     reload();
     if (!completion.verified && task.makes_cards_count > 0) {
-      // Watched, but the make-cards gate is still open.
-      router.replace("/decks");
+      // Watched, but the make-cards gate is still open — keep them here to finish it.
+      const msg = `Make ${task.makes_cards_count} card(s) from this video below to complete the task.`;
+      if (Platform.OS === "web") globalThis.alert?.(msg);
+      else Alert.alert("Almost there", msg);
     } else {
       router.back();
     }
@@ -58,6 +62,10 @@ export default function YoutubeTaskScreen() {
             onPress={() => watchUrl && Linking.openURL(watchUrl)}
           />
         </Card>
+      )}
+
+      {task.makes_cards_count > 0 && (
+        <MakeCardsSection key={cardsTick} task={task} onChange={() => setCardsTick((n) => n + 1)} />
       )}
 
       <View style={{ height: space.sm }} />

@@ -1,0 +1,5543 @@
+{
+  "source": "Obsidian vault (#flashcardsv2)",
+  "exportedAt": "2026-06-18T05:25:26.751Z",
+  "deckName": "Obsidian Flashcards",
+  "cards": [
+    {
+      "front": "What NSA program did George W. Bush implement after 9/11?",
+      "back": "President's Surveillance Program",
+      "note": "How It Works - Electronic Frontier Foundation",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-06-09",
+        "interval": 152,
+        "ease": 230
+      }
+    },
+    {
+      "front": "When did George W. Bush implement the President's Surveillance Program?",
+      "back": "After 9/11",
+      "note": "How It Works - Electronic Frontier Foundation",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-17",
+        "interval": 176,
+        "ease": 270
+      }
+    },
+    {
+      "front": "What kind of call information did the NSA request from major telecomm companies for the President's Surveillance Program?",
+      "back": "Call and customer metadata",
+      "note": "How It Works - Electronic Frontier Foundation",
+      "kind": "basic",
+      "schedule": {
+        "due": "2027-03-10",
+        "interval": 358,
+        "ease": 250
+      }
+    },
+    {
+      "front": "What did the NSA install in AT&T facilities?",
+      "back": "Fiber optic splitters",
+      "note": "How It Works - Electronic Frontier Foundation",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-06-17",
+        "interval": 204,
+        "ease": 270
+      }
+    },
+    {
+      "front": "What do NSA fiber optic splitters do?",
+      "back": "Copy internet traffic",
+      "note": "How It Works - Electronic Frontier Foundation",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-04",
+        "interval": 133,
+        "ease": 250
+      }
+    },
+    {
+      "front": "What two initial questions should an \"Illuminator\" ask to understand another's point of view?",
+      "back": "1. How are you seeing this event?\n2. What experiences cause you to see it that way?",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "multiline",
+      "schedule": {
+        "due": "2026-04-22",
+        "interval": 27,
+        "ease": 246
+      }
+    },
+    {
+      "front": "Beyond the events of a story, what two forward-looking insights should a good listener aim to uncover about the storyteller?",
+      "back": "What lessons they learned\nHow they changed as a result",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "multiline",
+      "schedule": {
+        "due": "2026-04-06",
+        "interval": 11,
+        "ease": 208
+      }
+    },
+    {
+      "front": "In David Brooks' view, what is the 'foundational skill' upon which all other social skills rest?",
+      "back": "The ability to see someone.",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-11",
+        "interval": 47,
+        "ease": 250
+      }
+    },
+    {
+      "front": "What does George Bernard Shaw identify as the 'worst sin' towards fellow creatures?",
+      "back": "To be indifferent to them.",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-03-30",
+        "interval": 34,
+        "ease": 291
+      }
+    },
+    {
+      "front": "In David Brooks' view, what is required for an individual to fully appreciate their own inner beauty and strengths?",
+      "back": "To have those qualities mirrored back to them by someone else.",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-08-13",
+        "interval": 140,
+        "ease": 307
+      }
+    },
+    {
+      "front": "William Ickes finds that strangers in their first conversation read each other with about [...] percent accuracy, while close friends and family reach only 35 percent.",
+      "back": "20",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-03-22",
+        "interval": 11,
+        "ease": 270
+      }
+    },
+    {
+      "front": "William Ickes finds that strangers in their first conversation read each other with about 20 percent accuracy, while close friends and family reach only [...] percent.",
+      "back": "35",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-17",
+        "interval": 10,
+        "ease": 286
+      }
+    },
+    {
+      "front": "Why is seeing others well considered a \"hard problem\" regarding our perspective of them?",
+      "back": "we only have an outside view of who they are.",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-08-26",
+        "interval": 162,
+        "ease": 311
+      }
+    },
+    {
+      "front": "What is the central paradox of David Brooks' analysis of the Gornicks' relationship in 'Fierce Attachments'?",
+      "back": "It is possible to know much about someone without actually 'seeing' them).",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-07-22",
+        "interval": 118,
+        "ease": 286
+      }
+    },
+    {
+      "front": "What core assumption does an Illuminator make about the knowledge or experiences of every person they encounter?",
+      "back": "Every person is fascinating on some topic.",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-17",
+        "interval": 39,
+        "ease": 251
+      }
+    },
+    {
+      "front": "What did Zadie Smith mean by describing herself as an \"equal-opportunity voyeur\" as a child?",
+      "back": "She wondered what it was like to be \"everybody,\" regardless of their background or beliefs.",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-06-28",
+        "interval": 108,
+        "ease": 308
+      }
+    },
+    {
+      "front": "According to David Brooks, why is it considered \"lazy\" to see someone through the lens of a doting grandmother or a tough coach?",
+      "back": "It reduces complex humans to stereotypes.",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-25",
+        "interval": 75,
+        "ease": 288
+      }
+    },
+    {
+      "front": "Mary Pipher's therapeutic approach centers on the idea that people are [...], typically doing the best they can.",
+      "back": "vulnerable and love-seeking",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-08",
+        "interval": 3,
+        "ease": 250
+      }
+    },
+    {
+      "front": "Mary Pipher's therapeutic approach centers on the idea that people are vulnerable and love-seeking, typically doing [...].",
+      "back": "the best they can",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-02-18",
+        "interval": 16,
+        "ease": 291
+      }
+    },
+    {
+      "front": "To better understand a person's character, Pipher found it useful to ask: \"How do you [...]?\" and \"How do you make them feel?\"",
+      "back": "treat others",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-03-12",
+        "interval": 1,
+        "ease": 210
+      }
+    },
+    {
+      "front": "To better understand a person's character, Pipher found it useful to ask: \"How do you treat others?\" and \"How do you [...]?\"",
+      "back": "make them feel",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-11",
+        "interval": 4,
+        "ease": 271
+      }
+    },
+    {
+      "front": "What is the main idea behind \"Let others voluntarily evolve\" in the context of accompaniment?",
+      "back": "Let others make their own choices and change on their own terms/timing.",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-06-01",
+        "interval": 81,
+        "ease": 270
+      }
+    },
+    {
+      "front": "David Brooks suggests that trust is built within a relationship when [...], mistakes are tolerated, and one person signals their availability/presence.",
+      "back": "individual differences are appreciated",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-03",
+        "interval": 3,
+        "ease": 250
+      }
+    },
+    {
+      "front": "David Brooks suggests that trust is built within a relationship when individual differences are appreciated, [...], and one person signals their availability/presence.",
+      "back": "mistakes are tolerated",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-03-11",
+        "interval": 1,
+        "ease": 247
+      }
+    },
+    {
+      "front": "David Brooks suggests that trust is built within a relationship when individual differences are appreciated, mistakes are tolerated, and one person signals their [...].",
+      "back": "availability/presence",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-02",
+        "interval": 1,
+        "ease": 226
+      }
+    },
+    {
+      "front": "In the context of supporting someone's growth, what is the primary alternative to being forceful about their developement",
+      "back": "Letting them voluntarily evolve.",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-29",
+        "interval": 48,
+        "ease": 268
+      }
+    },
+    {
+      "front": "In the context of accompaniment, what is a teacher's goal beyond simply offering the correct answers?",
+      "back": "To walk with students as they figure out how to solve a problem",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-17",
+        "interval": 61,
+        "ease": 310
+      }
+    },
+    {
+      "front": "According to the advice on accompaniment, what is the common mistake to avoid when someone is suffering a humiliation or setback?",
+      "back": "Feeling the need to validate feelings instead of just being there",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-06-04",
+        "interval": 79,
+        "ease": 288
+      }
+    },
+    {
+      "front": "Aldous Huxley captured the core reality: “Experience is not what happens to you, it’s [...].”",
+      "back": "what you do with what happens to you",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-04-30",
+        "interval": 35,
+        "ease": 271
+      }
+    },
+    {
+      "front": "To truly know a person, David Brooks suggests asking not \"What happened to this person?\" but what?",
+      "back": "\"How does this person interpret what happened?\"",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-01",
+        "interval": 36,
+        "ease": 250
+      }
+    },
+    {
+      "front": "What idea about shared experiences does David Brooks illustrate with the story of Irvin Yalom and his patients in group therapy?",
+      "back": "People can be at the same event together but have entirely different internal experiences of it.",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-28",
+        "interval": 64,
+        "ease": 310
+      }
+    },
+    {
+      "front": "How does the Anaïs Nin quote \"We do not see things as they are, we see things as we are\" apply to social perception?",
+      "back": "Our life events dictate how we construct our reality of an event.",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-30",
+        "interval": 49,
+        "ease": 270
+      }
+    },
+    {
+      "front": "what is the relationship between current behaviors (like hating to ask for favors) and past experiences?",
+      "back": "Current behaviors are seen as symptoms of underlying models or beliefs created by life experiences",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-14",
+        "interval": 49,
+        "ease": 291
+      }
+    },
+    {
+      "front": "In David Brooks' view, what differentiates a \"good conversation\" from a mere exchange of statements?",
+      "back": "It is an act of joint exploration.",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-03-29",
+        "interval": 17,
+        "ease": 230
+      }
+    },
+    {
+      "front": "What is the expected intellectual outcome of a conversation characterized as \"joint exploration\"?",
+      "back": "It sparks thoughts the participants never had before (starts in one place and ends in another).",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-11-11",
+        "interval": 180,
+        "ease": 311
+      }
+    },
+    {
+      "front": "What does it mean to treat attention as an \"on/off switch\" rather than a \"dimmer\" during conversation?",
+      "back": "It means treating presence as all-or-nothing: stopping other activities and being fully present rather than partially attending.",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-03",
+        "interval": 47,
+        "ease": 307
+      }
+    },
+    {
+      "front": "Why does a listener's attention often drift despite someone speaking to them?",
+      "back": "The average speaking rate (120–150 wpm) provides insufficient data to fully occupy the listener's brain.",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-08-12",
+        "interval": 148,
+        "ease": 306
+      }
+    },
+    {
+      "front": "In David Brooks' description of mastering conversation, why is Oprah Winfrey considered a \"Loud Listener\"?",
+      "back": "She is highly reactive, visibly feeling the emotions described by the speaker through facial expressions and vocal affirmations.",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-21",
+        "interval": 65,
+        "ease": 311
+      }
+    },
+    {
+      "front": "What is the social psychologist Gus Cooney's \"novelty penalty\" in conversation?",
+      "back": "People struggle to picture or get excited about unfamiliar topics, preferring to talk about what they already know.",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-06-03",
+        "interval": 83,
+        "ease": 288
+      }
+    },
+    {
+      "front": "According to David Brooks, what is the most effective way to \"get a conversation rolling\" with a stranger?",
+      "back": "Find the thing the other person is most attached to (favoring familiarity over novelty).",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-08-19",
+        "interval": 160,
+        "ease": 326
+      }
+    },
+    {
+      "front": "What interviewing technique helps move a person from being a 'witness' to a storyteller ('author')?",
+      "back": "Asking specific questions about concrete details (e.g., \"Where was your boss sitting?\") and internal reactions.",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-25",
+        "interval": 60,
+        "ease": 267
+      }
+    },
+    {
+      "front": "In David Brooks' 'How to Know a Person', what type of stories do good conversationalists ask for?",
+      "back": "Stories about specific events or experiences",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-09",
+        "interval": 29,
+        "ease": 231
+      }
+    },
+    {
+      "front": "After identifying a specific event in a story, what is the next step for a good conversationalist?",
+      "back": "understand *how* the person experienced that event and what they were feeling",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-08",
+        "interval": 43,
+        "ease": 251
+      }
+    },
+    {
+      "front": "What does a good conversationalist explore regarding the relationship between the past and the present?",
+      "back": "How the person is experiencing their past events now (current perspective vs. initial reaction).",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-07-05",
+        "interval": 110,
+        "ease": 291
+      }
+    },
+    {
+      "front": "What is the psychological concept of \"looping\" in conversation?",
+      "back": "Repeating back what someone just said to ensure you accurately understood their meaning.",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-06",
+        "interval": 56,
+        "ease": 310
+      }
+    },
+    {
+      "front": "Why do conversation experts recommend the practice of \"looping\" despite its potential clumsiness?",
+      "back": "To check if you and speaker are on the same page",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-09-29",
+        "interval": 187,
+        "ease": 328
+      }
+    },
+    {
+      "front": "According to the 'Midwife Model', why does a midwife occasionally 'prod' the speaker?",
+      "back": "To encourage a deeper honesty in areas where the speaker is not fully honest with themselves",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-06",
+        "interval": 71,
+        "ease": 288
+      }
+    },
+    {
+      "front": "The 'Midwife Model' is appropriate for conversations that are [...], where one person is accompanying the other through a hard time or life decision.",
+      "back": "lopsided",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-04-07",
+        "interval": 57,
+        "ease": 311
+      }
+    },
+    {
+      "front": "According to the \"Gem Statement\" framework, what should remain the focal point during difficult conversations?",
+      "back": "The shared truth (the gem statement) both parties agree on.",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-07-12",
+        "interval": 123,
+        "ease": 290
+      }
+    },
+    {
+      "front": "Instead of restating a point of view to win an argument, David Brooks suggests asking: \"What is the [...] underneath our practical disagreement?\"",
+      "back": "values disagreement",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-03-14",
+        "interval": 3,
+        "ease": 267
+      }
+    },
+    {
+      "front": "Instead of restating a point of view to win an argument, David Brooks suggests asking: \"What is the values disagreement underneath our [...]?\"",
+      "back": "practical disagreement",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-02",
+        "interval": 1,
+        "ease": 226
+      }
+    },
+    {
+      "front": "What is the shift in interpersonal dynamic when a conversation moves from repeating arguments to searching for their \"moral, philosophical roots\"?",
+      "back": "It becomes a mutual exploration (pulling stories out of each other rather than repeating points).",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-02",
+        "interval": 51,
+        "ease": 266
+      }
+    },
+    {
+      "front": "Instead of immediately sharing a similar personal story to build connection, what does David Brooks suggest to do with another person's experience?",
+      "back": "Focusing on and exploring their experience",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-07-20",
+        "interval": 116,
+        "ease": 270
+      }
+    },
+    {
+      "front": "When helping someone look at the \"big picture\" of their life, David Bradley asks questions about three specific topics: [...], skills, and schedule.",
+      "back": "ultimate goals",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-05",
+        "interval": 2,
+        "ease": 248
+      }
+    },
+    {
+      "front": "When helping someone look at the \"big picture\" of their life, David Bradley asks questions about three specific topics: ultimate goals, [...], and schedule.",
+      "back": "skills",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-01",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "When helping someone look at the \"big picture\" of their life, David Bradley asks questions about three specific topics: ultimate goals, skills, and [...].",
+      "back": "schedule",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-10",
+        "interval": 3,
+        "ease": 251
+      }
+    },
+    {
+      "front": "Regarding the \"big picture\" of a person's life, how does David Bradley define the topic of ultimate goals?",
+      "back": "What do you want to offer the world?",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-06-14",
+        "interval": 97,
+        "ease": 290
+      }
+    },
+    {
+      "front": "Regarding the \"big picture\" of a person's life, how does David Bradley define the topic of skills?",
+      "back": "What are you doing when you feel most alive?",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-03-29",
+        "interval": 3,
+        "ease": 166
+      }
+    },
+    {
+      "front": "Regarding the \"big picture\" of a person's life, how does David Bradley define the topic of schedule?",
+      "back": "How exactly do you fill your days?",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-06-12",
+        "interval": 95,
+        "ease": 291
+      }
+    },
+    {
+      "front": "How do \"humble questions\" differ from \"closed questions\" in terms of the respondent's freedom?",
+      "back": "Humble questions are open-ended, allowing the respondent to define the frame and depth of the answer.",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-07-07",
+        "interval": 118,
+        "ease": 306
+      }
+    },
+    {
+      "front": "1. [...]",
+      "back": "“How did you…”",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "cloze",
+      "schedule": null
+    },
+    {
+      "front": "2. [...]",
+      "back": "“What’s it like…”",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "cloze",
+      "schedule": null
+    },
+    {
+      "front": "3. [...]",
+      "back": "“Tell me about…”",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "cloze",
+      "schedule": null
+    },
+    {
+      "front": "4. [...]",
+      "back": "“In what ways…”",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-03-12",
+        "interval": 1,
+        "ease": 247
+      }
+    },
+    {
+      "front": "What did a 2012 study by Harvard neuroscientists reveal about the relative pleasure derived from self-disclosure?",
+      "back": "People often took more pleasure from sharing information about themselves than from receiving money.",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-20",
+        "interval": 85,
+        "ease": 288
+      }
+    },
+    {
+      "front": "According to psychologist Bernard Rimé, what is the relationship between the intensity of a negative experience and a person's desire to discuss it?",
+      "back": "The more negative the experience, the more compelled people feel to talk about it.",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-07-26",
+        "interval": 131,
+        "ease": 291
+      }
+    },
+    {
+      "front": "As schools became more fixated on [...], they stopped worrying about producing students who were considerate to others.",
+      "back": "career success",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-03",
+        "interval": 3,
+        "ease": 250
+      }
+    },
+    {
+      "front": "As schools became more fixated on career success, they stopped worrying about producing students who were [...].",
+      "back": "considerate to others",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-16",
+        "interval": 8,
+        "ease": 268
+      }
+    },
+    {
+      "front": "What core deficiency does David Brooks identify as the root of modern civilizational failure?",
+      "back": "A failure to teach the skills needed to see others",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-25",
+        "interval": 69,
+        "ease": 271
+      }
+    },
+    {
+      "front": "Why does David Brooks argue against \"pretending not to see\" social identity (e.g. ideology, race, class) when encountering another person?",
+      "back": "Because social identity is part of the life experiences that influence a person's world view",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-06-02",
+        "interval": 77,
+        "ease": 286
+      }
+    },
+    {
+      "front": "David Brooks suggests that understanding another person requires seeing them on three levels simultaneously: as a(n) [...], as a member of their groups, and within their social location.",
+      "back": "distinct individual",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-09",
+        "interval": 4,
+        "ease": 270
+      }
+    },
+    {
+      "front": "David Brooks suggests that understanding another person requires seeing them on three levels simultaneously: as a(n) distinct individual, as a [...], and within their social location.",
+      "back": "member of their groups",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-01",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "David Brooks suggests that understanding another person requires seeing them on three levels simultaneously: as a(n) distinct individual, as a member of their groups, and within their [...].",
+      "back": "social location",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-03-18",
+        "interval": 22,
+        "ease": 251
+      }
+    },
+    {
+      "front": "In the context of understanding others, what does \"social location\" refer to?",
+      "back": "The way people are positioned as insiders or outsiders (e.g., at the top of society vs. marginalized).",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-06-19",
+        "interval": 85,
+        "ease": 248
+      }
+    },
+    {
+      "front": "What internal conflict does Brooks describe regarding his 'right to an opinion' during a conversation about race with a Black woman?",
+      "back": "He was questioning his standing to speak on the issue as a white male",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-23",
+        "interval": 72,
+        "ease": 286
+      }
+    },
+    {
+      "front": "1. [...]",
+      "back": "\"What would you do if you weren't afraid?\"",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "cloze",
+      "schedule": null
+    },
+    {
+      "front": "2. [...]",
+      "back": "\"If we meet a year from now, what will we be celebrating?\"",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "cloze",
+      "schedule": null
+    },
+    {
+      "front": "3. [...]",
+      "back": "\"If you died tonight what would you regret not doing?\"",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-03-12",
+        "interval": 1,
+        "ease": 247
+      }
+    },
+    {
+      "front": "What is a question you can ask to dive into the events that lead up to a strong issue for a person?",
+      "back": "\"Why is that a problem for you?\"",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-04",
+        "interval": 53,
+        "ease": 251
+      }
+    },
+    {
+      "front": "1. [...]",
+      "back": "\"What's working really well in your life?",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "cloze",
+      "schedule": null
+    },
+    {
+      "front": "2. [...]",
+      "back": "\"What are you most self-confident about?\"",
+      "note": "How to Know a Person - David Brooks",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-18",
+        "interval": 10,
+        "ease": 270
+      }
+    },
+    {
+      "front": "Spaced repetition makes memory [...]",
+      "back": "a choice",
+      "note": "How to Write Good Prompts Using Spaced Repetition to Create Understanding - Andy Matuschak",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2027-06-18",
+        "interval": 488,
+        "ease": 310
+      }
+    },
+    {
+      "front": "Why are focused prompts good for retrieval?",
+      "back": "They prevent incomplete retrieval",
+      "note": "How to Write Good Prompts Using Spaced Repetition to Create Understanding - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-27",
+        "interval": 92,
+        "ease": 215
+      }
+    },
+    {
+      "front": "Why are precise prompts good for retrieval?",
+      "back": "They prevent inconsistent retrieval",
+      "note": "How to Write Good Prompts Using Spaced Repetition to Create Understanding - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-26",
+        "interval": 105,
+        "ease": 210
+      }
+    },
+    {
+      "front": "What do unfocused prompts have too much of?",
+      "back": "Detail",
+      "note": "How to Write Good Prompts Using Spaced Repetition to Create Understanding - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-13",
+        "interval": 158,
+        "ease": 270
+      }
+    },
+    {
+      "front": "Before writing prompts, what information should you know before hand?",
+      "back": "The knowledge you want to reinforce",
+      "note": "How to Write Good Prompts Using Spaced Repetition to Create Understanding - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-06-21",
+        "interval": 189,
+        "ease": 270
+      }
+    },
+    {
+      "front": "Follow these steps to write retrieval prompts for an interesting article [...],  2. Determine what knowledge to reinforce,  3. Convert that knowledge into prompts, 4. Repeat 5-10 times",
+      "back": "1. Read the article",
+      "note": "How to Write Good Prompts Using Spaced Repetition to Create Understanding - Andy Matuschak",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2025-08-26",
+        "interval": 4,
+        "ease": 275
+      }
+    },
+    {
+      "front": "Follow these steps to write retrieval prompts for an interesting article 1. Read the article,  [...],  3. Convert that knowledge into prompts, 4. Repeat 5-10 times",
+      "back": "2. Determine what knowledge to reinforce",
+      "note": "How to Write Good Prompts Using Spaced Repetition to Create Understanding - Andy Matuschak",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2000-01-01",
+        "interval": 1,
+        "ease": 250
+      }
+    },
+    {
+      "front": "Follow these steps to write retrieval prompts for an interesting article 1. Read the article,  2. Determine what knowledge to reinforce,  [...], 4. Repeat 5-10 times",
+      "back": "3. Convert that knowledge into prompts",
+      "note": "How to Write Good Prompts Using Spaced Repetition to Create Understanding - Andy Matuschak",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2025-08-24",
+        "interval": 3,
+        "ease": 250
+      }
+    },
+    {
+      "front": "Follow these steps to write retrieval prompts for an interesting article 1. Read the article,  2. Determine what knowledge to reinforce,  3. Convert that knowledge into prompts, [...]",
+      "back": "4. Repeat 5-10 times",
+      "note": "How to Write Good Prompts Using Spaced Repetition to Create Understanding - Andy Matuschak",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2000-01-01",
+        "interval": 1,
+        "ease": 250
+      }
+    },
+    {
+      "front": "What types of jnformation should you focus on when writing initial prompts for complex topics?",
+      "back": "Facts and definitions",
+      "note": "How to Write Good Prompts Using Spaced Repetition to Create Understanding - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-07-15",
+        "interval": 200,
+        "ease": 290
+      }
+    },
+    {
+      "front": "The following are some useful lenses to write prompts for 1. [...],  2. similarities and differences, 3. examples, 4. Cause and effect, 5. significance and implications,",
+      "back": "attributes and tendencies",
+      "note": "How to Write Good Prompts Using Spaced Repetition to Create Understanding - Andy Matuschak",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2025-08-23",
+        "interval": 1,
+        "ease": 235
+      }
+    },
+    {
+      "front": "The following are some useful lenses to write prompts for 1. attributes and tendencies,  2. [...], 3. examples, 4. Cause and effect, 5. significance and implications,",
+      "back": "similarities and differences",
+      "note": "How to Write Good Prompts Using Spaced Repetition to Create Understanding - Andy Matuschak",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2000-01-01",
+        "interval": 1,
+        "ease": 250
+      }
+    },
+    {
+      "front": "The following are some useful lenses to write prompts for 1. attributes and tendencies,  2. similarities and differences, 3. [...], 4. Cause and effect, 5. significance and implications,",
+      "back": "examples",
+      "note": "How to Write Good Prompts Using Spaced Repetition to Create Understanding - Andy Matuschak",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2025-08-27",
+        "interval": 3,
+        "ease": 255
+      }
+    },
+    {
+      "front": "The following are some useful lenses to write prompts for 1. attributes and tendencies,  2. similarities and differences, 3. examples, 4. [...], 5. significance and implications,",
+      "back": "Cause and effect",
+      "note": "How to Write Good Prompts Using Spaced Repetition to Create Understanding - Andy Matuschak",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2025-08-26",
+        "interval": 3,
+        "ease": 255
+      }
+    },
+    {
+      "front": "The following are some useful lenses to write prompts for 1. attributes and tendencies,  2. similarities and differences, 3. examples, 4. Cause and effect, 5. [...],",
+      "back": "significance and implications",
+      "note": "How to Write Good Prompts Using Spaced Repetition to Create Understanding - Andy Matuschak",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2025-08-22",
+        "interval": 1,
+        "ease": 235
+      }
+    },
+    {
+      "front": "What are the two types of memory strength?",
+      "back": "Storage and retrieval",
+      "note": "How We Learn - Benedict Carey",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-08",
+        "interval": 102,
+        "ease": 272
+      }
+    },
+    {
+      "front": "What is memory storage strength?",
+      "back": "Expertise on a topic",
+      "note": "How We Learn - Benedict Carey",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-04",
+        "interval": 113,
+        "ease": 292
+      }
+    },
+    {
+      "front": "What is memory retrieval strength?",
+      "back": "How easily you can recall a topic",
+      "note": "How We Learn - Benedict Carey",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-08-02",
+        "interval": 178,
+        "ease": 312
+      }
+    },
+    {
+      "front": "What is Desirable Difficulty?",
+      "back": "Memory strength increase, for a topic, is proportional to how difficult it was for you to recall",
+      "note": "How We Learn - Benedict Carey",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-03-29",
+        "interval": 81,
+        "ease": 272
+      }
+    },
+    {
+      "front": "What is the primary benefit of the spaced learning compared to cramming?",
+      "back": "Improved long-term information retention",
+      "note": "How We Learn - Benedict Carey",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-16",
+        "interval": 98,
+        "ease": 290
+      }
+    },
+    {
+      "front": "What is the spacing effect?",
+      "back": "Where studying for multiple shorter periods is better than studying for one long cram session.",
+      "note": "How We Learn - Benedict Carey",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-12-21",
+        "interval": 270,
+        "ease": 292
+      }
+    },
+    {
+      "front": "How does testing take advantage of Desirable Difficulty to improve memory strength?",
+      "back": "Forces you to recall information, which improves memory strength",
+      "note": "How We Learn - Benedict Carey",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-24",
+        "interval": 74,
+        "ease": 272
+      }
+    },
+    {
+      "front": "[...] practice is the opposite of interleaved practice",
+      "back": "Blocked",
+      "note": "How We Learn - Benedict Carey",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-04-18",
+        "interval": 100,
+        "ease": 292
+      }
+    },
+    {
+      "front": "Blocked practice is the opposite of [...] practice",
+      "back": "interleaved",
+      "note": "How We Learn - Benedict Carey",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-11-30",
+        "interval": 279,
+        "ease": 330
+      }
+    },
+    {
+      "front": "Why is blocked practice perceived to be better than interleaved practice?",
+      "back": "You appear to get better quickly during practice.",
+      "note": "How We Learn - Benedict Carey",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-28",
+        "interval": 117,
+        "ease": 299
+      }
+    },
+    {
+      "front": "Why is blocked practice worse than interleaved practice?",
+      "back": "You plateau more quickly and perform worse during novel testing",
+      "note": "How We Learn - Benedict Carey",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-08-28",
+        "interval": 194,
+        "ease": 319
+      }
+    },
+    {
+      "front": "Define incubation (learning)",
+      "back": "Letting your subconsciousness work on a tough problem in the background",
+      "note": "How We Learn - Benedict Carey",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-07-21",
+        "interval": 162,
+        "ease": 319
+      }
+    },
+    {
+      "front": "In order for incubation (learning) to be effective, what stage of working on a problem do you have to be?",
+      "back": "Stuck on the problem",
+      "note": "How We Learn - Benedict Carey",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-12-28",
+        "interval": 286,
+        "ease": 339
+      }
+    },
+    {
+      "front": "Explain how sleeping on a problem is an example of incubation (learning)",
+      "back": "You stop working on the problem, letting your subconsciousness passively think on it.",
+      "note": "How We Learn - Benedict Carey",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-08-16",
+        "interval": 182,
+        "ease": 319
+      }
+    },
+    {
+      "front": "Define \"fixedness\" in learning",
+      "back": "The idea that people make assumptions (unknowingly) about things that prevent them from thinking about it in a different ways.",
+      "note": "How We Learn - Benedict Carey",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-05",
+        "interval": 92,
+        "ease": 279
+      }
+    },
+    {
+      "front": "Explain how the candle problem demonstrated fixedness",
+      "back": "Tacks in boxes, people only saw a container of tacks. Tacks outside of boxes, people saw tacks and a container.",
+      "note": "How We Learn - Benedict Carey",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-20",
+        "interval": 109,
+        "ease": 299
+      }
+    },
+    {
+      "front": "What are two easy ways to vary the context of your studying?",
+      "back": "Changing when and where you study",
+      "note": "How We Learn - Benedict Carey",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-06-23",
+        "interval": 128,
+        "ease": 299
+      }
+    },
+    {
+      "front": "Scott Galloway argues that the American ideal should focus on [...] rather than attempting to determine which seeds will become redwoods.",
+      "back": "watering as many plants as possible",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-08",
+        "interval": 3,
+        "ease": 250
+      }
+    },
+    {
+      "front": "Scott Galloway argues that the American ideal should focus on watering as many plants as possible rather than attempting to [...].",
+      "back": "determine which seeds will become redwoods",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-28",
+        "interval": 16,
+        "ease": 290
+      }
+    },
+    {
+      "front": "How does the author define the core promise of capitalism?",
+      "back": "Work hard, take risks and get rewarded",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-06-27",
+        "interval": 108,
+        "ease": 289
+      }
+    },
+    {
+      "front": "In the author's view of capitalism, how are rewards distributed between those who take risks and those who do not?",
+      "back": "Those who take risks are rewarded more.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-07",
+        "interval": 29,
+        "ease": 270
+      }
+    },
+    {
+      "front": "At approximately what age does the male prefrontal cortex (PFC) catch up to the female PFC in maturity?",
+      "back": "Twenty-five",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-07-18",
+        "interval": 128,
+        "ease": 291
+      }
+    },
+    {
+      "front": "What is the primary limit of parental influence according to the shepherd metaphor?",
+      "back": "Parents can only angle children in the right direction rather than engineering specific outcomes.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-05",
+        "interval": 64,
+        "ease": 310
+      }
+    },
+    {
+      "front": "In the context of high school social dynamics, which group typically dwarfs the influence of parents on a teenager?",
+      "back": "Their peers",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-27",
+        "interval": 63,
+        "ease": 310
+      }
+    },
+    {
+      "front": "[...]",
+      "back": "Resources",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": null
+    },
+    {
+      "front": "[...]",
+      "back": "Intellect",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": null
+    },
+    {
+      "front": "[...]",
+      "back": "Kindness",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-11",
+        "interval": 4,
+        "ease": 270
+      }
+    },
+    {
+      "front": "What is the author's general view regarding the innate nature of most people?",
+      "back": "Most people are inherently good and look for opportunities to help others.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-05",
+        "interval": 41,
+        "ease": 290
+      }
+    },
+    {
+      "front": "According to Scott Galloway, two unheralded weapons for men are [...] and asking for help.",
+      "back": "kindness",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-03-13",
+        "interval": 2,
+        "ease": 230
+      }
+    },
+    {
+      "front": "According to Scott Galloway, two unheralded weapons for men are kindness and [...].",
+      "back": "asking for help",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-11",
+        "interval": 4,
+        "ease": 270
+      }
+    },
+    {
+      "front": "Regarding the concepts of kindness and asking for help, what is a common mistake many boys and men make?",
+      "back": "they forget how important they are",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-10",
+        "interval": 46,
+        "ease": 269
+      }
+    },
+    {
+      "front": "The author argues that while most people believe they are testing their outermost limits, they rarely reach even [...] of their actual capabilities.",
+      "back": "40 percent",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-04-12",
+        "interval": 56,
+        "ease": 310
+      }
+    },
+    {
+      "front": "According to Scott Galloway, what is the essential \"chaser\" that elevates talent into actual success?",
+      "back": "Hunger",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-10-26",
+        "interval": 214,
+        "ease": 329
+      }
+    },
+    {
+      "front": "What does Scott Galloway claim about the relationship between talent and professional success?",
+      "back": "Talent provides entry into the competition, but hunger is required to achieve success.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-26",
+        "interval": 76,
+        "ease": 289
+      }
+    },
+    {
+      "front": "According to Scott Galloway, what are the two primary goals for professional development in your twenties (hint: do this and try this)?",
+      "back": "Talking to people, and trying out new things.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-05",
+        "interval": 40,
+        "ease": 250
+      }
+    },
+    {
+      "front": "How should young professionals view the opportunity to choose among different career paths?",
+      "back": "As a blessing.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-09",
+        "interval": 66,
+        "ease": 310
+      }
+    },
+    {
+      "front": "Your goal in your twenties is to be [...], talking to people, and trying out new things.",
+      "back": "workshopping",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-03-12",
+        "interval": 1,
+        "ease": 244
+      }
+    },
+    {
+      "front": "Your goal in your twenties is to be workshopping, [...], and trying out new things.",
+      "back": "talking to people",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-03",
+        "interval": 2,
+        "ease": 249
+      }
+    },
+    {
+      "front": "Your goal in your twenties is to be workshopping, talking to people, and [...].",
+      "back": "trying out new things",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-01",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "What is Scott Galloway's philosophy regarding the scope of work tasks early in a career?",
+      "back": "Do not do only what you are asked to do, but also what you are capable of doing.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-06-26",
+        "interval": 106,
+        "ease": 290
+      }
+    },
+    {
+      "front": "According to Scott Galloway's advice for young professionals, what is the psychological goal when entering a room?",
+      "back": "To believe you can vanquish, outrun, or outlast every person in it.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-08-07",
+        "interval": 134,
+        "ease": 309
+      }
+    },
+    {
+      "front": "Where does Scott Galloway argue that greatness and happiness are located?",
+      "back": "In the agency of others",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-07-13",
+        "interval": 118,
+        "ease": 290
+      }
+    },
+    {
+      "front": "Scott Galloway identifies four primary reasons to spend time outside the home: [...], chatting up women, expanding friend and network groups, and developing and refining visibility.",
+      "back": "Meeting colleagues",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2000-01-01",
+        "interval": 1,
+        "ease": 250
+      }
+    },
+    {
+      "front": "Scott Galloway identifies four primary reasons to spend time outside the home: Meeting colleagues, [...], expanding friend and network groups, and developing and refining visibility.",
+      "back": "chatting up women",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-04",
+        "interval": 3,
+        "ease": 269
+      }
+    },
+    {
+      "front": "Scott Galloway identifies four primary reasons to spend time outside the home: Meeting colleagues, chatting up women, [...], and developing and refining visibility.",
+      "back": "expanding friend and network groups",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-03-14",
+        "interval": 3,
+        "ease": 264
+      }
+    },
+    {
+      "front": "Scott Galloway identifies four primary reasons to spend time outside the home: Meeting colleagues, chatting up women, expanding friend and network groups, and [...].",
+      "back": "developing and refining visibility",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-01",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "To expand one's friend and network circles, what kinds of interests should the people you seek out have?",
+      "back": "People who have different interests, goals, and hobbies.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-05",
+        "interval": 10,
+        "ease": 170
+      }
+    },
+    {
+      "front": "According to Scott Galloway, what is the correlation between time spent at home and professional/romantic success?",
+      "back": "Negative (inverse) correlation",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-17",
+        "interval": 61,
+        "ease": 310
+      }
+    },
+    {
+      "front": "Scott Galloway argues that professional success requires being willing to feel like an [...] and taking the risk of being out over your skis.",
+      "back": "imposter",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-03-19",
+        "interval": 8,
+        "ease": 250
+      }
+    },
+    {
+      "front": "Scott Galloway argues that professional success requires being willing to feel like an imposter and taking the risk of being [...].",
+      "back": "out over your skis",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-11",
+        "interval": 3,
+        "ease": 250
+      }
+    },
+    {
+      "front": "What is common about the qualifications of successful people?",
+      "back": "They weren't originally qualified to do what they did.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-02",
+        "interval": 7,
+        "ease": 170
+      }
+    },
+    {
+      "front": "According to Galloway, a key attribute of professional success and masculinity is taking risks and being willing to [...].",
+      "back": "feel like an imposter",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-04-25",
+        "interval": 44,
+        "ease": 250
+      }
+    },
+    {
+      "front": "In the context of career and high-reward ventures, what is Scott Galloway's philosophy regarding multiple attempts at success?",
+      "back": "You will need to make several attempts before succeeding.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-08",
+        "interval": 44,
+        "ease": 290
+      }
+    },
+    {
+      "front": "Why does Galloway suggest that success requires a willingness to walk away from most jobs or investments?",
+      "back": "because you generally fail a lot before you succeed",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-08-08",
+        "interval": 144,
+        "ease": 309
+      }
+    },
+    {
+      "front": "According to Galloway, what should be the mindset of leaders when they fail?",
+      "back": "They should shake their heads and move on",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-10-09",
+        "interval": 197,
+        "ease": 329
+      }
+    },
+    {
+      "front": "What is the recommended practice for making significant life decisions to avoid biased self-perception?",
+      "back": "Consult for external input.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-07-16",
+        "interval": 121,
+        "ease": 290
+      }
+    },
+    {
+      "front": "According to the text, what is the primary purpose of having a personal \"high counsel\"?",
+      "back": "To provide perspective that the individual cannot see themselves.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-04",
+        "interval": 23,
+        "ease": 269
+      }
+    },
+    {
+      "front": "When failing, how should you treat those who believed in you versus those who did not?",
+      "back": "Express gratitude to those who believed; demonstrate grace to those who didn't.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-04",
+        "interval": 61,
+        "ease": 310
+      }
+    },
+    {
+      "front": "According to Scott Galloway, what is the primary cause for boys and young men retreating to lower-risk online environments?",
+      "back": "An inability to endure rejection in the physical world.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-07-21",
+        "interval": 117,
+        "ease": 290
+      }
+    },
+    {
+      "front": "According to the text, what is the most common habit shared by CEOs?",
+      "back": "Regular exercise (four to five times a week)",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-09",
+        "interval": 53,
+        "ease": 250
+      }
+    },
+    {
+      "front": "What does Scott Galloway describe as the \"harbingers of weakness and fear\"?",
+      "back": "The comfortable and the familiar",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-09",
+        "interval": 44,
+        "ease": 249
+      }
+    },
+    {
+      "front": "According to Scott Galloway's philosophy on growth, what two negative experiences are necessary precursors to victory or true satisfaction?",
+      "back": "Rejection and awkwardness",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-19",
+        "interval": 24,
+        "ease": 229
+      }
+    },
+    {
+      "front": "Scott Galloway supports the practice of [...] as a way to prioritize growth through novelty over the comfortable and familiar.",
+      "back": "\"saying yes to everything\"",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-07-25",
+        "interval": 121,
+        "ease": 290
+      }
+    },
+    {
+      "front": "In Scott Galloway's program for young men, what is the 'one rule' for attending new social activities like classes or sports leagues?",
+      "back": "Introduce oneself to everyone there within the first month.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-15",
+        "interval": 59,
+        "ease": 310
+      }
+    },
+    {
+      "front": "According to Scott Galloway, what is the greatest and most specific skill a young man can develop?",
+      "back": "Willingness to endure rejection",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-11",
+        "interval": 46,
+        "ease": 270
+      }
+    },
+    {
+      "front": "Alongside building resilience, what is the primary benefit of being rejected ('getting nos') frequently in social situations?",
+      "back": "It allows one to calibrate what works and what doesn't.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-11",
+        "interval": 60,
+        "ease": 250
+      }
+    },
+    {
+      "front": "When expressing emotions, what should one keep in mind regarding the complexity of feelings?",
+      "back": "It is rarely just one emotion; it is more likely several at once.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-06",
+        "interval": 25,
+        "ease": 230
+      }
+    },
+    {
+      "front": "What is the general cultural attitude in America toward business failure or personal errors, according to Scott Galloway?",
+      "back": "Tolerance and forgiveness (provided there is a bias toward action).",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-08-27",
+        "interval": 163,
+        "ease": 310
+      }
+    },
+    {
+      "front": "According to Scott Galloway, what is the best solution for feelings of defeat or frustration?",
+      "back": "Taking action",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-03-28",
+        "interval": 16,
+        "ease": 249
+      }
+    },
+    {
+      "front": "What is the primary psychological danger of adopting a victim mentality regarding personal agency?",
+      "back": "It destroys agency and reduces the likelihood of taking action.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-02",
+        "interval": 46,
+        "ease": 290
+      }
+    },
+    {
+      "front": "What is the core premise regarding how friendship occurs according to Scott Galloway?",
+      "back": "it requires being proactive.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-25",
+        "interval": 30,
+        "ease": 229
+      }
+    },
+    {
+      "front": "What does Scott Galloway suggest as a strategy for men who struggle to articulate their personal difficulties?",
+      "back": "Be up-front about what is going on, as friends may be able to help put those feelings into words.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-29",
+        "interval": 43,
+        "ease": 250
+      }
+    },
+    {
+      "front": "What social quality should men practice even if it initially feels awkward or clumsy?",
+      "back": "Vulnerability",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-06-07",
+        "interval": 87,
+        "ease": 271
+      }
+    },
+    {
+      "front": "What behavioral practice does Scott Galloway recommend for any time a positive feeling or thought strikes you?",
+      "back": "Emote about it (express the feeling)",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-26",
+        "interval": 70,
+        "ease": 270
+      }
+    },
+    {
+      "front": "* Telling friends you hope you'll be [...]",
+      "back": "friends for life",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": null
+    },
+    {
+      "front": "* Telling people you are [...]",
+      "back": "attracted to them",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": null
+    },
+    {
+      "front": "* Telling people they are [...]",
+      "back": "smart or funny",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": null
+    },
+    {
+      "front": "* [...]",
+      "back": "Laughing out loud",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": null
+    },
+    {
+      "front": "* [...]",
+      "back": "touching people (appropriately)",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2000-01-01",
+        "interval": 1,
+        "ease": 250
+      }
+    },
+    {
+      "front": "What happens to male mortality rates when they are not actively engaged in others' lives?",
+      "back": "They skyrocket",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-07-11",
+        "interval": 116,
+        "ease": 290
+      }
+    },
+    {
+      "front": "For a fifty-year-old, what is the strongest predictor of their health at eighty years old?",
+      "back": "The quality of their relationships",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-03-28",
+        "interval": 47,
+        "ease": 309
+      }
+    },
+    {
+      "front": "What broad effect did leaning into emotions like laughing and crying have on the author's personal growth?",
+      "back": "It increased their emotional fluency.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-16",
+        "interval": 65,
+        "ease": 270
+      }
+    },
+    {
+      "front": "In the context of 'Notes on Being a Man', what specific social habit does Scott Galloway credit for helping him become a kinder person over the past decade?",
+      "back": "Making a conscious effort to compliment and admire others.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-01",
+        "interval": 21,
+        "ease": 210
+      }
+    },
+    {
+      "front": "Scott Galloway defines one facet of masculinity as the ability to [...], put out fires, and be comfortable with others expressing big emotions.",
+      "back": "lower the temperature",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2000-01-01",
+        "interval": 1,
+        "ease": 250
+      }
+    },
+    {
+      "front": "Scott Galloway defines one facet of masculinity as the ability to lower the temperature, [...], and be comfortable with others expressing big emotions.",
+      "back": "put out fires",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-02",
+        "interval": 1,
+        "ease": 229
+      }
+    },
+    {
+      "front": "Scott Galloway defines one facet of masculinity as the ability to lower the temperature, put out fires, and be comfortable with [...].",
+      "back": "others expressing big emotions",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-03-12",
+        "interval": 1,
+        "ease": 244
+      }
+    },
+    {
+      "front": "In the context of masculinity and emotional regulation, what is meant by 'lowering the temperature'?",
+      "back": "Modeling calm and taking the intensity out of a crisis when others are overreacting.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-09-14",
+        "interval": 181,
+        "ease": 310
+      }
+    },
+    {
+      "front": "In the author's reflection on mortality and professional success, what does he conclude are the only things that truly matter in the end?",
+      "back": "Each other (relationships and friendships)",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-01",
+        "interval": 75,
+        "ease": 289
+      }
+    },
+    {
+      "front": "According to the text, what two qualities should one prioritize when making friends to improve personal success?",
+      "back": "High character and ambition",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-07",
+        "interval": 12,
+        "ease": 189
+      }
+    },
+    {
+      "front": "What is the common rule of thumb quoted in the text regarding the impact of one's inner circle on personal development?",
+      "back": "You are the average of your five closest friends.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-07-14",
+        "interval": 124,
+        "ease": 290
+      }
+    },
+    {
+      "front": "What two traits does Scott Galloway emphasize are necessary for 'friendship cold-calling' or initiating new social connections?",
+      "back": "Courage and resilience",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-03-27",
+        "interval": 18,
+        "ease": 230
+      }
+    },
+    {
+      "front": "When attempting to meet new people, how should one respond to those who show no interest in reciprocating?",
+      "back": "Accept that they are not interested and move on (resilience)",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-06-27",
+        "interval": 102,
+        "ease": 290
+      }
+    },
+    {
+      "front": "According to Scott Galloway, why do spur-of-the-moment invitations often work for friends who plan weeks in advance?",
+      "back": "They often have nothing planned for tonight or tomorrow.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-09-11",
+        "interval": 169,
+        "ease": 310
+      }
+    },
+    {
+      "front": "What scheduling strategy does Scott Galloway use to maintain contact with busy friends?",
+      "back": "Spur-of-the-moment invitations (inviting them to meet tonight or tomorrow).",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-06-22",
+        "interval": 102,
+        "ease": 309
+      }
+    },
+    {
+      "front": "What is Scott Galloway's primary strategy for establishing deeper, more authentic connections with male friends?",
+      "back": "Take the risk of \"going first\" by initiating conversation on a topic that hasn't been broached before.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-19",
+        "interval": 38,
+        "ease": 249
+      }
+    },
+    {
+      "front": "When attempting to deepen male friendships, going first serves to seek [...] for vulnerability while gauging what subjects are fair game.",
+      "back": "permission",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-06",
+        "interval": 4,
+        "ease": 271
+      }
+    },
+    {
+      "front": "When attempting to deepen male friendships, going first serves to seek permission for vulnerability while gauging what subjects are [...].",
+      "back": "fair game",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-11",
+        "interval": 4,
+        "ease": 270
+      }
+    },
+    {
+      "front": "According to Scott Galloway's experience, what is the most likely outcome when a man takes a risk and speaks first on a sensitive topic with a trusted friend?",
+      "back": "The friend will engage (noted as happening nine times out of ten).",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-10-22",
+        "interval": 210,
+        "ease": 329
+      }
+    },
+    {
+      "front": "In the context of 'Notes on Being a Man', how does Scott Galloway define 'showing up' in a friendship during a crisis?",
+      "back": "Taking action and being physically present without waiting for permission or asking what can be done.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-07-14",
+        "interval": 119,
+        "ease": 290
+      }
+    },
+    {
+      "front": "According to Galloway, a key difference between a true friend and a casual acquaintance is that a true friend [...] instead of asking \"If there's anything I can do...\"",
+      "back": "shows up",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-11",
+        "interval": 4,
+        "ease": 270
+      }
+    },
+    {
+      "front": "According to Galloway, a key difference between a true friend and a casual acquaintance is that a true friend shows up instead of asking [...]",
+      "back": "\"If there's anything I can do...\"",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-06",
+        "interval": 3,
+        "ease": 269
+      }
+    },
+    {
+      "front": "Scott Galloway argues that the core question of interpersonal impact is: how do you [...]?",
+      "back": "make people feel",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-04-14",
+        "interval": 50,
+        "ease": 250
+      }
+    },
+    {
+      "front": "What is the primary difference between how young people and older people prioritize others' happiness, according to Scott Galloway?",
+      "back": "Younger people focus on their own preferences and having a good time, while older people prioritize whether their family and friends are happy.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-06-30",
+        "interval": 113,
+        "ease": 290
+      }
+    },
+    {
+      "front": "Where does the capacity to find and sustain a loving relationship begin, according to Scott Galloway?",
+      "back": "Within yourself (by cultivating internal and external respect and strength).",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-08-06",
+        "interval": 133,
+        "ease": 290
+      }
+    },
+    {
+      "front": "What is Scott Galloway's primary piece of advice for dating and finding a partner?",
+      "back": "Like someone who likes you.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-03-28",
+        "interval": 2,
+        "ease": 150
+      }
+    },
+    {
+      "front": "According to the text, cultivating [...] and strength creates the confidence necessary to enjoy a relationship with someone who likes you back.",
+      "back": "self-respect",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-08",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "According to the text, cultivating self-respect and [...] creates the confidence necessary to enjoy a relationship with someone who likes you back.",
+      "back": "strength",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-06",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "What common psychological trap do people fall into when a potential partner is 'not that into' them?",
+      "back": "Believing that the other person is better than them.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-20",
+        "interval": 40,
+        "ease": 249
+      }
+    },
+    {
+      "front": "If a potential partner thinks very highly of you, what perception of their 'worth' should you avoid falling into?",
+      "back": "Viewing them as unworthy or beneath you.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-16",
+        "interval": 60,
+        "ease": 310
+      }
+    },
+    {
+      "front": "How does Scott Galloway define loneliness in a subjective sense?",
+      "back": "The gulf between what we hope for/expect versus what we actually get.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-10",
+        "interval": 54,
+        "ease": 310
+      }
+    },
+    {
+      "front": "Loneliness is subjective; it appears in the gap between what we [...] versus what we get.",
+      "back": "hope for and expect",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-03-21",
+        "interval": 10,
+        "ease": 270
+      }
+    },
+    {
+      "front": "Loneliness is subjective; it appears in the gap between what we hope for and expect versus [...].",
+      "back": "what we get",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-11",
+        "interval": 4,
+        "ease": 270
+      }
+    },
+    {
+      "front": "Scott Galloway advise young men to seek out those defined by [...], kindness, intellect, and humor.",
+      "back": "excellence",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-03",
+        "interval": 1,
+        "ease": 231
+      }
+    },
+    {
+      "front": "Scott Galloway advise young men to seek out those defined by excellence, [...], intellect, and humor.",
+      "back": "kindness",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-03-14",
+        "interval": 3,
+        "ease": 264
+      }
+    },
+    {
+      "front": "Scott Galloway advise young men to seek out those defined by excellence, kindness, [...], and humor.",
+      "back": "intellect",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-10",
+        "interval": 3,
+        "ease": 250
+      }
+    },
+    {
+      "front": "Scott Galloway advise young men to seek out those defined by excellence, kindness, intellect, and [...].",
+      "back": "humor",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-03",
+        "interval": 3,
+        "ease": 250
+      }
+    },
+    {
+      "front": "Scott Galloway identifies that beyond physical attraction, couples must align on [...], passion, and money.",
+      "back": "values",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-03-15",
+        "interval": 4,
+        "ease": 284
+      }
+    },
+    {
+      "front": "Scott Galloway identifies that beyond physical attraction, couples must align on values, [...], and money.",
+      "back": "passion",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-03",
+        "interval": 1,
+        "ease": 231
+      }
+    },
+    {
+      "front": "Scott Galloway identifies that beyond physical attraction, couples must align on values, passion, and [...].",
+      "back": "money",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-08",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "According to Scott Galloway, women respond well to men who demonstrate these three qualities: [...], initiative, and listening skills.",
+      "back": "straightforward interest",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-03-12",
+        "interval": 1,
+        "ease": 244
+      }
+    },
+    {
+      "front": "According to Scott Galloway, women respond well to men who demonstrate these three qualities: straightforward interest, [...], and listening skills.",
+      "back": "initiative",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-03",
+        "interval": 1,
+        "ease": 231
+      }
+    },
+    {
+      "front": "According to Scott Galloway, women respond well to men who demonstrate these three qualities: straightforward interest, initiative, and [...].",
+      "back": "listening skills",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-08",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "What is the baseline requirement for a man's behavior when approaching or talking to a woman?",
+      "back": "Ensuring she always feels safe.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-03",
+        "interval": 68,
+        "ease": 289
+      }
+    },
+    {
+      "front": "According to the author Scott Galloway, what is the fastest way to get someone to like you?",
+      "back": "To like them first",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-07-23",
+        "interval": 133,
+        "ease": 309
+      }
+    },
+    {
+      "front": "According to Scott Galloway, what is the most efficient way to demonstrate intellect to people without being boring?",
+      "back": "Humor",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-06-29",
+        "interval": 104,
+        "ease": 289
+      }
+    },
+    {
+      "front": "In a healthy relationship, partners serve several key functions: they facilitate [...], compensate for weaknesses, and provide corrective feedback regarding unfair or unwise behavior.",
+      "back": "smart risk-taking",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-03",
+        "interval": 1,
+        "ease": 231
+      }
+    },
+    {
+      "front": "In a healthy relationship, partners serve several key functions: they facilitate smart risk-taking, [...], and provide corrective feedback regarding unfair or unwise behavior.",
+      "back": "compensate for weaknesses",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-08",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "In a healthy relationship, partners serve several key functions: they facilitate smart risk-taking, compensate for weaknesses, and provide [...] regarding unfair or unwise behavior.",
+      "back": "corrective feedback",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-03-13",
+        "interval": 3,
+        "ease": 265
+      }
+    },
+    {
+      "front": "According to the text, what is the distinction between 'good' partners and 'great' partners?",
+      "back": "Good partners protect you from others; great partners protect you from yourself.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-27",
+        "interval": 46,
+        "ease": 270
+      }
+    },
+    {
+      "front": "According to the text, why should one take the \"uncomfortable risk\" of spending time with people they don't view as compatible?",
+      "back": "You might be surprised (by compatibility/outcome).",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-06-04",
+        "interval": 84,
+        "ease": 270
+      }
+    },
+    {
+      "front": "In the context of a great partnership, how should partners feel about each other's success?",
+      "back": "They should genuinely want the other person to win and celebrate/relive each other's victories.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-07-06",
+        "interval": 116,
+        "ease": 290
+      }
+    },
+    {
+      "front": "In Scott Galloway's view, what is the 'zillion-dollar skill' for young men in dating?",
+      "back": "Dealing with rejection",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-06-29",
+        "interval": 112,
+        "ease": 309
+      }
+    },
+    {
+      "front": "According to Scott Galloway, what is the primary lesson learned from being rejected by a woman?",
+      "back": "Resilience (realizing that you're just fine after a 'no').",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-03-27",
+        "interval": 40,
+        "ease": 290
+      }
+    },
+    {
+      "front": "According to the text, why does porn use negatively impact a young man's ability to eventually find success in dating?",
+      "back": "It diminishes the opportunity to face rejection ('getting to no'), which is necessary to eventually get to 'yes'.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-08",
+        "interval": 27,
+        "ease": 270
+      }
+    },
+    {
+      "front": "According to Scott Galloway's philosophy on marriage, why does a relationship require ongoing investment and generosity over long periods (e.g., ten years)?",
+      "back": "Because both individuals will inevitably become different people over time.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-10-16",
+        "interval": 204,
+        "ease": 329
+      }
+    },
+    {
+      "front": "To continue growing together despite personal changes over time, Scott Galloway argues that a couple must invest [...] and generosity in their relationship.",
+      "back": "effort",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-10",
+        "interval": 3,
+        "ease": 250
+      }
+    },
+    {
+      "front": "To continue growing together despite personal changes over time, Scott Galloway argues that a couple must invest effort and [...] in their relationship.",
+      "back": "generosity",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-06",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "According to the text, what basic physical oversight is often at the root of 'really awful' fights between partners?",
+      "back": "Skipping lunch (hunger)",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-01",
+        "interval": 45,
+        "ease": 290
+      }
+    },
+    {
+      "front": "The Gottman Institute identifies the Four Horsemen (predictors of early divorce) as: [...], criticism, defensiveness, and stonewalling.",
+      "back": "contempt",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-01",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "The Gottman Institute identifies the Four Horsemen (predictors of early divorce) as: contempt, [...], defensiveness, and stonewalling.",
+      "back": "criticism",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-03-12",
+        "interval": 1,
+        "ease": 244
+      }
+    },
+    {
+      "front": "The Gottman Institute identifies the Four Horsemen (predictors of early divorce) as: contempt, criticism, [...], and stonewalling.",
+      "back": "defensiveness",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2000-01-01",
+        "interval": 1,
+        "ease": 250
+      }
+    },
+    {
+      "front": "The Gottman Institute identifies the Four Horsemen (predictors of early divorce) as: contempt, criticism, defensiveness, and [...].",
+      "back": "stonewalling",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-02",
+        "interval": 1,
+        "ease": 229
+      }
+    },
+    {
+      "front": "What behavior does Scott Galloway suggest fathers model as often as possible with their children?",
+      "back": "Physical affection",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-03-31",
+        "interval": 44,
+        "ease": 309
+      }
+    },
+    {
+      "front": "In the context of 'Notes on Being a Man', what tendency is described as typical male focuses over effective listening?",
+      "back": "Solutions",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-21",
+        "interval": 41,
+        "ease": 290
+      }
+    },
+    {
+      "front": "According to the text, what is a parent's real purpose in relation to their children?",
+      "back": "To love them",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-08-30",
+        "interval": 166,
+        "ease": 329
+      }
+    },
+    {
+      "front": "What core advice did a Fortune 500 CEO give Scott Galloway regarding raising children and providing counsel?",
+      "back": "Children are always listening, even if there is a decade-long lag before they apply the advice.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-18",
+        "interval": 54,
+        "ease": 269
+      }
+    },
+    {
+      "front": "Regarding parental guidance, why should one continue to correct children even when they appear indifferent?",
+      "back": "There is a \"lag\" between when a child hears advice and when they actually apply it.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-07-17",
+        "interval": 122,
+        "ease": 290
+      }
+    },
+    {
+      "front": "Scott Galloway seeks to communicate three specific principles to his sons through active coaching: [...], empathy, and perseverance.",
+      "back": "kindness",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-08",
+        "interval": 3,
+        "ease": 250
+      }
+    },
+    {
+      "front": "Scott Galloway seeks to communicate three specific principles to his sons through active coaching: kindness, [...], and perseverance.",
+      "back": "empathy",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-08",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "Scott Galloway seeks to communicate three specific principles to his sons through active coaching: kindness, empathy, and [...].",
+      "back": "perseverance",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-01-01",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "According to Scott Galloway's advice for dads, what should be the approach to shared interests with children?",
+      "back": "Foster and adopt their interests rather than expecting them to inherit yours.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-07",
+        "interval": 42,
+        "ease": 270
+      }
+    },
+    {
+      "front": "According to Scott Galloway, what is the consequence of a father not taking an interest in his children's hobbies?",
+      "back": "There will not be much overlap between them.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-11-21",
+        "interval": 240,
+        "ease": 330
+      }
+    },
+    {
+      "front": "In the context of a mentor of a boy or young man, what does Scott Galloway describe as the \"ultimate expression of masculinity\"?",
+      "back": "Getting involved in the young man's life.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-10",
+        "interval": 46,
+        "ease": 290
+      }
+    },
+    {
+      "front": "According to the text, how do boys' responses to their parents' adult friends typically compare to their responses to their own parents?",
+      "back": "They will often listen to their parents' friends more than their parents.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-06-16",
+        "interval": 97,
+        "ease": 290
+      }
+    },
+    {
+      "front": "Scott Galloway suggests that a successful man should feel compelled to [...] those who are \"a quarter of the way up\" the mountain.",
+      "back": "mentor/assist",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-04-23",
+        "interval": 67,
+        "ease": 270
+      }
+    },
+    {
+      "front": "What is the core concept behind Scott Galloway's assertion that parenthood is a \"negative game\"?",
+      "back": "The parent is expected to give more love to their children than they will ever receive back.",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-20",
+        "interval": 56,
+        "ease": 310
+      }
+    },
+    {
+      "front": "According to the author's view of parental asymmetry, who benefits most from the parent-child relationship?",
+      "back": "The children",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-22",
+        "interval": 44,
+        "ease": 290
+      }
+    },
+    {
+      "front": "How does Scott Galloway apply Suze Orman’s financial principle to relationships?",
+      "back": "Like investments, invest early and it will compound",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-14",
+        "interval": 63,
+        "ease": 269
+      }
+    },
+    {
+      "front": "According to the text, [...] holds true in relationships, meaning early investments in a child warrant immense returns later in life.",
+      "back": "Compound interest",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-04-23",
+        "interval": 58,
+        "ease": 310
+      }
+    },
+    {
+      "front": "In Scott Galloway's view, what is a primary enemy of masculinity?",
+      "back": "Isolation",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-16",
+        "interval": 35,
+        "ease": 249
+      }
+    },
+    {
+      "front": "According to the author's observation on social perception, what trait is never associated with spending a lot of time alone?",
+      "back": "Being impressive",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-06-20",
+        "interval": 100,
+        "ease": 309
+      }
+    },
+    {
+      "front": "What does Scott Galloway claim many men fail to do when struggling with self-correcting bad habits?",
+      "back": "Ask for help",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-08",
+        "interval": 58,
+        "ease": 250
+      }
+    },
+    {
+      "front": "According to Galloway, what is the preferred alternative to seeking answers online when facing personal difficulties?",
+      "back": "Find a person",
+      "note": "Notes on Being a Man - Scott Galloway",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-10-02",
+        "interval": 190,
+        "ease": 310
+      }
+    },
+    {
+      "front": "What is selection phenomenon in the context of nutritional research?",
+      "back": "When healthy people adopt a new healthy behavior and cause the link between the behavior and healthiness to appear stronger",
+      "note": "Nutrition Beliefs Are Just-So Stories - Cremieux",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-08-31",
+        "interval": 189,
+        "ease": 270
+      }
+    },
+    {
+      "front": "Why do positive health behaviors cluster?",
+      "back": "People who do one healthy habit are likely to do multiple ones",
+      "note": "Nutrition Beliefs Are Just-So Stories - Cremieux",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-12-29",
+        "interval": 287,
+        "ease": 290
+      }
+    },
+    {
+      "front": "Provide an example of positive health behaviors clustering (use smoking and exercise)",
+      "back": "People who exercise are less likely to smoke",
+      "note": "Nutrition Beliefs Are Just-So Stories - Cremieux",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-07-03",
+        "interval": 176,
+        "ease": 310
+      }
+    },
+    {
+      "front": "Why does the selection phenomenon cause a perceived increase in the relationship between a positive behavior and health outcomes?",
+      "back": "Differential adoption causes more health seeking people to take up the behavior, leading to a health bias in future observations.",
+      "note": "Nutrition Beliefs Are Just-So Stories - Cremieux",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-08-20",
+        "interval": 192,
+        "ease": 270
+      }
+    },
+    {
+      "front": "What should you ask someone who is sharing new information with you instead of \"Why is this right?\"",
+      "back": "\"Is this true and how do you know?\"",
+      "note": "Nutrition Beliefs Are Just-So Stories - Cremieux",
+      "kind": "basic",
+      "schedule": {
+        "due": "2027-02-02",
+        "interval": 313,
+        "ease": 290
+      }
+    },
+    {
+      "front": "With latex suite, what is the shortcut for squaring (e.g. $x^{2}$)?",
+      "back": "`sr`",
+      "note": "Obsidian",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-15",
+        "interval": 20,
+        "ease": 170
+      }
+    },
+    {
+      "front": "With latex suite, what is the shortcut for cubing (e.g. $x^{3}$)?",
+      "back": "`cb`",
+      "note": "Obsidian",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-28",
+        "interval": 110,
+        "ease": 290
+      }
+    },
+    {
+      "front": "With latex suite, what is the shortcut for arbitrary superscripts (e.g. $x^{n}$)?",
+      "back": "`rd`",
+      "note": "Obsidian",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-03",
+        "interval": 85,
+        "ease": 270
+      }
+    },
+    {
+      "front": "Why does Riya have temperature regulation issues?",
+      "back": "Hyper thyroid condition",
+      "note": "People",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-09-03",
+        "interval": 200,
+        "ease": 230
+      }
+    },
+    {
+      "front": "When looking for a place to stand around with Riya, what should I keep in mind?",
+      "back": "She doesn't like the sun",
+      "note": "People",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-23",
+        "interval": 147,
+        "ease": 230
+      }
+    },
+    {
+      "front": "Why doesn't Riya A. like the sun?",
+      "back": "She has a temperature regulation issues",
+      "note": "People",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-09",
+        "interval": 168,
+        "ease": 270
+      }
+    },
+    {
+      "front": "What diet restrictions does Alec have?",
+      "back": "He's vegetarian",
+      "note": "People",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-11-09",
+        "interval": 305,
+        "ease": 290
+      }
+    },
+    {
+      "front": "Who in Bear Flag worked in Mathworks?",
+      "back": "Will Nitsch",
+      "note": "People",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-10-13",
+        "interval": 290,
+        "ease": 290
+      }
+    },
+    {
+      "front": "Who in Bear Flag is in an engineering rotational program?",
+      "back": "Pranav Deshmane",
+      "note": "People",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-07-17",
+        "interval": 202,
+        "ease": 250
+      }
+    },
+    {
+      "front": "What is Will Nitsch's specialty (Bear Flag)?",
+      "back": "Image processing and computer vision",
+      "note": "People",
+      "kind": "basic",
+      "schedule": {
+        "due": "2027-06-01",
+        "interval": 432,
+        "ease": 270
+      }
+    },
+    {
+      "front": "What is Will Nitsch's (Bear Flag) dog's name?",
+      "back": "Charlie",
+      "note": "People",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-12-23",
+        "interval": 324,
+        "ease": 290
+      }
+    },
+    {
+      "front": "What are Lauren Hu's (Bear Flag) rabbit's names?",
+      "back": "Ruth Bunny Ginsberg and Bunny Sanders",
+      "note": "People",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-21",
+        "interval": 143,
+        "ease": 250
+      }
+    },
+    {
+      "front": "What pets does Lauren Hu have?",
+      "back": "Rabbits",
+      "note": "People",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-20",
+        "interval": 179,
+        "ease": 270
+      }
+    },
+    {
+      "front": "Which two Bear Flag employees are brothers?",
+      "back": "Aaron & Austin Chun",
+      "note": "People",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-20",
+        "interval": 158,
+        "ease": 270
+      }
+    },
+    {
+      "front": "Who in Bear Flag worked at Exponents in Natick?",
+      "back": "Sean Scally",
+      "note": "People",
+      "kind": "basic",
+      "schedule": {
+        "due": "2027-01-10",
+        "interval": 344,
+        "ease": 270
+      }
+    },
+    {
+      "front": "Who are the three BRT ping pong players?",
+      "back": "Yifan (coach), Michael, Dean",
+      "note": "People",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-12",
+        "interval": 138,
+        "ease": 250
+      }
+    },
+    {
+      "front": "What is Andrew Stein's sons name?",
+      "back": "Sydney",
+      "note": "People",
+      "kind": "basic",
+      "schedule": {
+        "due": "2027-01-15",
+        "interval": 295,
+        "ease": 289
+      }
+    },
+    {
+      "front": "What is Andrew Stein's wife's name?",
+      "back": "Gillian",
+      "note": "People",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-23",
+        "interval": 133,
+        "ease": 309
+      }
+    },
+    {
+      "front": "What dietary restrictions does Andrew Stein have?",
+      "back": "Can't eat pork",
+      "note": "People",
+      "kind": "basic",
+      "schedule": {
+        "due": "2027-05-02",
+        "interval": 402,
+        "ease": 309
+      }
+    },
+    {
+      "front": "What religion is Andrew Stein?",
+      "back": "Jewish",
+      "note": "People",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-12-29",
+        "interval": 317,
+        "ease": 309
+      }
+    },
+    {
+      "front": "What dietary restrictions does Rahul (bear flag) have?",
+      "back": "Can't eat beef",
+      "note": "People",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-18",
+        "interval": 37,
+        "ease": 229
+      }
+    },
+    {
+      "front": "What are Chris Thai's dietary restrictions?",
+      "back": "Doesn't eat beef",
+      "note": "People",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-06-06",
+        "interval": 180,
+        "ease": 288
+      }
+    },
+    {
+      "front": "Why doesn't Chris Thai eat beef?",
+      "back": "He likes cows and beef is worse for the environment than other meats",
+      "note": "People",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-07-19",
+        "interval": 160,
+        "ease": 248
+      }
+    },
+    {
+      "front": "What music competitions does Chris Thai like watching?",
+      "back": "Drum Corp",
+      "note": "People",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-12-02",
+        "interval": 281,
+        "ease": 268
+      }
+    },
+    {
+      "front": "What does Minnie (Albert's partner) do for a job?",
+      "back": "Surgical first assistant",
+      "note": "People",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-15",
+        "interval": 74,
+        "ease": 277
+      }
+    },
+    {
+      "front": "Where does Minnie work (as of 2025-11-22)?",
+      "back": "Kaiser Permamente",
+      "note": "People",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-06-05",
+        "interval": 110,
+        "ease": 297
+      }
+    },
+    {
+      "front": "What does the ket $|0\\rangle$ mean?",
+      "back": "$\\begin{bmatrix}1 \\\\ 0\\end{bmatrix}$",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-07-18",
+        "interval": 168,
+        "ease": 270
+      }
+    },
+    {
+      "front": "What does the ket $|1\\rangle$ mean?",
+      "back": "$\\begin{bmatrix}0 \\\\ 1\\end{bmatrix}$",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2027-03-06",
+        "interval": 359,
+        "ease": 310
+      }
+    },
+    {
+      "front": "What constraint do the amplitudes of the quantum state of a qubit follow?",
+      "back": "They form a unit vector",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-29",
+        "interval": 123,
+        "ease": 290
+      }
+    },
+    {
+      "front": "How many dimensions do qubit quantum states have?",
+      "back": "2",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-10-14",
+        "interval": 241,
+        "ease": 290
+      }
+    },
+    {
+      "front": "What does superposition mean?",
+      "back": "Linear combination",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-08",
+        "interval": 102,
+        "ease": 290
+      }
+    },
+    {
+      "front": "What is the amplitude in a superposition?",
+      "back": "The coefficient for a particular state",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-24",
+        "interval": 113,
+        "ease": 250
+      }
+    },
+    {
+      "front": "What are the amplitudes of the state $0.6∣0⟩+0.8∣1⟩$?",
+      "back": "0.6 & 0.8",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-07-11",
+        "interval": 161,
+        "ease": 310
+      }
+    },
+    {
+      "front": "$0.6∣0⟩+0.8∣1⟩$ is a [...] of $|0⟩$ and $∣1⟩$",
+      "back": "superposition",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2026-06-10",
+        "interval": 153,
+        "ease": 310
+      }
+    },
+    {
+      "front": "In quantum computing, what is an alternative notation to the NOT gate?",
+      "back": "$X$",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-03-28",
+        "interval": 56,
+        "ease": 270
+      }
+    },
+    {
+      "front": "$NOT(\\alpha|0\\rangle+\\beta|1\\rangle)$=?",
+      "back": "$\\alpha|1\\rangle+\\beta|0\\rangle)$",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-26",
+        "interval": 120,
+        "ease": 290
+      }
+    },
+    {
+      "front": "In quantum computing, what is the matrix representation of the NOT gate?",
+      "back": "$X=\\begin{bmatrix}0 & 1 \\\\ 1 & 0\\end{bmatrix}$",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-27",
+        "interval": 121,
+        "ease": 291
+      }
+    },
+    {
+      "front": "What is $|\\varphi\\rangle$?",
+      "back": "Arbitrary quantum state",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-25",
+        "interval": 107,
+        "ease": 290
+      }
+    },
+    {
+      "front": "What mathematical representation do quantum gates take?",
+      "back": "Transformation matrices",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-07-29",
+        "interval": 170,
+        "ease": 270
+      }
+    },
+    {
+      "front": "Why are stable qubits difficult to use?",
+      "back": "They are hard to manipulate",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-09-23",
+        "interval": 226,
+        "ease": 290
+      }
+    },
+    {
+      "front": "Why are easy to manipulate qubits difficult to use?",
+      "back": "They easily change state when you don't want them to",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-22",
+        "interval": 134,
+        "ease": 290
+      }
+    },
+    {
+      "front": "What is the balance quantum computers need to strike between stability and malleability?",
+      "back": "Qubits that are easy to manipulate when doing operations and stable otherwise",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-08-24",
+        "interval": 181,
+        "ease": 270
+      }
+    },
+    {
+      "front": "In quantum computing what is $H$?",
+      "back": "Hadamard gate",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2027-01-25",
+        "interval": 305,
+        "ease": 290
+      }
+    },
+    {
+      "front": "In quantum computing, $H|0\\rangle=?$",
+      "back": "$\\frac{|0\\rangle +|1\\rangle}{\\sqrt 2}$",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-07-01",
+        "interval": 136,
+        "ease": 250
+      }
+    },
+    {
+      "front": "In quantum computing, $H|1\\rangle =?$",
+      "back": "$\\frac{|0\\rangle -|1\\rangle}{\\sqrt 2}$",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-10-15",
+        "interval": 212,
+        "ease": 270
+      }
+    },
+    {
+      "front": "What is the matrix representation of the Hadamard gate?",
+      "back": "$H=\\frac{1}{\\sqrt{ 2 }}\\begin{bmatrix}1 & 1 \\\\ 1 & -1\\end{bmatrix}$",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-06-24",
+        "interval": 142,
+        "ease": 270
+      }
+    },
+    {
+      "front": "What happens to a qubit $|\\varphi\\rangle$ when you measure it in the computational basis?",
+      "back": "It collapses to $|0\\rangle$ or $|1\\rangle$",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-26",
+        "interval": 61,
+        "ease": 271
+      }
+    },
+    {
+      "front": "What is the probability of 0 for the quantum state $\\alpha|0\\rangle+\\beta|1\\rangle$?",
+      "back": "$|\\alpha|^{2}$",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-19",
+        "interval": 39,
+        "ease": 251
+      }
+    },
+    {
+      "front": "What is the probability of 1 for the quantum state $\\alpha|0\\rangle+\\beta|1\\rangle$?",
+      "back": "$|\\beta|^{2}$",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-18",
+        "interval": 130,
+        "ease": 291
+      }
+    },
+    {
+      "front": "Given a quantum state with unknown amplitudes, how can you observe the amplitudes?",
+      "back": "You can't, according to the laws of physics",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-11-15",
+        "interval": 265,
+        "ease": 291
+      }
+    },
+    {
+      "front": "What is the algebraic definition (eqn form) of a unitary matrix $U$?",
+      "back": "$U^{\\dagger}U=I$",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-19",
+        "interval": 108,
+        "ease": 251
+      }
+    },
+    {
+      "front": "What is the adjoint of a matrix $M$?",
+      "back": "The conjugate transpose",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-01",
+        "interval": 95,
+        "ease": 291
+      }
+    },
+    {
+      "front": "What is $M^{\\dagger}=?$",
+      "back": "$M^{\\dagger}=(M^{T})^{*}$",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2027-01-02",
+        "interval": 299,
+        "ease": 291
+      }
+    },
+    {
+      "front": "What is the adjoint of $M=\\begin{bmatrix}a & b \\\\ c & d\\end{bmatrix}$ (that is $M^{\\dagger})$?",
+      "back": "$\\begin{bmatrix}a^* & c^* \\\\ b^* & d^*\\end{bmatrix}$",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-07-24",
+        "interval": 159,
+        "ease": 271
+      }
+    },
+    {
+      "front": "Who invented the X, Y, & Z gates of quantum computing?",
+      "back": "Wolfgang Pauli",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-06-15",
+        "interval": 158,
+        "ease": 311
+      }
+    },
+    {
+      "front": "The $Y$ gate in matrix form",
+      "back": "This is what quantum gate?$\\begin{bmatrix}0 & -i \\\\ i & 0\\end{bmatrix}$",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2025-11-07",
+        "interval": 1,
+        "ease": 231
+      }
+    },
+    {
+      "front": "This is what quantum gate?$\\begin{bmatrix}0 & -i \\\\ i & 0\\end{bmatrix}$",
+      "back": "The $Y$ gate in matrix form",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2000-01-01",
+        "interval": 1,
+        "ease": 250
+      }
+    },
+    {
+      "front": "The Z gate in matrix form",
+      "back": "This is what quantum gate?$\\begin{bmatrix}1 & 0 \\\\ 0 & -1\\end{bmatrix}$",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2000-01-01",
+        "interval": 1,
+        "ease": 250
+      }
+    },
+    {
+      "front": "This is what quantum gate?$\\begin{bmatrix}1 & 0 \\\\ 0 & -1\\end{bmatrix}$",
+      "back": "The Z gate in matrix form",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2025-11-09",
+        "interval": 3,
+        "ease": 251
+      }
+    },
+    {
+      "front": "Quantum gates are what class of transformation matrix?",
+      "back": "Unitary",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-07",
+        "interval": 89,
+        "ease": 271
+      }
+    },
+    {
+      "front": "Unitary matrices are the only matrices with this key property",
+      "back": "They preserve the length of their input vector",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-02",
+        "interval": 96,
+        "ease": 291
+      }
+    },
+    {
+      "front": "In quantum computing, why is it important that quantum gates are unitary?",
+      "back": "So they preserve the unit length of the quantum state",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-17",
+        "interval": 91,
+        "ease": 251
+      }
+    },
+    {
+      "front": "In quantum computing, why is it important for quantum states to have unit length?",
+      "back": "So the squares of the elements form a probability distribution (sum to 1)",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-08-09",
+        "interval": 175,
+        "ease": 271
+      }
+    },
+    {
+      "front": "Intuitively, why are reflections and rotations unitary?",
+      "back": "They don't affect the length of the input vector",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-06-26",
+        "interval": 170,
+        "ease": 311
+      }
+    },
+    {
+      "front": "Write out a 2 qubit state with amplitudes (ket notation)",
+      "back": "$\\alpha|00\\rangle+\\beta|01\\rangle+\\gamma|10\\rangle+\\delta|11\\rangle$",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-03-30",
+        "interval": 43,
+        "ease": 251
+      }
+    },
+    {
+      "front": "In a CNOT gate, what does the control bit do?",
+      "back": "Acts as an \"if statement\"",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-08-10",
+        "interval": 186,
+        "ease": 271
+      }
+    },
+    {
+      "front": "How do you represent the 2 qubit CNOT gate in ket notation (e.g. $|\\rangle\\to|\\rangle$)?",
+      "back": "$|x,y\\rangle\\to|x,y\\oplus x\\rangle$",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-03",
+        "interval": 25,
+        "ease": 231
+      }
+    },
+    {
+      "front": "What quantum gate does this represent $|x,y\\rangle\\to|x,y\\oplus x\\rangle$?",
+      "back": "CNOT",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-09-22",
+        "interval": 197,
+        "ease": 291
+      }
+    },
+    {
+      "front": "Explain intuitively how this CNOT gate works $|x,y\\rangle\\to|x,y\\oplus x\\rangle$",
+      "back": "$x$ qubit stays the same (control) while the $y$ qubit (target) is inverted",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2027-01-30",
+        "interval": 310,
+        "ease": 291
+      }
+    },
+    {
+      "front": "What is the solid black dot represent in this image > ![[Quantum computing for the very curious - Andy Matuschak-1762498539171.webp]]?",
+      "back": "Control bit",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-13",
+        "interval": 32,
+        "ease": 251
+      }
+    },
+    {
+      "front": "What gate is this?![[Flashcards - Quantum computing for the very curious - Andy Matuschak-1763100187146.webp]]",
+      "back": "Toffoli gate",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-10-30",
+        "interval": 232,
+        "ease": 294
+      }
+    },
+    {
+      "front": "With what inputs can the Toffoli gate simulate a classical AND gate?",
+      "back": "$z=0$",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-03-28",
+        "interval": 2,
+        "ease": 153
+      }
+    },
+    {
+      "front": "In quantum computing, what is $e^{ i\\theta }$ called in $\\begin{aligned} \\left[ \\begin{array}{cc} e^{i\\theta} & 0 \\\\ 0 & e^{i\\theta} \\end{array} \\right] = e^{i\\theta} \\left[ \\begin{array}{cc} 1 & 0 \\\\ 0 & 1 \\end{array} \\right] = e^{i \\theta} I \\end{aligned}$?",
+      "back": "global phase factor",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-07",
+        "interval": 115,
+        "ease": 294
+      }
+    },
+    {
+      "front": "In quantum computing, why can we ignore the global phase factor ($e^{ i\\theta }$)?",
+      "back": "Because it doesn't change the measurement probabilities at the end of the circuit",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-03-27",
+        "interval": 78,
+        "ease": 273
+      }
+    },
+    {
+      "front": "In quantum computing, why does the global phase factor not affect measurement probabilities?",
+      "back": "$|e^{ i\\theta }|=1$ so it doesn't affect the probability",
+      "note": "Quantum computing for the very curious - Andy Matuschak",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-07",
+        "interval": 56,
+        "ease": 234
+      }
+    },
+    {
+      "front": "Why does $|e^{ i\\theta }|=1$?",
+      "back": "$|e^{ i\\theta }|=|\\cos(\\theta)+i\\sin (\\theta)|=\\sqrt{ \\cos(\\theta)^{2} +\\sin(\\theta)^{2}}=\\sqrt{ 1 }=1$",
+      "note": "Random Math",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-28",
+        "interval": 42,
+        "ease": 210
+      }
+    },
+    {
+      "front": "[...] + $\\cos ^{2}(\\theta)$ = $1$",
+      "back": "$\\sin ^{2}(\\theta)$",
+      "note": "Random Math",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2000-01-01",
+        "interval": 1,
+        "ease": 250
+      }
+    },
+    {
+      "front": "$\\sin ^{2}(\\theta)$ + [...] = $1$",
+      "back": "$\\cos ^{2}(\\theta)$",
+      "note": "Random Math",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2025-11-29",
+        "interval": 4,
+        "ease": 270
+      }
+    },
+    {
+      "front": "$\\sin ^{2}(\\theta)$ + $\\cos ^{2}(\\theta)$ = [...]",
+      "back": "$1$",
+      "note": "Random Math",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2025-11-25",
+        "interval": 3,
+        "ease": 268
+      }
+    },
+    {
+      "front": "Capital of Alabama (AL)",
+      "back": "Montgomery is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-12",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "Montgomery is the capital of",
+      "back": "Capital of Alabama (AL)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-12",
+        "interval": 1,
+        "ease": 223
+      }
+    },
+    {
+      "front": "Capital of Alaska (AK)",
+      "back": "Juneau is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-14",
+        "interval": 3,
+        "ease": 250
+      }
+    },
+    {
+      "front": "Juneau is the capital of",
+      "back": "Capital of Alaska (AK)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-13",
+        "interval": 2,
+        "ease": 243
+      }
+    },
+    {
+      "front": "Capital of Arizona (AZ)",
+      "back": "Phoenix is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-14",
+        "interval": 3,
+        "ease": 250
+      }
+    },
+    {
+      "front": "Phoenix is the capital of",
+      "back": "Capital of Arizona (AZ)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-13",
+        "interval": 2,
+        "ease": 243
+      }
+    },
+    {
+      "front": "Capital of Arkansas (AR)",
+      "back": "Little Rock is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-13",
+        "interval": 2,
+        "ease": 243
+      }
+    },
+    {
+      "front": "Little Rock is the capital of",
+      "back": "Capital of Arkansas (AR)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-15",
+        "interval": 4,
+        "ease": 270
+      }
+    },
+    {
+      "front": "Capital of California (CA)",
+      "back": "Sacramento is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-14",
+        "interval": 3,
+        "ease": 263
+      }
+    },
+    {
+      "front": "Sacramento is the capital of",
+      "back": "Capital of California (CA)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-15",
+        "interval": 4,
+        "ease": 270
+      }
+    },
+    {
+      "front": "Capital of Colorado (CO)",
+      "back": "Denver is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-12",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "Denver is the capital of",
+      "back": "Capital of Colorado (CO)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-13",
+        "interval": 2,
+        "ease": 243
+      }
+    },
+    {
+      "front": "Capital of Connecticut (CT)",
+      "back": "Hartford is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-13",
+        "interval": 2,
+        "ease": 243
+      }
+    },
+    {
+      "front": "Hartford is the capital of",
+      "back": "Capital of Connecticut (CT)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-15",
+        "interval": 4,
+        "ease": 270
+      }
+    },
+    {
+      "front": "Capital of Delaware (DE)",
+      "back": "Dover is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-12",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "Dover is the capital of",
+      "back": "Capital of Delaware (DE)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-13",
+        "interval": 2,
+        "ease": 243
+      }
+    },
+    {
+      "front": "Capital of Florida (FL)",
+      "back": "Tallahassee is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-14",
+        "interval": 3,
+        "ease": 263
+      }
+    },
+    {
+      "front": "Tallahassee is the capital of",
+      "back": "Capital of Florida (FL)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-14",
+        "interval": 3,
+        "ease": 250
+      }
+    },
+    {
+      "front": "Capital of Georgia (GA)",
+      "back": "Atlanta is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-12",
+        "interval": 1,
+        "ease": 223
+      }
+    },
+    {
+      "front": "Atlanta is the capital of",
+      "back": "Capital of Georgia (GA)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-15",
+        "interval": 4,
+        "ease": 270
+      }
+    },
+    {
+      "front": "Capital of Hawaii (HI)",
+      "back": "Honolulu is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-12",
+        "interval": 1,
+        "ease": 223
+      }
+    },
+    {
+      "front": "Honolulu is the capital of",
+      "back": "Capital of Hawaii (HI)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-14",
+        "interval": 3,
+        "ease": 250
+      }
+    },
+    {
+      "front": "Capital of Idaho (ID)",
+      "back": "Boise is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-14",
+        "interval": 3,
+        "ease": 263
+      }
+    },
+    {
+      "front": "Boise is the capital of",
+      "back": "Capital of Idaho (ID)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-15",
+        "interval": 4,
+        "ease": 270
+      }
+    },
+    {
+      "front": "Capital of Illinois (IL)",
+      "back": "Springfield is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-12",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "Springfield is the capital of",
+      "back": "Capital of Illinois (IL)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-12",
+        "interval": 1,
+        "ease": 223
+      }
+    },
+    {
+      "front": "Capital of Indiana (IN)",
+      "back": "Indianapolis is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-12",
+        "interval": 2,
+        "ease": 243
+      }
+    },
+    {
+      "front": "Indianapolis is the capital of",
+      "back": "Capital of Indiana (IN)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-15",
+        "interval": 4,
+        "ease": 270
+      }
+    },
+    {
+      "front": "Capital of Iowa (IA)",
+      "back": "Des Moines is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-12",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "Des Moines is the capital of",
+      "back": "Capital of Iowa (IA)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-12",
+        "interval": 1,
+        "ease": 223
+      }
+    },
+    {
+      "front": "Capital of Kansas (KS)",
+      "back": "Topeka is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-12",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "Topeka is the capital of",
+      "back": "Capital of Kansas (KS)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-13",
+        "interval": 2,
+        "ease": 243
+      }
+    },
+    {
+      "front": "Capital of Kentucky (KY)",
+      "back": "Frankfort is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-12",
+        "interval": 1,
+        "ease": 223
+      }
+    },
+    {
+      "front": "Frankfort is the capital of",
+      "back": "Capital of Kentucky (KY)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-12",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "Capital of Louisiana (LA)",
+      "back": "Baton Rouge is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-12",
+        "interval": 1,
+        "ease": 223
+      }
+    },
+    {
+      "front": "Baton Rouge is the capital of",
+      "back": "Capital of Louisiana (LA)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-14",
+        "interval": 3,
+        "ease": 250
+      }
+    },
+    {
+      "front": "Capital of Maine (ME)",
+      "back": "Augusta is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-12",
+        "interval": 1,
+        "ease": 223
+      }
+    },
+    {
+      "front": "Augusta is the capital of",
+      "back": "Capital of Maine (ME)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-12",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "Capital of Maryland (MD)",
+      "back": "Annapolis is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-12",
+        "interval": 1,
+        "ease": 223
+      }
+    },
+    {
+      "front": "Annapolis is the capital of",
+      "back": "Capital of Maryland (MD)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-12",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "Capital of Massachusetts (MA)",
+      "back": "Boston is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-14",
+        "interval": 3,
+        "ease": 263
+      }
+    },
+    {
+      "front": "Boston is the capital of",
+      "back": "Capital of Massachusetts (MA)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-15",
+        "interval": 4,
+        "ease": 270
+      }
+    },
+    {
+      "front": "Capital of Michigan (MI)",
+      "back": "Lansing is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-12",
+        "interval": 1,
+        "ease": 223
+      }
+    },
+    {
+      "front": "Lansing is the capital of",
+      "back": "Capital of Michigan (MI)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-12",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "Capital of Minnesota (MN)",
+      "back": "St. Paul is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-12",
+        "interval": 1,
+        "ease": 223
+      }
+    },
+    {
+      "front": "St. Paul is the capital of",
+      "back": "Capital of Minnesota (MN)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-12",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "Capital of Mississippi (MS)",
+      "back": "Jackson is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-12",
+        "interval": 1,
+        "ease": 223
+      }
+    },
+    {
+      "front": "Jackson is the capital of",
+      "back": "Capital of Mississippi (MS)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-12",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "Capital of Missouri (MO)",
+      "back": "Jefferson  is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-12",
+        "interval": 1,
+        "ease": 223
+      }
+    },
+    {
+      "front": "Jefferson  is the capital of",
+      "back": "Capital of Missouri (MO)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-12",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "Capital of Montana (MT)",
+      "back": "Helena is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-12",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "Helena is the capital of",
+      "back": "Capital of Montana (MT)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-12",
+        "interval": 1,
+        "ease": 223
+      }
+    },
+    {
+      "front": "Capital of Nebraska (NE)",
+      "back": "Lincoln is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-12",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "Lincoln is the capital of",
+      "back": "Capital of Nebraska (NE)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-12",
+        "interval": 1,
+        "ease": 223
+      }
+    },
+    {
+      "front": "Capital of Nevada (NV)",
+      "back": "Carson City is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-12",
+        "interval": 1,
+        "ease": 223
+      }
+    },
+    {
+      "front": "Carson City is the capital of",
+      "back": "Capital of Nevada (NV)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-12",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "Capital of New Hampshire (NH)",
+      "back": "Concord is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-12",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "Concord is the capital of",
+      "back": "Capital of New Hampshire (NH)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-13",
+        "interval": 2,
+        "ease": 243
+      }
+    },
+    {
+      "front": "Capital of New Jersey (NJ)",
+      "back": "Trenton is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-14",
+        "interval": 3,
+        "ease": 250
+      }
+    },
+    {
+      "front": "Trenton is the capital of",
+      "back": "Capital of New Jersey (NJ)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-14",
+        "interval": 3,
+        "ease": 263
+      }
+    },
+    {
+      "front": "Capital of New Mexico (NM)",
+      "back": "Santa Fe is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-12",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "Santa Fe is the capital of",
+      "back": "Capital of New Mexico (NM)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-11",
+        "interval": 1,
+        "ease": 223
+      }
+    },
+    {
+      "front": "Capital of New York (NY)",
+      "back": "Albany is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-14",
+        "interval": 3,
+        "ease": 263
+      }
+    },
+    {
+      "front": "Albany is the capital of",
+      "back": "Capital of New York (NY)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-15",
+        "interval": 4,
+        "ease": 270
+      }
+    },
+    {
+      "front": "Capital of North Carolina (NC)",
+      "back": "Raleigh is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-12",
+        "interval": 1,
+        "ease": 223
+      }
+    },
+    {
+      "front": "Raleigh is the capital of",
+      "back": "Capital of North Carolina (NC)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-12",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "Capital of North Dakota (ND)",
+      "back": "Bismarck is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-12",
+        "interval": 1,
+        "ease": 223
+      }
+    },
+    {
+      "front": "Bismarck is the capital of",
+      "back": "Capital of North Dakota (ND)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-12",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "Capital of Ohio (OH)",
+      "back": "Columbus is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-12",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "Columbus is the capital of",
+      "back": "Capital of Ohio (OH)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-13",
+        "interval": 2,
+        "ease": 243
+      }
+    },
+    {
+      "front": "Capital of Oklahoma (OK)",
+      "back": "Oklahoma City is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-13",
+        "interval": 2,
+        "ease": 243
+      }
+    },
+    {
+      "front": "Oklahoma City is the capital of",
+      "back": "Capital of Oklahoma (OK)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-14",
+        "interval": 3,
+        "ease": 250
+      }
+    },
+    {
+      "front": "Capital of Oregon (OR)",
+      "back": "Salem is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-12",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "Salem is the capital of",
+      "back": "Capital of Oregon (OR)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-12",
+        "interval": 1,
+        "ease": 223
+      }
+    },
+    {
+      "front": "Capital of Pennsylvania (PA)",
+      "back": "Harrisburg is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-12",
+        "interval": 1,
+        "ease": 223
+      }
+    },
+    {
+      "front": "Harrisburg is the capital of",
+      "back": "Capital of Pennsylvania (PA)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-14",
+        "interval": 3,
+        "ease": 250
+      }
+    },
+    {
+      "front": "Capital of Rhode Island (RI)",
+      "back": "Providence is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-12",
+        "interval": 1,
+        "ease": 223
+      }
+    },
+    {
+      "front": "Providence is the capital of",
+      "back": "Capital of Rhode Island (RI)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-14",
+        "interval": 3,
+        "ease": 250
+      }
+    },
+    {
+      "front": "Capital of South Carolina (SC)",
+      "back": "Columbia is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-12",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "Columbia is the capital of",
+      "back": "Capital of South Carolina (SC)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-12",
+        "interval": 1,
+        "ease": 223
+      }
+    },
+    {
+      "front": "Capital of South Dakota (SD)",
+      "back": "Pierre is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-12",
+        "interval": 1,
+        "ease": 223
+      }
+    },
+    {
+      "front": "Pierre is the capital of",
+      "back": "Capital of South Dakota (SD)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-12",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "Capital of Tennessee (TN)",
+      "back": "Nashville is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-12",
+        "interval": 1,
+        "ease": 223
+      }
+    },
+    {
+      "front": "Nashville is the capital of",
+      "back": "Capital of Tennessee (TN)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-15",
+        "interval": 4,
+        "ease": 270
+      }
+    },
+    {
+      "front": "Capital of Texas (TX)",
+      "back": "Austin is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-15",
+        "interval": 4,
+        "ease": 270
+      }
+    },
+    {
+      "front": "Austin is the capital of",
+      "back": "Capital of Texas (TX)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-13",
+        "interval": 3,
+        "ease": 263
+      }
+    },
+    {
+      "front": "Capital of Utah (UT)",
+      "back": "Salt Lake City is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-12",
+        "interval": 1,
+        "ease": 223
+      }
+    },
+    {
+      "front": "Salt Lake City is the capital of",
+      "back": "Capital of Utah (UT)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-15",
+        "interval": 4,
+        "ease": 270
+      }
+    },
+    {
+      "front": "Capital of Vermont (VT)",
+      "back": "Montpelier is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-12",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "Montpelier is the capital of",
+      "back": "Capital of Vermont (VT)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-13",
+        "interval": 2,
+        "ease": 243
+      }
+    },
+    {
+      "front": "Capital of Virginia (VA)",
+      "back": "Richmond is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-12",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "Richmond is the capital of",
+      "back": "Capital of Virginia (VA)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-12",
+        "interval": 1,
+        "ease": 223
+      }
+    },
+    {
+      "front": "Capital of Washington (WA)",
+      "back": "Olympia is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-12",
+        "interval": 1,
+        "ease": 223
+      }
+    },
+    {
+      "front": "Olympia is the capital of",
+      "back": "Capital of Washington (WA)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-12",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "Capital of West Virginia (WV)",
+      "back": "Charleston is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-12",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "Charleston is the capital of",
+      "back": "Capital of West Virginia (WV)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-12",
+        "interval": 1,
+        "ease": 223
+      }
+    },
+    {
+      "front": "Capital of Wisconsin (WI)",
+      "back": "Madison is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-13",
+        "interval": 2,
+        "ease": 243
+      }
+    },
+    {
+      "front": "Madison is the capital of",
+      "back": "Capital of Wisconsin (WI)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-12",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "Capital of Wyoming (WY)",
+      "back": "Cheyenne is the capital of",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-03-12",
+        "interval": 1,
+        "ease": 223
+      }
+    },
+    {
+      "front": "Cheyenne is the capital of",
+      "back": "Capital of Wyoming (WY)",
+      "note": "US States and Capitals",
+      "kind": "reversed",
+      "schedule": {
+        "due": "2026-01-12",
+        "interval": 1,
+        "ease": 230
+      }
+    },
+    {
+      "front": "Who can read encrypted data when using end-to-end encryption?",
+      "back": "Only the end users",
+      "note": "Hacker Lexicon What Is End-to-End Encryption - Andy Greenberg",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-06",
+        "interval": 128,
+        "ease": 290
+      }
+    },
+    {
+      "front": "Who can read encrypted data when using traditional encryption?",
+      "back": "The end user and whoever holds the encryption key (e.g. company server)",
+      "note": "Hacker Lexicon What Is End-to-End Encryption - Andy Greenberg",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-30",
+        "interval": 154,
+        "ease": 270
+      }
+    },
+    {
+      "front": "Why is end-to-end encryption better than traditional encryption?",
+      "back": "Only the end users can see read the data. Messengers like company servers can't",
+      "note": "Hacker Lexicon What Is End-to-End Encryption - Andy Greenberg",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-07-16",
+        "interval": 189,
+        "ease": 270
+      }
+    },
+    {
+      "front": "What can decrypt a message encrypted with your public key?",
+      "back": "Your private key",
+      "note": "Hacker Lexicon What Is End-to-End Encryption - Andy Greenberg",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-14",
+        "interval": 168,
+        "ease": 310
+      }
+    },
+    {
+      "front": "What is the function of the public key in the lockbox analogy?",
+      "back": "People with your public key can put something in your lockbox and lock it (send and encrypt)",
+      "note": "Hacker Lexicon What Is End-to-End Encryption - Andy Greenberg",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-07-20",
+        "interval": 193,
+        "ease": 270
+      }
+    },
+    {
+      "front": "What is the function of the private key in the lockbox analogy?",
+      "back": "Only you can unlock the lockbox to see the contents inside.",
+      "note": "Hacker Lexicon What Is End-to-End Encryption - Andy Greenberg",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-07-10",
+        "interval": 123,
+        "ease": 270
+      }
+    },
+    {
+      "front": "What is the process of sending an encrypted message using public key encryption?",
+      "back": "1.) Sender encrypt (sends) message with public key 2.) Recipient decrypts  (reads) message with private key",
+      "note": "Hacker Lexicon What Is End-to-End Encryption - Andy Greenberg",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-07-09",
+        "interval": 183,
+        "ease": 270
+      }
+    },
+    {
+      "front": "What does the 4th Amendment protect you from?",
+      "back": "Unreasonable search and seizure",
+      "note": "Know Your Rights - Hanni Fakhoury",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-08-11",
+        "interval": 211,
+        "ease": 270
+      }
+    },
+    {
+      "front": "If the police knock on your door and request to enter, what should you do next?",
+      "back": "Ask for a copy of the warrant",
+      "note": "Know Your Rights - Hanni Fakhoury",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-12",
+        "interval": 136,
+        "ease": 250
+      }
+    },
+    {
+      "front": "A valid warrant should have [...], list of items, judge's signature, warrant deadline",
+      "back": "name / address of target",
+      "note": "Know Your Rights - Hanni Fakhoury",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2000-01-01",
+        "interval": 1,
+        "ease": 250
+      }
+    },
+    {
+      "front": "A valid warrant should have name / address of target, [...], judge's signature, warrant deadline",
+      "back": "list of items",
+      "note": "Know Your Rights - Hanni Fakhoury",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2000-01-01",
+        "interval": 1,
+        "ease": 250
+      }
+    },
+    {
+      "front": "A valid warrant should have name / address of target, list of items, [...], warrant deadline",
+      "back": "judge's signature",
+      "note": "Know Your Rights - Hanni Fakhoury",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2000-01-01",
+        "interval": 1,
+        "ease": 250
+      }
+    },
+    {
+      "front": "A valid warrant should have name / address of target, list of items, judge's signature, [...]",
+      "back": "warrant deadline",
+      "note": "Know Your Rights - Hanni Fakhoury",
+      "kind": "cloze",
+      "schedule": {
+        "due": "2025-09-13",
+        "interval": 3,
+        "ease": 250
+      }
+    },
+    {
+      "front": "Who controls the scope of a warrant?",
+      "back": "Judge",
+      "note": "Know Your Rights - Hanni Fakhoury",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-02",
+        "interval": 158,
+        "ease": 270
+      }
+    },
+    {
+      "front": "What permissions can warrants give police?",
+      "back": "Arrest and search & seizure",
+      "note": "Know Your Rights - Hanni Fakhoury",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-21",
+        "interval": 145,
+        "ease": 250
+      }
+    },
+    {
+      "front": "Under what situation can the police always search you?",
+      "back": "If you consent to the search",
+      "note": "Know Your Rights - Hanni Fakhoury",
+      "kind": "basic",
+      "schedule": {
+        "due": "2027-01-09",
+        "interval": 319,
+        "ease": 290
+      }
+    },
+    {
+      "front": "What's the scope of a self-consented police search?",
+      "back": "Whatever you set",
+      "note": "Know Your Rights - Hanni Fakhoury",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-11",
+        "interval": 124,
+        "ease": 250
+      }
+    },
+    {
+      "front": "What happens to evidence from illegal searches?",
+      "back": "Generally can't be used in court",
+      "note": "Know Your Rights - Hanni Fakhoury",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-09-08",
+        "interval": 218,
+        "ease": 250
+      }
+    },
+    {
+      "front": "During a search / arrest, what should you say to law enforcement?",
+      "back": "\"I don't want to talk to you or answer any questions without my attorney present\"",
+      "note": "Know Your Rights - Hanni Fakhoury",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-19",
+        "interval": 129,
+        "ease": 270
+      }
+    },
+    {
+      "front": "What do police need before searching you and your home?",
+      "back": "warrant",
+      "note": "Know Your Rights - Hanni Fakhoury",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-12-02",
+        "interval": 305,
+        "ease": 290
+      }
+    },
+    {
+      "front": "What are the two core tenants of Liberalism?",
+      "back": "Individual rights & limited government",
+      "note": "Liberalism A Political Ideology Explained - Jitender",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-10",
+        "interval": 90,
+        "ease": 250
+      }
+    },
+    {
+      "front": "What is the \"Rule of Law\" in Liberalism?",
+      "back": "Individual and government subject to the same laws",
+      "note": "Liberalism A Political Ideology Explained - Jitender",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-03-30",
+        "interval": 112,
+        "ease": 250
+      }
+    },
+    {
+      "front": "How does Liberalism relate economic and political freedom?",
+      "back": "Economic freedom is tied to political freedom",
+      "note": "Liberalism A Political Ideology Explained - Jitender",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-01",
+        "interval": 125,
+        "ease": 250
+      }
+    },
+    {
+      "front": "What is one criticism of Liberalism relating limited government and inequality?",
+      "back": "The government can help combat inequality, but is too limited in Liberalism",
+      "note": "Liberalism A Political Ideology Explained - Jitender",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-09-15",
+        "interval": 212,
+        "ease": 250
+      }
+    },
+    {
+      "front": "What is one criticism of Liberalism relating individual rights and inequality?",
+      "back": "Liberalism is too focused on individual rights and not widespread inequality (the common good)",
+      "note": "Liberalism A Political Ideology Explained - Jitender",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-07-31",
+        "interval": 204,
+        "ease": 270
+      }
+    },
+    {
+      "front": "Why are children anti-fragile?",
+      "back": "They become stronger after hardships",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-09-26",
+        "interval": 258,
+        "ease": 268
+      }
+    },
+    {
+      "front": "What are the two central claims in \"The Anxious Generation\"?",
+      "back": "Overprotection in the real world and underprotection in the virtual world",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2027-08-24",
+        "interval": 516,
+        "ease": 290
+      }
+    },
+    {
+      "front": "When did the \"Great Rewiring\" occur?",
+      "back": "2010-2015",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-06",
+        "interval": 130,
+        "ease": 228
+      }
+    },
+    {
+      "front": "Why is \"adolescents admitted to hospitals for self-harm\" a better indicator than self-reports for determining rises in mental illness?",
+      "back": "self reports are influenced by factors like increases in general mental health awareness",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-03",
+        "interval": 127,
+        "ease": 228
+      }
+    },
+    {
+      "front": "According to \"The Anxious Generation\" what caused the first wave of the internet era?",
+      "back": "When personal computers and internet access became widespread",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2027-06-21",
+        "interval": 461,
+        "ease": 288
+      }
+    },
+    {
+      "front": "According to \"The Anxious Generation\" when was the first wave of the internet era?",
+      "back": "1990",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-06-08",
+        "interval": 152,
+        "ease": 230
+      }
+    },
+    {
+      "front": "According to \"The Anxious Generation\" what caused the second wave of the internet era?",
+      "back": "Ubiquity of smartphones and social media",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-29",
+        "interval": 181,
+        "ease": 288
+      }
+    },
+    {
+      "front": "According to \"The Anxious Generation\" when was the second wave of the internet era?",
+      "back": "2012",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-05",
+        "interval": 112,
+        "ease": 228
+      }
+    },
+    {
+      "front": "Why is social media on your smartphone more dangerous to mental health than social media on a PC?",
+      "back": "Smartphones are always with you",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-10-23",
+        "interval": 300,
+        "ease": 308
+      }
+    },
+    {
+      "front": "Why is a low-stakes environment important for kids to learn?",
+      "back": "So they can safely try things out",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-09-16",
+        "interval": 251,
+        "ease": 268
+      }
+    },
+    {
+      "front": "What learning pattern do kids learn best from?",
+      "back": "Repetition with feedback in a low-stakes environment",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-24",
+        "interval": 118,
+        "ease": 227
+      }
+    },
+    {
+      "front": "Why do kids need unsupervised play with others?",
+      "back": "To teach them how to interact with others",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2027-05-04",
+        "interval": 404,
+        "ease": 268
+      }
+    },
+    {
+      "front": "What key social skills do kids learn from unsupervised play with others?",
+      "back": "How to interact with other people their age",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2027-03-25",
+        "interval": 364,
+        "ease": 248
+      }
+    },
+    {
+      "front": "Why are children motivated to learn key social skills (e.g. reading emotion) from unsupervised play with others?",
+      "back": "They want to be included in the group and \"keep the fun going\"",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-07-02",
+        "interval": 175,
+        "ease": 247
+      }
+    },
+    {
+      "front": "Typically how is online communication different from face-to-face interactions?",
+      "back": "It's asynchronous",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-11-11",
+        "interval": 275,
+        "ease": 268
+      }
+    },
+    {
+      "front": "Why is asynchronous communication worse for children than synchronous?",
+      "back": "They don't learn key social skills",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-09-01",
+        "interval": 236,
+        "ease": 267
+      }
+    },
+    {
+      "front": "What features of social media makes them \"conformity engines\"?",
+      "back": "High exposure to what others are doing (posts) and numerical indicators of success / failure (likes)",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-13",
+        "interval": 172,
+        "ease": 270
+      }
+    },
+    {
+      "front": "How do kids learn using conformity?",
+      "back": "They follow the \"best\"",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-08-21",
+        "interval": 256,
+        "ease": 308
+      }
+    },
+    {
+      "front": "Why is it dangerous for kids to conform to successful people on social media?",
+      "back": "What is successful on social media doesn't necessarily translate to real life",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2027-05-14",
+        "interval": 431,
+        "ease": 288
+      }
+    },
+    {
+      "front": "What does it mean when something is anti-fragile?",
+      "back": "It needs to go through hardship to become strong",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-03-31",
+        "interval": 129,
+        "ease": 268
+      }
+    },
+    {
+      "front": "What is \"Defend Mode\" (Anxious Generation)?",
+      "back": "Being wary of the world",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2027-05-09",
+        "interval": 423,
+        "ease": 288
+      }
+    },
+    {
+      "front": "What is \"Discover Mode\" (Anxious Generation)?",
+      "back": "Seeing every experience as an opportunity",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-15",
+        "interval": 171,
+        "ease": 270
+      }
+    },
+    {
+      "front": "According to \"The Anxious Generation\", how safe should we keep kids?",
+      "back": "As safe as necessary, not as safe as possible",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-06-07",
+        "interval": 190,
+        "ease": 270
+      }
+    },
+    {
+      "front": "What does overprotecting children lead them to develop?",
+      "back": "Anxiety disorders",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-05-16",
+        "interval": 175,
+        "ease": 287
+      }
+    },
+    {
+      "front": "Why does overprotecting children lead to them developing anxiety disorders?",
+      "back": "they don't get the experiences necessary to build confidence. Kids are anti-fragile.",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-22",
+        "interval": 86,
+        "ease": 228
+      }
+    },
+    {
+      "front": "Why can social media be high-stakes?",
+      "back": "Every action is highly public",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-06-28",
+        "interval": 171,
+        "ease": 248
+      }
+    },
+    {
+      "front": "According to The Anxious Generation, why is replacing free play with adult supervised activities bad?",
+      "back": "Because kids need unsupervised play",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-07-13",
+        "interval": 154,
+        "ease": 227
+      }
+    },
+    {
+      "front": "Why did declining social cohesion affect childhood autonomy?",
+      "back": "Parents felt they couldn't trust their neighbors to look out for their kids",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-07-04",
+        "interval": 189,
+        "ease": 247
+      }
+    },
+    {
+      "front": "How did stranger danger affect parent's views of other adults in their community?",
+      "back": "They felt like they couldn't trust them with their kids",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-09-30",
+        "interval": 253,
+        "ease": 267
+      }
+    },
+    {
+      "front": "How did stranger danger affect parent's views of other's kids?",
+      "back": "They felt like they should stay away from other's kids",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-04-30",
+        "interval": 168,
+        "ease": 287
+      }
+    },
+    {
+      "front": "Define psychological safety?",
+      "back": "The idea that people can disagree with each other's ideas respectfully",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-09-02",
+        "interval": 212,
+        "ease": 247
+      }
+    },
+    {
+      "front": "How does psychological safety differ from emotional safety",
+      "back": "Psychological safety allows for negative emotions and criticism",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-07-08",
+        "interval": 177,
+        "ease": 247
+      }
+    },
+    {
+      "front": "What is \"safetyism\"?",
+      "back": "The idea that safety trumps everything, no matter how trivial the potential danger",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-10-31",
+        "interval": 271,
+        "ease": 267
+      }
+    },
+    {
+      "front": "How does overprotection make kids grow up in defense mode?",
+      "back": "Kids don't gain the confidence and skills needed to feel comfortable exploring the world",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2027-05-13",
+        "interval": 413,
+        "ease": 267
+      }
+    },
+    {
+      "front": "What is the unseen cost of kids spending hours online (social media, video games, etc.)?",
+      "back": "The opportunity cost of what they could have been doing",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-10-07",
+        "interval": 264,
+        "ease": 267
+      }
+    },
+    {
+      "front": "Heavy social media usage can affect attention in a similar way as [...] (disorder)",
+      "back": "ADHD",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "cloze",
+      "schedule": null
+    },
+    {
+      "front": "How can you slowly build a kid's confidence in themselves and their parent's trust in their independence at the same time?",
+      "back": "Let kids do something new without parental supervision, increasing the task magnitude slowly over time",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-08-22",
+        "interval": 203,
+        "ease": 247
+      }
+    },
+    {
+      "front": "What is the idea of \"race to the bottom\" for companies?",
+      "back": "\"If I don't do this bad thing, someone else is gonna do this bad thing and I'll fall behind so therefore I must do this bad thing myself\"",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-10-25",
+        "interval": 267,
+        "ease": 267
+      }
+    },
+    {
+      "front": "How is the internet a shallow version of the real world?",
+      "back": "It provides a false simulation of social connection, entertainment, learning, and sex satisfaction",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-06-25",
+        "interval": 180,
+        "ease": 247
+      }
+    },
+    {
+      "front": "Why is the virtual world an isolated version of the real world?",
+      "back": "You don't need to face the uncomfortableness of real life",
+      "note": "The Anxious Generation - Jonathan Haidt",
+      "kind": "basic",
+      "schedule": {
+        "due": "2026-08-29",
+        "interval": 233,
+        "ease": 267
+      }
+    }
+  ]
+}

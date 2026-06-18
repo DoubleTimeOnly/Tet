@@ -132,3 +132,18 @@ SQLite.
   doesn't wipe your streak.
 - **Anki import** (Settings): import an `.apkg` as fresh FSRS cards (Anki's SM-2
   scheduling history is intentionally not ported). Device builds only.
+- **Obsidian import**: cards authored with the Obsidian "Spaced Repetition"
+  plugin (notes tagged `#flashcardsv2`) are exported to
+  `data/obsidian-flashcards.json` and imported into one "Obsidian Flashcards"
+  deck **with their schedule preserved** — unlike Anki import, each card keeps
+  its due date, interval→stability, and ease→difficulty (best-effort SM-2→FSRS;
+  raw SM-2 values are kept verbatim in the JSON). See `lib/obsidianImport.ts`.
+
+  ```sh
+  # Re-export from a vault (writes data/obsidian-flashcards.json):
+  OBSIDIAN_VAULT="/path/to/vault" npx jest exportObsidianFlashcards
+
+  # Import the bundled JSON into a Store (one-shot, not auto-run):
+  #   import { seedObsidianFlashcards } from "./services/seedObsidian";
+  #   await seedObsidianFlashcards(store);
+  ```

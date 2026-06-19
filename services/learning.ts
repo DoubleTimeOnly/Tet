@@ -1,9 +1,10 @@
 import type { Store } from "../db/store";
 import type { Task, Card, Rating, CompletionEvidence } from "../db/schema";
 import { computeToday, type DailySlice, DEFAULT_REVIEW_CAP } from "../lib/dailySlice";
-import { currentStreak } from "../lib/streak";
+import { currentStreak, longestStreak } from "../lib/streak";
 import { grade } from "../lib/fsrs";
 import { recordCompletion } from "../lib/completion";
+import { totalXp, levelForXp, type LevelProgress } from "../lib/xp";
 
 /**
  * Orchestration: Store reads/writes + pure lib logic. Screens call these and
@@ -13,7 +14,12 @@ import { recordCompletion } from "../lib/completion";
 
 export interface TodayView {
   slice: DailySlice;
+  /** Current consecutive-day streak. */
   streak: number;
+  /** Best streak ever achieved (for the "best N" display). */
+  maxStreak: number;
+  /** XP level + progress, derived from reviews + youtube minutes. */
+  xp: LevelProgress;
 }
 
 export async function getTodayView(
@@ -22,10 +28,11 @@ export async function getTodayView(
   tz: string,
   cap = DEFAULT_REVIEW_CAP,
 ): Promise<TodayView> {
-  const [tasks, dueCards, allCompletions] = await Promise.all([
+  const [tasks, dueCards, allCompletions, reviews] = await Promise.all([
     store.listTasks({ activeOnly: true }),
     store.listDueCards(now),
     store.listCompletions(),
+    store.countReviews(),
   ]);
   // computeToday derives the dayKey itself and filters completions to today.
   const slice = computeToday({
@@ -37,7 +44,9 @@ export async function getTodayView(
     cap,
   });
   const streak = currentStreak({ completions: allCompletions, now, tz });
-  return { slice, streak };
+  const maxStreak = longestStreak({ completions: allCompletions });
+  const xp = levelForXp(totalXp({ reviews, completions: allCompletions }));
+  return { slice, streak, maxStreak, xp };
 }
 
 /** Grade a due card: advance FSRS, persist scheduling, record the review. */
@@ -53,6 +62,28 @@ export async function gradeCard(
   await store.updateCardScheduling(next);
   await store.insertReview(review);
   return next;
+}
+
+/** Edit a card's question/answer text (e.g. a typo spotted while reviewing). */
+export async function editCard(
+  store: Store,
+  cardId: string,
+  front: string,
+  back: string,
+): Promise<void> {
+  await store.updateCardContent(cardId, front.trim(), back.trim());
+}
+
+/**
+ * Ignore a card: soft-delete so it stops appearing in review but stays in the
+ * database (and in exports) for later recovery. Pass ignored=false to restore.
+ */
+export async function setCardIgnored(
+  store: Store,
+  cardId: string,
+  ignored: boolean,
+): Promise<void> {
+  await store.setCardIgnored(cardId, ignored);
 }
 
 /**

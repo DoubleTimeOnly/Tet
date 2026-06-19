@@ -31,6 +31,42 @@ describe("exportAll / importAll round-trip", () => {
     const empty: BackupData = { decks: [], tasks: [], cards: [], reviews: [], completions: [] };
     expect(importAll(exportAll(empty))).toEqual(empty);
   });
+
+  it("preserves the newer fields: playlist meta, ignored cards, watched-minutes", () => {
+    const data: BackupData = {
+      decks: [{ id: "d1", name: "Deck", created_at: 1 }],
+      tasks: [
+        makeTask({
+          id: "yt",
+          type: "youtube",
+          // playlist progress (cached items + watched videos) lives in meta
+          meta: JSON.stringify({
+            playlistId: "PL1",
+            items: [{ id: "v1", title: "One" }],
+            fetchedDay: "2026-06-19",
+            fetchedAt: 5,
+            watchedIds: ["v1"],
+            pick: null,
+          }),
+        }),
+      ],
+      cards: [makeCard({ id: "c1", deck_id: "d1", ignored: true })],
+      reviews: [{ id: "r1", card_id: "c1", rating: "good", reviewed_at: 5 }],
+      completions: [
+        makeCompletion({
+          id: "cm1",
+          task_id: "yt",
+          evidence: { type: "youtube", manual: true, minutes: 12 },
+        }),
+      ],
+    };
+    const restored = importAll(exportAll(data, 1000));
+    expect(restored).toEqual(data);
+    // spot-check the fields most likely to be dropped
+    expect(restored.tasks[0]!.meta).toBe(data.tasks[0]!.meta);
+    expect(restored.cards[0]!.ignored).toBe(true);
+    expect(restored.completions[0]!.evidence).toEqual({ type: "youtube", manual: true, minutes: 12 });
+  });
 });
 
 describe("importAll validation (no partial-write corruption)", () => {

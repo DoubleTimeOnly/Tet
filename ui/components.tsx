@@ -43,6 +43,32 @@ export function Muted({ children }: { children: React.ReactNode }) {
   return <Text style={styles.muted}>{children}</Text>;
 }
 
+/** Level + XP progress bar for the Today screen's gamification header. */
+export function XpBar({
+  level,
+  xpIntoLevel,
+  xpForLevel,
+}: {
+  level: number;
+  xpIntoLevel: number;
+  xpForLevel: number;
+}) {
+  const pct = xpForLevel > 0 ? Math.min(1, xpIntoLevel / xpForLevel) : 0;
+  return (
+    <View style={{ gap: space.sm }}>
+      <View style={styles.xpRow}>
+        <Text style={styles.subtitle}>Level {level}</Text>
+        <Text style={styles.muted}>
+          {xpIntoLevel} / {xpForLevel} XP
+        </Text>
+      </View>
+      <View style={styles.xpTrack}>
+        <View style={[styles.xpFill, { width: `${pct * 100}%` }]} />
+      </View>
+    </View>
+  );
+}
+
 type ButtonKind = "primary" | "neutral" | "good" | "warn" | "danger";
 
 export function Button({
@@ -101,4 +127,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   buttonText: { color: colors.text, fontSize: 16, fontWeight: "600" },
+  xpRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "baseline" },
+  xpTrack: {
+    height: 10,
+    backgroundColor: colors.border,
+    borderRadius: radius,
+    overflow: "hidden",
+  },
+  xpFill: { height: "100%", backgroundColor: colors.accent, borderRadius: radius },
 });

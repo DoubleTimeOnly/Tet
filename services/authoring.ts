@@ -65,6 +65,7 @@ export async function createTask(
     reading_target: input.readingTarget ?? null,
     active: true,
     created_at: now,
+    meta: null,
   };
   await store.insertTask(task);
   return task;

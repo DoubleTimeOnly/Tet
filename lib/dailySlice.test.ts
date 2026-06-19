@@ -74,8 +74,10 @@ describe("computeToday — tasks", () => {
 });
 
 describe("computeToday — review cap & overflow", () => {
+  // Distinct fronts so these exercise the cap, not sibling burying (identical
+  // content would collapse into one group).
   const dueCards = (n: number) =>
-    Array.from({ length: n }, (_, i) => makeCard({ id: `c${i}`, due: i }));
+    Array.from({ length: n }, (_, i) => makeCard({ id: `c${i}`, front: `q${i}`, due: i }));
 
   it("only due cards (due <= now) are eligible", () => {
     const slice = computeToday({
@@ -107,5 +109,23 @@ describe("computeToday — review cap & overflow", () => {
     const slice = computeToday({ tasks: [], cards: dueCards(31), completions: [], now, tz: LA });
     expect(slice.reviewCards).toHaveLength(30);
     expect(slice.reviewOverflow).toHaveLength(1);
+  });
+});
+
+describe("computeToday — sibling burying", () => {
+  it("surfaces only one cloze of a sibling group today; the rest roll over", () => {
+    const slice = computeToday({
+      tasks: [],
+      cards: [
+        makeCard({ id: "c0", front: "[...] not b", back: "a", due: now - 2 }),
+        makeCard({ id: "c1", front: "a not [...]", back: "b", due: now - 1 }),
+        makeCard({ id: "solo", front: "gato", back: "cat", due: now - 3 }),
+      ],
+      completions: [],
+      now,
+      tz: LA,
+    });
+    expect(slice.reviewCards.map((c) => c.id)).toEqual(["solo", "c0"]);
+    expect(slice.reviewOverflow.map((c) => c.id)).toEqual(["c1"]);
   });
 });

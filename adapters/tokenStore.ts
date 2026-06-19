@@ -9,17 +9,16 @@ export interface WritableTokenStore extends TokenStore {
   setToken(token: string | null): Promise<void>;
 }
 
-const KEY = "readwise_token";
-
-export function createTokenStore(): WritableTokenStore {
+/** Backing store for a single secret, keyed by name. */
+function makeKeyStore(key: string): WritableTokenStore {
   if (Platform.OS === "web") {
     return {
       async getToken() {
-        return globalThis.localStorage?.getItem(KEY) ?? null;
+        return globalThis.localStorage?.getItem(key) ?? null;
       },
       async setToken(token) {
-        if (token) globalThis.localStorage?.setItem(KEY, token);
-        else globalThis.localStorage?.removeItem(KEY);
+        if (token) globalThis.localStorage?.setItem(key, token);
+        else globalThis.localStorage?.removeItem(key);
       },
     };
   }
@@ -27,11 +26,20 @@ export function createTokenStore(): WritableTokenStore {
   const SecureStore = require("expo-secure-store") as typeof import("expo-secure-store");
   return {
     async getToken() {
-      return SecureStore.getItemAsync(KEY);
+      return SecureStore.getItemAsync(key);
     },
     async setToken(token) {
-      if (token) await SecureStore.setItemAsync(KEY, token);
-      else await SecureStore.deleteItemAsync(KEY);
+      if (token) await SecureStore.setItemAsync(key, token);
+      else await SecureStore.deleteItemAsync(key);
     },
   };
+}
+
+export function createTokenStore(): WritableTokenStore {
+  return makeKeyStore("readwise_token");
+}
+
+/** YouTube Data API key, used to read playlist tasks. Same storage as the token. */
+export function createYoutubeApiKeyStore(): WritableTokenStore {
+  return makeKeyStore("youtube_api_key");
 }

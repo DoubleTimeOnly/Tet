@@ -18,6 +18,8 @@ export interface Store {
   // tasks
   insertTask(task: Task): Promise<void>;
   setTaskActive(id: string, active: boolean): Promise<void>;
+  /** Persist a task's opaque JSON state blob (e.g. YouTube playlist cache). */
+  updateTaskMeta(id: string, meta: string | null): Promise<void>;
   listTasks(opts?: { activeOnly?: boolean }): Promise<Task[]>;
   getTask(id: string): Promise<Task | null>;
 
@@ -25,13 +27,21 @@ export interface Store {
   insertCard(card: Card): Promise<void>;
   /** Persist a card's scheduling after grade() — fsrs_state/due/state_label. */
   updateCardScheduling(card: Card): Promise<void>;
+  /** Edit a card's question/answer text (review-time correction). */
+  updateCardContent(id: string, front: string, back: string): Promise<void>;
+  /** Soft-delete / restore: ignored cards are skipped by listDueCards. */
+  setCardIgnored(id: string, ignored: boolean): Promise<void>;
   getCard(id: string): Promise<Card | null>;
-  /** Cards with due <= nowMs, oldest-first, optionally limited. */
+  /** Non-ignored cards with due <= nowMs, oldest-first, optionally limited. */
   listDueCards(nowMs: number, limit?: number): Promise<Card[]>;
+  /** Every card across all decks (Library views, export). */
+  listAllCards(): Promise<Card[]>;
   countCardsBySourceTask(taskId: string): Promise<number>;
 
   // reviews
   insertReview(review: Review): Promise<void>;
+  /** Total graded reviews — each is one flashcard reviewed (XP source). */
+  countReviews(): Promise<number>;
 
   // completions
   insertCompletion(completion: Completion): Promise<void>;

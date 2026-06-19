@@ -47,3 +47,25 @@ export function currentStreak(input: CurrentStreakInput): number {
   }
   return streak;
 }
+
+/**
+ * longestStreak — the best run of consecutive satisfied days ever achieved,
+ * scanning the full history (not just the trailing window). Same "a day counts
+ * iff it has >=1 verified completion" rule as currentStreak, so the two agree
+ * on what a streak day is.
+ */
+export function longestStreak(input: { completions: Completion[] }): number {
+  const days = [
+    ...new Set(input.completions.filter((c) => c.verified).map((c) => c.date)),
+  ].sort();
+
+  let best = 0;
+  let run = 0;
+  let prev: string | null = null;
+  for (const day of days) {
+    run = prev !== null && previousDayKey(day) === prev ? run + 1 : 1;
+    if (run > best) best = run;
+    prev = day;
+  }
+  return best;
+}

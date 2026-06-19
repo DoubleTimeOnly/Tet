@@ -26,6 +26,10 @@ export class MemoryStore implements Store {
     const t = this.tasks.find((x) => x.id === id);
     if (t) t.active = active;
   }
+  async updateTaskMeta(id: string, meta: string | null): Promise<void> {
+    const t = this.tasks.find((x) => x.id === id);
+    if (t) t.meta = meta;
+  }
   async listTasks(opts: { activeOnly?: boolean } = {}): Promise<Task[]> {
     return this.tasks
       .filter((t) => (opts.activeOnly ? t.active : true))
@@ -47,16 +51,30 @@ export class MemoryStore implements Store {
       c.state_label = card.state_label;
     }
   }
+  async updateCardContent(id: string, front: string, back: string): Promise<void> {
+    const c = this.cards.find((x) => x.id === id);
+    if (c) {
+      c.front = front;
+      c.back = back;
+    }
+  }
+  async setCardIgnored(id: string, ignored: boolean): Promise<void> {
+    const c = this.cards.find((x) => x.id === id);
+    if (c) c.ignored = ignored;
+  }
   async getCard(id: string): Promise<Card | null> {
     const c = this.cards.find((x) => x.id === id);
     return c ? { ...c } : null;
   }
   async listDueCards(nowMs: number, limit?: number): Promise<Card[]> {
     const due = this.cards
-      .filter((c) => c.due <= nowMs)
+      .filter((c) => !c.ignored && c.due <= nowMs)
       .sort((a, b) => a.due - b.due)
       .map((c) => ({ ...c }));
     return limit === undefined ? due : due.slice(0, limit);
+  }
+  async listAllCards(): Promise<Card[]> {
+    return this.cards.map((c) => ({ ...c }));
   }
   async countCardsBySourceTask(taskId: string): Promise<number> {
     return this.cards.filter((c) => c.source_task_id === taskId).length;
@@ -64,6 +82,9 @@ export class MemoryStore implements Store {
 
   async insertReview(review: Review): Promise<void> {
     this.reviews.push({ ...review });
+  }
+  async countReviews(): Promise<number> {
+    return this.reviews.length;
   }
 
   async insertCompletion(completion: Completion): Promise<void> {

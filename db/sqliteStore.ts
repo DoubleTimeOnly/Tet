@@ -26,6 +26,21 @@ export class SqliteStore implements Store {
     this.db = await SQLite.openDatabaseAsync(this.dbName);
     await this.db.execAsync("PRAGMA foreign_keys = ON;");
     await this.db.execAsync(SCHEMA_SQL);
+    await this.migrate();
+  }
+
+  /** Additive migrations for DBs created before a column existed. */
+  private async migrate(): Promise<void> {
+    const cardCols = await this.conn.getAllAsync<{ name: string }>("PRAGMA table_info(cards)");
+    if (!cardCols.some((c) => c.name === "ignored")) {
+      await this.conn.execAsync(
+        "ALTER TABLE cards ADD COLUMN ignored INTEGER NOT NULL DEFAULT 0",
+      );
+    }
+    const taskCols = await this.conn.getAllAsync<{ name: string }>("PRAGMA table_info(tasks)");
+    if (!taskCols.some((c) => c.name === "meta")) {
+      await this.conn.execAsync("ALTER TABLE tasks ADD COLUMN meta TEXT");
+    }
   }
 
   async insertDeck(d: Deck): Promise<void> {
@@ -40,13 +55,16 @@ export class SqliteStore implements Store {
 
   async insertTask(t: Task): Promise<void> {
     await this.conn.runAsync(
-      `INSERT INTO tasks (id, type, title, source_ref, cadence, makes_cards_count, reading_target, active, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [t.id, t.type, t.title, t.source_ref, t.cadence, t.makes_cards_count, t.reading_target, t.active ? 1 : 0, t.created_at],
+      `INSERT INTO tasks (id, type, title, source_ref, cadence, makes_cards_count, reading_target, active, created_at, meta)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [t.id, t.type, t.title, t.source_ref, t.cadence, t.makes_cards_count, t.reading_target, t.active ? 1 : 0, t.created_at, t.meta ?? null],
     );
   }
   async setTaskActive(id: string, active: boolean): Promise<void> {
     await this.conn.runAsync("UPDATE tasks SET active = ? WHERE id = ?", [active ? 1 : 0, id]);
+  }
+  async updateTaskMeta(id: string, meta: string | null): Promise<void> {
+    await this.conn.runAsync("UPDATE tasks SET meta = ? WHERE id = ?", [meta, id]);
   }
   async listTasks(opts: { activeOnly?: boolean } = {}): Promise<Task[]> {
     const rows = await this.conn.getAllAsync<TaskRow>(
@@ -61,9 +79,9 @@ export class SqliteStore implements Store {
 
   async insertCard(c: Card): Promise<void> {
     await this.conn.runAsync(
-      `INSERT INTO cards (id, deck_id, front, back, source_task_id, created_at, fsrs_state, due, state_label)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [c.id, c.deck_id, c.front, c.back, c.source_task_id, c.created_at, c.fsrs_state, c.due, c.state_label],
+      `INSERT INTO cards (id, deck_id, front, back, source_task_id, created_at, fsrs_state, due, state_label, ignored)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [c.id, c.deck_id, c.front, c.back, c.source_task_id, c.created_at, c.fsrs_state, c.due, c.state_label, c.ignored ? 1 : 0],
     );
   }
   async updateCardScheduling(c: Card): Promise<void> {
@@ -72,13 +90,31 @@ export class SqliteStore implements Store {
       [c.fsrs_state, c.due, c.state_label, c.id],
     );
   }
+  async updateCardContent(id: string, front: string, back: string): Promise<void> {
+    await this.conn.runAsync(
+      "UPDATE cards SET front = ?, back = ? WHERE id = ?",
+      [front, back, id],
+    );
+  }
+  async setCardIgnored(id: string, ignored: boolean): Promise<void> {
+    await this.conn.runAsync(
+      "UPDATE cards SET ignored = ? WHERE id = ?",
+      [ignored ? 1 : 0, id],
+    );
+  }
   async getCard(id: string): Promise<Card | null> {
-    return this.conn.getFirstAsync<Card>("SELECT * FROM cards WHERE id = ?", [id]);
+    const row = await this.conn.getFirstAsync<CardRow>("SELECT * FROM cards WHERE id = ?", [id]);
+    return row ? rowToCard(row) : null;
   }
   async listDueCards(nowMs: number, limit?: number): Promise<Card[]> {
-    const sql = "SELECT * FROM cards WHERE due <= ? ORDER BY due ASC" + (limit !== undefined ? " LIMIT ?" : "");
+    const sql = "SELECT * FROM cards WHERE ignored = 0 AND due <= ? ORDER BY due ASC" + (limit !== undefined ? " LIMIT ?" : "");
     const args = limit !== undefined ? [nowMs, limit] : [nowMs];
-    return this.conn.getAllAsync<Card>(sql, args);
+    const rows = await this.conn.getAllAsync<CardRow>(sql, args);
+    return rows.map(rowToCard);
+  }
+  async listAllCards(): Promise<Card[]> {
+    const rows = await this.conn.getAllAsync<CardRow>("SELECT * FROM cards ORDER BY created_at");
+    return rows.map(rowToCard);
   }
   async countCardsBySourceTask(taskId: string): Promise<number> {
     const row = await this.conn.getFirstAsync<{ n: number }>(
@@ -93,6 +129,12 @@ export class SqliteStore implements Store {
       "INSERT INTO reviews (id, card_id, rating, reviewed_at) VALUES (?, ?, ?, ?)",
       [r.id, r.card_id, r.rating, r.reviewed_at],
     );
+  }
+  async countReviews(): Promise<number> {
+    const row = await this.conn.getFirstAsync<{ n: number }>(
+      "SELECT COUNT(*) AS n FROM reviews",
+    );
+    return row?.n ?? 0;
   }
 
   async insertCompletion(c: Completion): Promise<void> {
@@ -114,7 +156,7 @@ export class SqliteStore implements Store {
     const [decks, tasks, cards, reviews, completions] = await Promise.all([
       this.listDecks(),
       this.listTasks(),
-      this.conn.getAllAsync<Card>("SELECT * FROM cards"),
+      this.listAllCards(),
       this.conn.getAllAsync<Review>("SELECT * FROM reviews"),
       this.listCompletions(),
     ]);
@@ -141,6 +183,13 @@ export class SqliteStore implements Store {
 }
 
 // SQLite stores booleans as 0/1 and evidence as a JSON string; revive on read.
+interface CardRow extends Omit<Card, "ignored"> {
+  ignored: number;
+}
+function rowToCard(r: CardRow): Card {
+  return { ...r, ignored: r.ignored === 1 };
+}
+
 interface TaskRow extends Omit<Task, "active"> {
   active: number;
 }

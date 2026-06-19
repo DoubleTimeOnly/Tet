@@ -37,6 +37,12 @@ export interface Task {
   reading_target: number | null;
   active: boolean;
   created_at: number;
+  /**
+   * Opaque per-task JSON state. Currently holds a YouTube playlist task's cached
+   * items / watched videos / daily pick (see lib/playlist). Null for everything
+   * else. Kept as a TEXT blob so task-type-specific state needs no new columns.
+   */
+  meta: string | null;
 }
 
 export interface Card {
@@ -51,6 +57,11 @@ export interface Card {
   /** Denormalized from fsrs_state — epoch ms, INDEXED for the daily query. */
   due: number;
   state_label: CardState;
+  /**
+   * Soft-delete: an ignored card is excluded from review (listDueCards) but kept
+   * in the table so it can be recovered or carried in an export. Defaults false.
+   */
+  ignored: boolean;
 }
 
 export interface Review {
@@ -62,7 +73,10 @@ export interface Review {
 
 export type CompletionEvidence =
   | { type: "flashcard"; n: number }
-  | { type: "youtube"; manual: true }
+  // `minutes` is the video's duration, captured from the player at watch time
+  // and used for XP (1 XP/min). Optional: completions written before the
+  // gamification feature won't carry it, so readers must default to 0.
+  | { type: "youtube"; manual: true; minutes?: number }
   | { type: "reading"; readwise_fraction: number };
 
 export interface Completion {
@@ -95,7 +109,8 @@ CREATE TABLE IF NOT EXISTS tasks (
   makes_cards_count INTEGER NOT NULL DEFAULT 0,
   reading_target    REAL,
   active            INTEGER NOT NULL DEFAULT 1,
-  created_at        INTEGER NOT NULL
+  created_at        INTEGER NOT NULL,
+  meta              TEXT
 );
 
 CREATE TABLE IF NOT EXISTS cards (
@@ -107,7 +122,8 @@ CREATE TABLE IF NOT EXISTS cards (
   created_at     INTEGER NOT NULL,
   fsrs_state     TEXT NOT NULL,
   due            INTEGER NOT NULL,
-  state_label    TEXT NOT NULL CHECK (state_label IN ('new','learning','review'))
+  state_label    TEXT NOT NULL CHECK (state_label IN ('new','learning','review')),
+  ignored        INTEGER NOT NULL DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS idx_cards_due ON cards(due);
 CREATE INDEX IF NOT EXISTS idx_cards_source_task ON cards(source_task_id);

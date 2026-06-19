@@ -1,4 +1,4 @@
-import { currentStreak } from "./streak";
+import { currentStreak, longestStreak } from "./streak";
 import { makeCompletion } from "./testFixtures";
 import { DateTime } from "luxon";
 
@@ -71,5 +71,46 @@ describe("currentStreak", () => {
       "2026-06-15",
     );
     expect(currentStreak({ completions, now, tz: LA, windowDays: 3 })).toBe(3);
+  });
+});
+
+describe("longestStreak", () => {
+  it("no completions -> 0", () => {
+    expect(longestStreak({ completions: [] })).toBe(0);
+  });
+
+  it("finds the best run, not the current one", () => {
+    // A past 3-day run, then a gap, then a current 1-day run.
+    const completions = days(
+      "2026-06-01",
+      "2026-06-02",
+      "2026-06-03",
+      "2026-06-15",
+    );
+    expect(longestStreak({ completions })).toBe(3);
+  });
+
+  it("ignores unverified days when counting runs", () => {
+    const completions = [
+      ...days("2026-06-10", "2026-06-11"),
+      makeCompletion({ id: "x", date: "2026-06-12", verified: false }),
+      ...days("2026-06-13"),
+    ];
+    // The unverified 06-12 breaks the run: best is the 06-10..06-11 pair.
+    expect(longestStreak({ completions })).toBe(2);
+  });
+
+  it("dedupes multiple completions on the same day", () => {
+    const completions = [
+      makeCompletion({ id: "a", task_id: "t1", date: "2026-06-14", verified: true }),
+      makeCompletion({ id: "b", task_id: "t2", date: "2026-06-14", verified: true }),
+      ...days("2026-06-15"),
+    ];
+    expect(longestStreak({ completions })).toBe(2);
+  });
+
+  it("is order-independent (completions need not be sorted)", () => {
+    const completions = days("2026-06-15", "2026-06-13", "2026-06-14");
+    expect(longestStreak({ completions })).toBe(3);
   });
 });

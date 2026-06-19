@@ -2,7 +2,7 @@ import { useCallback, useState } from "react";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useStore } from "../../ui/StoreProvider";
 import { getTodayView, type TodayView } from "../../services/learning";
-import { Screen, Card, Title, Subtitle, Body, Muted, Button } from "../../ui/components";
+import { Screen, Card, Title, Subtitle, Body, Muted, Button, XpBar } from "../../ui/components";
 import type { TaskSliceItem } from "../../lib/dailySlice";
 
 export default function TodayScreen() {
@@ -22,16 +22,20 @@ export default function TodayScreen() {
 
   if (!view) return null;
 
-  const { slice, streak } = view;
+  const { slice, streak, maxStreak, xp } = view;
   const reviewCount = slice.reviewCards.length;
   const nothingToDo = slice.tasks.length === 0 && reviewCount === 0;
 
   return (
     <Screen>
       <Title>Today</Title>
-      <Muted>
-        {streak > 0 ? `🔥 ${streak}-day streak` : "Start a streak today"}
-      </Muted>
+      <Card>
+        <XpBar level={xp.level} xpIntoLevel={xp.xpIntoLevel} xpForLevel={xp.xpForLevel} />
+        <Muted>
+          {streak > 0 ? `🔥 ${streak}-day streak` : "Start a streak today"}
+          {maxStreak > 0 ? ` · best ${maxStreak}` : ""}
+        </Muted>
+      </Card>
 
       {reviewCount > 0 && (
         <Card>

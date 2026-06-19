@@ -85,6 +85,7 @@ export function createCard(input: CreateCardInput): Card {
     fsrs_state: "{}",
     due: 0,
     state_label: "new",
+    ignored: false,
   };
   return syncScheduling(base, fresh);
 }

@@ -7,10 +7,17 @@ import type {
 } from "../db/schema";
 
 /**
- * JSON export/import (eng-review #7). A dev-build reinstall mid-trial would
- * otherwise wipe the 14-day streak; exportAll() hands a share-sheet blob,
- * importAll() restores it. No cloud, no partial writes — importAll validates
- * the whole payload before returning so a corrupt file can't half-apply.
+ * Complete JSON export/import — the whole instance in one file. Every table
+ * round-trips: decks, cards (with FSRS schedule + ignored flag), tasks (with
+ * playlist `meta` progress), reviews, and completions. Derived state isn't
+ * stored and so isn't listed here — XP/levels (lib/xp) and streaks (lib/streak)
+ * recompute from reviews + completions, so a restore reconstructs them exactly.
+ *
+ * Importing REPLACES the local dataset (store.replaceAll), so exporting from one
+ * Tet and importing into another recreates the original. No cloud, no partial
+ * writes — importAll validates the whole payload before returning so a corrupt
+ * file can't half-apply. (Secrets like API tokens live outside the DB and are
+ * intentionally not part of the backup.)
  */
 
 export const BACKUP_VERSION = 1;

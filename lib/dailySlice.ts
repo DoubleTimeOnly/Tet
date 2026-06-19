@@ -1,4 +1,5 @@
 import { localDayKey, type Instant } from "./dayKey";
+import { burySiblings } from "./siblings";
 import type { Task, Card, Completion } from "../db/schema";
 
 /**
@@ -60,10 +61,15 @@ export function computeToday(input: DailySliceInput): DailySlice {
     .filter((c) => c.due <= nowMs)
     .sort((a, b) => a.due - b.due);
 
+  // Don't surface sibling cards (multi-cloze / reversed) together — seeing one
+  // gives away the others. Keep the oldest of each group today; its siblings
+  // join the overflow and roll to a later day.
+  const { kept, deferred } = burySiblings(due);
+
   return {
     dayKey,
     tasks: taskItems,
-    reviewCards: due.slice(0, cap),
-    reviewOverflow: due.slice(cap),
+    reviewCards: kept.slice(0, cap),
+    reviewOverflow: [...kept.slice(cap), ...deferred],
   };
 }

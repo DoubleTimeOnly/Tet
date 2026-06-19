@@ -3,16 +3,22 @@ import { TextInput, View, StyleSheet } from "react-native";
 import { useFocusEffect } from "expo-router";
 import { useStore } from "../../ui/StoreProvider";
 import { addCard, createTask, createDeck } from "../../services/authoring";
+import { setCardIgnored } from "../../services/learning";
+import { fetchYouTubeTitle, fetchPlaylistTitle, parsePlaylistId } from "../../lib/youtube";
+import { createYoutubeApiKeyStore } from "../../adapters/tokenStore";
 import { Screen, Card, Title, Subtitle, Body, Muted, Button } from "../../ui/components";
 import { ReadwiseDocPicker } from "../../ui/ReadwiseDocPicker";
+import { CardBrowser } from "../../ui/CardBrowser";
 import { colors, radius, space } from "../../ui/theme";
-import type { Deck, Task, TaskType } from "../../db/schema";
+import type { Deck, Task, TaskType, Card as CardRow } from "../../db/schema";
 
 export default function LibraryScreen() {
   const { store, reload, version } = useStore();
   const [decks, setDecks] = useState<Deck[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [cardCounts, setCardCounts] = useState<Record<string, number>>({});
+  const [allTasks, setAllTasks] = useState<Task[]>([]);
+  const [allCards, setAllCards] = useState<CardRow[]>([]);
+  const [ignored, setIgnored] = useState<CardRow[]>([]);
 
   const load = useCallback(() => {
     let active = true;
@@ -21,14 +27,26 @@ export default function LibraryScreen() {
       if (!active) return;
       setDecks(snap.decks);
       setTasks(snap.tasks.filter((t) => t.active));
-      const counts: Record<string, number> = {};
-      for (const c of snap.cards) counts[c.deck_id] = (counts[c.deck_id] ?? 0) + 1;
-      setCardCounts(counts);
+      setAllTasks(snap.tasks); // includes removed tasks, needed to label sources
+      setAllCards(snap.cards);
+      setIgnored(snap.cards.filter((c) => c.ignored));
     })();
     return () => {
       active = false;
     };
   }, [store, version]);
+
+  const recover = async (id: string) => {
+    await setCardIgnored(store, id, false);
+    reload();
+  };
+
+  // Soft-remove: deactivate so it drops out of the Library and the daily slice
+  // but its completion history (and your streak) stays intact.
+  const removeTask = async (id: string) => {
+    await store.setTaskActive(id, false);
+    reload();
+  };
 
   useFocusEffect(load);
 
@@ -36,21 +54,29 @@ export default function LibraryScreen() {
     <Screen>
       <Title>Library</Title>
 
-      <Subtitle>Decks</Subtitle>
-      {decks.map((d) => (
-        <Card key={d.id}>
-          <Body>{d.name}</Body>
-          <Muted>{cardCounts[d.id] ?? 0} cards</Muted>
-        </Card>
-      ))}
+      <CardBrowser cards={allCards} tasks={allTasks} onChanged={reload} />
 
       <AddCardForm decks={decks} onDone={reload} />
+
+      {ignored.length > 0 && (
+        <>
+          <Subtitle>Ignored cards</Subtitle>
+          <Muted>Hidden from review but kept here — recover any time.</Muted>
+          {ignored.map((c) => (
+            <Card key={c.id}>
+              <Body>{c.front}</Body>
+              <Button label="Recover" kind="neutral" onPress={() => recover(c.id)} />
+            </Card>
+          ))}
+        </>
+      )}
 
       <Subtitle>Tasks</Subtitle>
       {tasks.map((t) => (
         <Card key={t.id}>
           <Body>{t.title}</Body>
           <Muted>{`${t.type} · cadence ${t.cadence}${t.makes_cards_count ? ` · make ${t.makes_cards_count}` : ""}`}</Muted>
+          <Button label="Remove" kind="neutral" onPress={() => removeTask(t.id)} />
         </Card>
       ))}
 
@@ -107,9 +133,28 @@ function AddTaskForm({ onDone }: { onDone: () => void }) {
   const [pickedDoc, setPickedDoc] = useState<{ id: string; title: string } | null>(null);
   const [cadence, setCadence] = useState("1");
   const [makes, setMakes] = useState("0");
+  const [ytKeyStore] = useState(createYoutubeApiKeyStore);
 
   // For reading tasks the source_ref is the Readwise doc id picked below.
   const resolvedSourceRef = type === "reading" ? (pickedDoc?.id ?? "") : sourceRef;
+
+  const isPlaylist = type === "youtube" && parsePlaylistId(sourceRef) !== null;
+
+  // Pull a title from the URL once it parses (YouTube tasks). A playlist needs
+  // the API key to resolve its name; fall back to a generic label. Only fills an
+  // empty title so a name you typed yourself isn't clobbered.
+  const fillTitleFromUrl = async () => {
+    if (title.trim()) return;
+    const playlistId = parsePlaylistId(sourceRef);
+    if (playlistId) {
+      const key = await ytKeyStore.getToken();
+      const name = key ? await fetchPlaylistTitle(playlistId, key) : null;
+      setTitle(name ?? "YouTube playlist");
+      return;
+    }
+    const fetched = await fetchYouTubeTitle(sourceRef);
+    if (fetched) setTitle(fetched);
+  };
 
   const submit = async () => {
     if (!title.trim()) return;
@@ -118,7 +163,8 @@ function AddTaskForm({ onDone }: { onDone: () => void }) {
       title: title.trim(),
       sourceRef: resolvedSourceRef.trim() || null,
       cadence: Math.max(1, parseInt(cadence, 10) || 1),
-      makesCardsCount: Math.max(0, parseInt(makes, 10) || 0),
+      // Making cards is optional for YouTube; the make-N gate is reading-only.
+      makesCardsCount: type === "reading" ? Math.max(0, parseInt(makes, 10) || 0) : 0,
       readingTarget: type === "reading" ? 0.9 : null,
     });
     setTitle("");
@@ -137,7 +183,18 @@ function AddTaskForm({ onDone }: { onDone: () => void }) {
       </View>
       <Field placeholder="Title" value={title} onChangeText={setTitle} />
       {type === "youtube" && (
-        <Field placeholder="YouTube URL" value={sourceRef} onChangeText={setSourceRef} />
+        <>
+          <Field
+            placeholder="YouTube video or playlist URL"
+            value={sourceRef}
+            onChangeText={setSourceRef}
+            onBlur={fillTitleFromUrl}
+            autoCapitalize="none"
+          />
+          {isPlaylist && (
+            <Muted>Playlist task — samples one unwatched video per day (needs a YouTube API key in Settings).</Muted>
+          )}
+        </>
       )}
       {type === "reading" && (
         <ReadwiseDocPicker
@@ -153,7 +210,7 @@ function AddTaskForm({ onDone }: { onDone: () => void }) {
           <Muted>Cadence/day</Muted>
           <Field placeholder="1" value={cadence} onChangeText={setCadence} keyboardType="number-pad" />
         </View>
-        {type !== "flashcard" && (
+        {type === "reading" && (
           <View style={{ flex: 1 }}>
             <Muted>Make N cards</Muted>
             <Field placeholder="0" value={makes} onChangeText={setMakes} keyboardType="number-pad" />

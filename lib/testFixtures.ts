@@ -13,6 +13,7 @@ export function makeTask(over: Partial<Task> = {}): Task {
     reading_target: null,
     active: true,
     created_at: 0,
+    meta: null,
     ...over,
   };
 }
@@ -28,6 +29,7 @@ export function makeCard(over: Partial<Card> = {}): Card {
     fsrs_state: "{}",
     due: 0,
     state_label: "review",
+    ignored: false,
     ...over,
   };
 }

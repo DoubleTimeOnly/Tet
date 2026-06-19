@@ -301,6 +301,7 @@ export function importObsidian(
         fsrs_state: JSON.stringify(fsrsCard),
         due: fsrsCard.due.getTime(),
         state_label: "review",
+        ignored: false,
       });
       scheduled++;
     }

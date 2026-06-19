@@ -10,6 +10,7 @@ import { ActivityIndicator, View } from "react-native";
 import type { Store } from "../db/store";
 import { createStore } from "../db/createStore";
 import { seedStarterDeck } from "../services/authoring";
+import { seedObsidianFlashcards } from "../services/seedObsidian";
 
 interface StoreContextValue {
   store: Store;
@@ -40,7 +41,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       const s = await createStore();
       // Cold start: seed a starter deck + review task on first run.
       const decks = await s.listDecks();
-      if (decks.length === 0) await seedStarterDeck(s);
+      if (decks.length === 0) {
+        // Cold start seeds the bundled Obsidian flashcard export (schedule
+        // preserved), then a starter review task so the day isn't empty.
+        await seedObsidianFlashcards(s);
+        await seedStarterDeck(s);
+      }
       if (!cancelled) setStore(s);
     })();
     return () => {

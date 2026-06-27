@@ -248,8 +248,8 @@ export class SqliteStore implements Store {
       }
       for (const d of data.decks) await this.insertDeck(d);
       for (const t of data.tasks) await this.insertTask(t);
-      for (const n of data.notes ?? []) await this.insertNote(n);
-      for (const c of data.cards) await this.insertCard(c);
+      await this.bulkInsertNotes(data.notes ?? []);
+      await this.bulkInsertCards(data.cards);
       for (const r of data.reviews) await this.insertReview(r);
       for (const c of data.completions) await this.insertCompletion(c);
     });
@@ -257,9 +257,39 @@ export class SqliteStore implements Store {
   async insertMany(decks: Deck[], cards: Card[], notes: Note[] = []): Promise<void> {
     await this.conn.withTransactionAsync(async () => {
       for (const d of decks) await this.insertDeck(d);
-      for (const n of notes) await this.insertNote(n);
-      for (const c of cards) await this.insertCard(c);
+      await this.bulkInsertNotes(notes);
+      await this.bulkInsertCards(cards);
     });
+  }
+
+  // SQLite allows at most 999 bind parameters per statement.
+  private async bulkInsertCards(cards: Card[]): Promise<void> {
+    if (cards.length === 0) return;
+    const COLS = 12;
+    const CHUNK = Math.floor(999 / COLS); // 83
+    for (let i = 0; i < cards.length; i += CHUNK) {
+      const chunk = cards.slice(i, i + CHUNK);
+      const placeholders = chunk.map(() => "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)").join(", ");
+      const sql = `INSERT INTO cards (id, deck_id, front, back, note_id, template, source_task_id, created_at, fsrs_state, due, state_label, ignored) VALUES ${placeholders}`;
+      const params = chunk.flatMap((c) => [
+        c.id, c.deck_id, c.front, c.back, c.note_id ?? null, c.template, c.source_task_id,
+        c.created_at, c.fsrs_state, c.due, c.state_label, c.ignored ? 1 : 0,
+      ]);
+      await this.conn.runAsync(sql, params);
+    }
+  }
+
+  private async bulkInsertNotes(notes: Note[]): Promise<void> {
+    if (notes.length === 0) return;
+    const COLS = 6;
+    const CHUNK = Math.floor(999 / COLS); // 166
+    for (let i = 0; i < notes.length; i += CHUNK) {
+      const chunk = notes.slice(i, i + CHUNK);
+      const placeholders = chunk.map(() => "(?, ?, ?, ?, ?, ?)").join(", ");
+      const sql = `INSERT INTO notes (id, deck_id, kind, fields, source_task_id, created_at) VALUES ${placeholders}`;
+      const params = chunk.flatMap((n) => [n.id, n.deck_id, n.kind, n.fields, n.source_task_id, n.created_at]);
+      await this.conn.runAsync(sql, params);
+    }
   }
 }
 

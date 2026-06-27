@@ -78,6 +78,11 @@ export default function ReviewScreen() {
   const card = queue[index]!;
 
   const onGrade = async (rating: Rating) => {
+    if (rating === "again") {
+      setQueue((q) => [...q, card]);
+      advance();
+      return;
+    }
     await gradeCard(store, card.id, rating, Date.now(), tz);
     setReviewed((n) => n + 1);
     advance();

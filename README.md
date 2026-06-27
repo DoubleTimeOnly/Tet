@@ -40,36 +40,54 @@ Click through the whole app in a browser. Data is **in-memory** (resets on refre
 and a Starter deck is auto-seeded so it's not empty. Push notifications and the native
 YouTube embed are stubbed on web — YouTube falls back to "Open in YouTube".
 
-### On your phone — development build (recommended)
+### On your phone — standalone install (no laptop required)
 
-This project is on **Expo SDK 56**. The stock **Expo Go** app usually can't run it
-("incompatible SDK version") because Expo Go only ships the latest *stable* SDK
-runtime. Use a **development build** instead — a custom app with this exact runtime
-baked in. It also gives you reliable push (Expo Go can't).
+The fastest way to get a self-contained app on your phone that keeps working all week
+without a dev server running.
 
 Build it in the cloud with [EAS](https://docs.expo.dev/build/introduction/) (no Xcode /
 Android Studio needed locally):
 
 ```bash
-npm install -g eas-cli      # or use: npx eas-cli@latest <cmd>
+npm install -g eas-cli      # or: npx eas-cli@latest <cmd>
 eas login                   # free Expo account
-eas init                    # creates the EAS project id (first time)
+eas init                    # creates the EAS project id (first time only)
 
-# Android (e.g. Motorola Razr): builds an installable APK
+# Android — produces a direct-install APK (no account needed beyond Expo)
+eas build --profile preview --platform android
+
+# iOS — requires an Apple Developer account ($99/yr)
+eas build --profile preview --platform ios
+```
+
+When the build finishes EAS prints a QR code / link. Open it on your phone and install
+the app. No bundler needs to be running — the JS is bundled into the binary.
+
+> **Android tip:** if your phone blocks installs from unknown sources, go to
+> Settings → Apps → Special app access → Install unknown apps and allow your browser.
+
+### On your phone — development build (for active development)
+
+Use this if you want hot-reload while editing code. It requires keeping the bundler
+running on your laptop.
+
+```bash
+npm install -g eas-cli
+eas login
+eas init
+
+# Android
 eas build --profile development --platform android
-# iOS:
+# iOS
 eas build --profile development --platform ios
 ```
 
-When the build finishes, open the link on your phone and install the app. Then start
-the bundler and open the dev build (scan the QR from *this* app, not Expo Go):
+Install the app from the EAS link, then start the bundler and connect (scan the QR
+from the installed dev app, not Expo Go):
 
 ```bash
 npx expo start --dev-client
 ```
-
-A development build gives you real SQLite persistence, secure-store, Readwise checks,
-the embedded YouTube player, and reliable notifications.
 
 ### Local native build (if you have the toolchains)
 

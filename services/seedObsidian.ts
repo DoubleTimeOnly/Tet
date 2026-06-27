@@ -26,7 +26,7 @@ export async function seedObsidianFlashcards(
   now?: Date | number,
 ): Promise<SeedObsidianResult> {
   const data = exportJson as ObsidianExport;
-  const { deck, cards, scheduled, fresh } = importObsidian(data, { now });
-  await store.insertMany([deck], cards);
+  const { deck, cards, notes, scheduled, fresh } = importObsidian(data, { now });
+  await store.insertMany([deck], cards, notes);
   return { deckId: deck.id, count: cards.length, scheduled, fresh };
 }

@@ -2,9 +2,11 @@ import type {
   Deck,
   Task,
   Card,
+  Note,
   Review,
   Completion,
 } from "../db/schema";
+import { backfillNotes } from "./notesBackfill";
 
 /**
  * Complete JSON export/import — the whole instance in one file. Every table
@@ -20,11 +22,14 @@ import type {
  * intentionally not part of the backup.)
  */
 
-export const BACKUP_VERSION = 1;
+// v2 adds the notes table (sibling groups). v1 backups predate it and are
+// upgraded on import by reconstructing notes from card content (backfillNotes).
+export const BACKUP_VERSION = 2;
 
 export interface BackupData {
   decks: Deck[];
   tasks: Task[];
+  notes: Note[];
   cards: Card[];
   reviews: Review[];
   completions: Completion[];
@@ -52,6 +57,7 @@ export function exportAll(
     exported_at: now instanceof Date ? now.getTime() : now,
     decks: data.decks,
     tasks: data.tasks,
+    notes: data.notes,
     cards: data.cards,
     reviews: data.reviews,
     completions: data.completions,
@@ -59,6 +65,7 @@ export function exportAll(
   return JSON.stringify(backup);
 }
 
+// `notes` is validated separately (absent in v1) so old backups still import.
 const TABLES: (keyof BackupData)[] = [
   "decks",
   "tasks",
@@ -85,9 +92,9 @@ export function importAll(json: string): BackupData {
   }
   const obj = parsed as Record<string, unknown>;
 
-  if (obj.version !== BACKUP_VERSION) {
+  if (obj.version !== 1 && obj.version !== BACKUP_VERSION) {
     throw new BackupImportError(
-      `Unsupported backup version ${String(obj.version)} (expected ${BACKUP_VERSION})`,
+      `Unsupported backup version ${String(obj.version)} (expected 1 or ${BACKUP_VERSION})`,
     );
   }
 
@@ -97,10 +104,29 @@ export function importAll(json: string): BackupData {
     }
   }
 
+  const cards = obj.cards as Card[];
+  // v1 predates notes: reconstruct sibling groups from card content so old
+  // backups restore with grouping + propagating edits intact.
+  if (obj.version === 1) {
+    const { notes, cards: stamped } = backfillNotes(cards);
+    return {
+      decks: obj.decks as Deck[],
+      tasks: obj.tasks as Task[],
+      notes,
+      cards: stamped,
+      reviews: obj.reviews as Review[],
+      completions: obj.completions as Completion[],
+    };
+  }
+
+  if (!Array.isArray(obj.notes)) {
+    throw new BackupImportError(`Missing or invalid "notes" array`);
+  }
   return {
     decks: obj.decks as Deck[],
     tasks: obj.tasks as Task[],
-    cards: obj.cards as Card[],
+    notes: obj.notes as Note[],
+    cards,
     reviews: obj.reviews as Review[],
     completions: obj.completions as Completion[],
   };

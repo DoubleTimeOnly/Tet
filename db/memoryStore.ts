@@ -1,11 +1,12 @@
 import type { Store } from "./store";
-import type { Deck, Task, Card, Review, Completion } from "./schema";
+import type { Deck, Task, Card, Note, Review, Completion } from "./schema";
 import type { BackupData } from "../lib/backup";
 
 /** In-memory Store: powers node tests and the web preview. */
 export class MemoryStore implements Store {
   private decks: Deck[] = [];
   private tasks: Task[] = [];
+  private notes: Note[] = [];
   private cards: Card[] = [];
   private reviews: Review[] = [];
   private completions: Completion[] = [];
@@ -40,6 +41,21 @@ export class MemoryStore implements Store {
     return t ? { ...t } : null;
   }
 
+  async insertNote(note: Note): Promise<void> {
+    this.notes.push({ ...note });
+  }
+  async getNote(id: string): Promise<Note | null> {
+    const n = this.notes.find((x) => x.id === id);
+    return n ? { ...n } : null;
+  }
+  async updateNoteFields(id: string, fields: string): Promise<void> {
+    const n = this.notes.find((x) => x.id === id);
+    if (n) n.fields = fields;
+  }
+  async listNotes(): Promise<Note[]> {
+    return this.notes.map((n) => ({ ...n }));
+  }
+
   async insertCard(card: Card): Promise<void> {
     this.cards.push({ ...card });
   }
@@ -58,6 +74,9 @@ export class MemoryStore implements Store {
       c.back = back;
     }
   }
+  async deleteCard(id: string): Promise<void> {
+    this.cards = this.cards.filter((c) => c.id !== id);
+  }
   async setCardIgnored(id: string, ignored: boolean): Promise<void> {
     const c = this.cards.find((x) => x.id === id);
     if (c) c.ignored = ignored;
@@ -72,6 +91,9 @@ export class MemoryStore implements Store {
       .sort((a, b) => a.due - b.due)
       .map((c) => ({ ...c }));
     return limit === undefined ? due : due.slice(0, limit);
+  }
+  async listCardsByNote(noteId: string): Promise<Card[]> {
+    return this.cards.filter((c) => c.note_id === noteId).map((c) => ({ ...c }));
   }
   async listAllCards(): Promise<Card[]> {
     return this.cards.map((c) => ({ ...c }));
@@ -103,6 +125,7 @@ export class MemoryStore implements Store {
     return {
       decks: this.decks.map((d) => ({ ...d })),
       tasks: this.tasks.map((t) => ({ ...t })),
+      notes: this.notes.map((n) => ({ ...n })),
       cards: this.cards.map((c) => ({ ...c })),
       reviews: this.reviews.map((r) => ({ ...r })),
       completions: this.completions.map((c) => ({ ...c })),
@@ -111,12 +134,14 @@ export class MemoryStore implements Store {
   async replaceAll(data: BackupData): Promise<void> {
     this.decks = data.decks.map((d) => ({ ...d }));
     this.tasks = data.tasks.map((t) => ({ ...t }));
+    this.notes = (data.notes ?? []).map((n) => ({ ...n }));
     this.cards = data.cards.map((c) => ({ ...c }));
     this.reviews = data.reviews.map((r) => ({ ...r }));
     this.completions = data.completions.map((c) => ({ ...c }));
   }
-  async insertMany(decks: Deck[], cards: Card[]): Promise<void> {
+  async insertMany(decks: Deck[], cards: Card[], notes: Note[] = []): Promise<void> {
     this.decks.push(...decks.map((d) => ({ ...d })));
+    this.notes.push(...notes.map((n) => ({ ...n })));
     this.cards.push(...cards.map((c) => ({ ...c })));
   }
 }

@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import { TextInput, View, StyleSheet } from "react-native";
 import { useStore } from "./StoreProvider";
 import { editCard, setCardIgnored } from "../services/learning";
+import { updateNote } from "../services/authoring";
+import { countClozeSpans, makeFields, noteFields, clozeText } from "../lib/notes";
 import { Card as CardView, Subtitle, Muted, Button } from "./components";
 import { MathText } from "./MathText";
 import { colors, radius, space } from "./theme";
@@ -14,7 +16,7 @@ import {
   CATEGORY_LABELS,
   type LibCategory,
 } from "../lib/cardLibrary";
-import type { Card, Task } from "../db/schema";
+import type { Card, Note, Task } from "../db/schema";
 
 /** Long lists are capped; the search bar is how you find a specific card. */
 const LIST_LIMIT = 100;
@@ -166,12 +168,47 @@ function BrowseHeader({ title, onBack }: { title: string; onBack: () => void }) 
 function CardRow({ card, onChanged }: { card: Card; onChanged: () => void }) {
   const { store } = useStore();
   const [editing, setEditing] = useState(false);
+  // The owning note (loaded on edit) — null for a standalone basic card.
+  const [note, setNote] = useState<Note | null>(null);
   const [front, setFront] = useState(card.front);
   const [back, setBack] = useState(card.back);
+  const [text, setText] = useState(""); // cloze shared source
+
+  const startEdit = async () => {
+    if (card.note_id) {
+      const n = await store.getNote(card.note_id);
+      setNote(n);
+      if (n) {
+        const f = noteFields(n);
+        if (n.kind === "cloze") setText(clozeText(f));
+        else {
+          setFront((f as { front: string }).front);
+          setBack((f as { back: string }).back);
+        }
+      }
+    } else {
+      setNote(null);
+      setFront(card.front);
+      setBack(card.back);
+    }
+    setEditing(true);
+  };
+
+  const isCloze = note?.kind === "cloze";
+  const spanCount = countClozeSpans(text);
+  const canSave = isCloze ? spanCount > 0 : Boolean(front.trim() && back.trim());
 
   const save = async () => {
-    if (!front.trim() || !back.trim()) return;
-    await editCard(store, card.id, front, back);
+    if (!canSave) return;
+    if (note) {
+      // Edit the shared source; every sibling card regenerates from it.
+      const fields = isCloze
+        ? makeFields("cloze", { text })
+        : makeFields(note.kind, { front, back });
+      await updateNote(store, note.id, fields);
+    } else {
+      await editCard(store, card.id, front, back);
+    }
     setEditing(false);
     onChanged();
   };
@@ -183,16 +220,32 @@ function CardRow({ card, onChanged }: { card: Card; onChanged: () => void }) {
   if (editing) {
     return (
       <CardView>
-        <Muted>Question</Muted>
-        <TextInput value={front} onChangeText={setFront} multiline style={styles.input} />
-        <Muted>Answer</Muted>
-        <TextInput value={back} onChangeText={setBack} multiline style={styles.input} />
+        {note && (
+          <Muted>
+            {isCloze
+              ? `Cloze note · ${spanCount} card${spanCount === 1 ? "" : "s"} · editing updates every blank`
+              : `${note.kind === "reversed" ? "Reversed" : "Basic"} note · editing updates both directions`}
+          </Muted>
+        )}
+        {isCloze ? (
+          <>
+            <Muted>Sentence (wrap blanks in ==…==)</Muted>
+            <TextInput value={text} onChangeText={setText} multiline style={styles.input} />
+          </>
+        ) : (
+          <>
+            <Muted>Question</Muted>
+            <TextInput value={front} onChangeText={setFront} multiline style={styles.input} />
+            <Muted>Answer</Muted>
+            <TextInput value={back} onChangeText={setBack} multiline style={styles.input} />
+          </>
+        )}
         <View style={styles.row}>
           <View style={{ flex: 1 }}>
-            <Button label="Cancel" kind="neutral" onPress={() => { setFront(card.front); setBack(card.back); setEditing(false); }} />
+            <Button label="Cancel" kind="neutral" onPress={() => setEditing(false)} />
           </View>
           <View style={{ flex: 1 }}>
-            <Button label="Save" onPress={save} disabled={!front.trim() || !back.trim()} />
+            <Button label="Save" onPress={save} disabled={!canSave} />
           </View>
         </View>
       </CardView>
@@ -206,7 +259,7 @@ function CardRow({ card, onChanged }: { card: Card; onChanged: () => void }) {
       <MathText value={card.back} kind="body" />
       <View style={styles.row}>
         <View style={{ flex: 1 }}>
-          <Button label="Edit" kind="neutral" onPress={() => setEditing(true)} />
+          <Button label="Edit" kind="neutral" onPress={startEdit} />
         </View>
         <View style={{ flex: 1 }}>
           <Button label="Ignore" kind="neutral" onPress={ignore} />

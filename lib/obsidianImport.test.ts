@@ -190,4 +190,39 @@ describe("importObsidian", () => {
     const revived = JSON.parse(cards[0]!.fsrs_state);
     expect(() => scheduler.next(revived, NOW, Rating.Good)).not.toThrow();
   });
+
+  it("groups a multi-cloze line into one cloze note", () => {
+    const grouped: ObsidianExport = {
+      source: "test",
+      exportedAt: NOW.toISOString(),
+      deckName: "D",
+      cards: [
+        { front: "[...] not b", back: "a", note: "n", kind: "cloze", schedule: null },
+        { front: "a not [...]", back: "b", note: "n", kind: "cloze", schedule: null },
+      ],
+    };
+    const { cards, notes } = importObsidian(grouped, { now: NOW });
+    expect(notes).toHaveLength(1);
+    expect(notes[0]!.kind).toBe("cloze");
+    expect(JSON.parse(notes[0]!.fields)).toEqual({ text: "==a== not ==b==" });
+    expect(cards.every((c) => c.note_id === notes[0]!.id)).toBe(true);
+    expect(cards.map((c) => c.template)).toEqual([0, 1]);
+  });
+
+  it("groups a reversed pair into one reversed note", () => {
+    const grouped: ObsidianExport = {
+      source: "test",
+      exportedAt: NOW.toISOString(),
+      deckName: "D",
+      cards: [
+        { front: "perro", back: "dog", note: "n", kind: "reversed", schedule: null },
+        { front: "dog", back: "perro", note: "n", kind: "reversed", schedule: null },
+      ],
+    };
+    const { cards, notes } = importObsidian(grouped, { now: NOW });
+    expect(notes).toHaveLength(1);
+    expect(notes[0]!.kind).toBe("reversed");
+    expect(JSON.parse(notes[0]!.fields)).toEqual({ front: "perro", back: "dog" });
+    expect(cards.every((c) => c.note_id === notes[0]!.id)).toBe(true);
+  });
 });

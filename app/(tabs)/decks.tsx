@@ -2,15 +2,16 @@ import { useCallback, useState } from "react";
 import { TextInput, View, StyleSheet } from "react-native";
 import { useFocusEffect } from "expo-router";
 import { useStore } from "../../ui/StoreProvider";
-import { addCard, createTask, createDeck } from "../../services/authoring";
+import { addCard, addNote, createTask, createDeck } from "../../services/authoring";
 import { setCardIgnored } from "../../services/learning";
+import { countClozeSpans, makeFields } from "../../lib/notes";
 import { fetchYouTubeTitle, fetchPlaylistTitle, parsePlaylistId } from "../../lib/youtube";
 import { createYoutubeApiKeyStore } from "../../adapters/tokenStore";
 import { Screen, Card, Title, Subtitle, Body, Muted, Button } from "../../ui/components";
 import { ReadwiseDocPicker } from "../../ui/ReadwiseDocPicker";
 import { CardBrowser } from "../../ui/CardBrowser";
 import { colors, radius, space } from "../../ui/theme";
-import type { Deck, Task, TaskType, Card as CardRow } from "../../db/schema";
+import type { Deck, Task, TaskType, NoteKind, Card as CardRow } from "../../db/schema";
 
 export default function LibraryScreen() {
   const { store, reload, version } = useStore();
@@ -85,21 +86,47 @@ export default function LibraryScreen() {
   );
 }
 
+const KIND_LABELS: Record<NoteKind, string> = {
+  basic: "Basic",
+  cloze: "Cloze",
+  reversed: "Reversed",
+};
+
 function AddCardForm({ decks, onDone }: { decks: Deck[]; onDone: () => void }) {
   const { store } = useStore();
+  const [kind, setKind] = useState<NoteKind>("basic");
   const [front, setFront] = useState("");
   const [back, setBack] = useState("");
+  const [text, setText] = useState(""); // cloze shared source
   const [deckId, setDeckId] = useState<string | null>(null);
 
   const target = deckId ?? decks[0]?.id ?? null;
 
+  const spanCount = countClozeSpans(text);
+  const canSubmit =
+    kind === "cloze" ? spanCount > 0 : Boolean(front.trim() && back.trim());
+
   const submit = async () => {
-    if (!front.trim() || !back.trim()) return;
+    if (!canSubmit) return;
     let dest = target;
     if (!dest) dest = (await createDeck(store, "My deck")).id;
-    await addCard(store, { deckId: dest, front: front.trim(), back: back.trim() });
+
+    if (kind === "basic") {
+      // A plain basic card stays note-less (its front/back are edited directly).
+      await addCard(store, { deckId: dest, front: front.trim(), back: back.trim() });
+    } else {
+      await addNote(store, {
+        deckId: dest,
+        kind,
+        fields:
+          kind === "cloze"
+            ? makeFields("cloze", { text })
+            : makeFields("reversed", { front, back }),
+      });
+    }
     setFront("");
     setBack("");
+    setText("");
     onDone();
   };
 
@@ -118,9 +145,38 @@ function AddCardForm({ decks, onDone }: { decks: Deck[]; onDone: () => void }) {
           ))}
         </View>
       )}
-      <Field placeholder="Front" value={front} onChangeText={setFront} />
-      <Field placeholder="Back" value={back} onChangeText={setBack} />
-      <Button label="Add card" onPress={submit} />
+      <View style={styles.row}>
+        {(Object.keys(KIND_LABELS) as NoteKind[]).map((k) => (
+          <Button
+            key={k}
+            label={KIND_LABELS[k]}
+            kind={k === kind ? "primary" : "neutral"}
+            onPress={() => setKind(k)}
+          />
+        ))}
+      </View>
+      {kind === "cloze" ? (
+        <>
+          <Field
+            placeholder="Sentence with ==blanks== wrapped in =="
+            value={text}
+            onChangeText={setText}
+            multiline
+          />
+          <Muted>
+            {spanCount === 0
+              ? "Wrap each answer in ==…== to make a blank"
+              : `${spanCount} blank${spanCount === 1 ? "" : "s"} → ${spanCount} card${spanCount === 1 ? "" : "s"}`}
+          </Muted>
+        </>
+      ) : (
+        <>
+          <Field placeholder="Front" value={front} onChangeText={setFront} />
+          <Field placeholder="Back" value={back} onChangeText={setBack} />
+          {kind === "reversed" && <Muted>Asked both directions → 2 cards</Muted>}
+        </>
+      )}
+      <Button label="Add card" onPress={submit} disabled={!canSubmit} />
     </Card>
   );
 }

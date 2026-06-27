@@ -24,6 +24,8 @@ export function makeCard(over: Partial<Card> = {}): Card {
     deck_id: "deck-1",
     front: "q",
     back: "a",
+    note_id: null,
+    template: 0,
     source_task_id: null,
     created_at: 0,
     fsrs_state: "{}",

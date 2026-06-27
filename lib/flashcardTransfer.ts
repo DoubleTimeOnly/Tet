@@ -86,6 +86,10 @@ export function importFlashcards(
       ...c,
       id: genId(),
       deck_id: newDeckId,
+      // notes don't travel with a flashcard-only export, so drop the owning
+      // note_id (it would dangle) and treat each card as a standalone basic.
+      note_id: null,
+      template: 0,
       // a card's source task doesn't travel with a flashcard-only export
       source_task_id: null,
       ignored: Boolean(c.ignored),

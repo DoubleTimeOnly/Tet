@@ -8,6 +8,7 @@ function sampleData(): BackupData {
   return {
     decks: [deck],
     tasks: [makeTask({ id: "t1" })],
+    notes: [],
     cards: [makeCard({ id: "card-1", deck_id: "d1" })],
     reviews: [review],
     completions: [makeCompletion({ id: "comp-1", task_id: "t1" })],
@@ -28,7 +29,7 @@ describe("exportAll / importAll round-trip", () => {
   });
 
   it("round-trips an empty dataset", () => {
-    const empty: BackupData = { decks: [], tasks: [], cards: [], reviews: [], completions: [] };
+    const empty: BackupData = { decks: [], tasks: [], notes: [], cards: [], reviews: [], completions: [] };
     expect(importAll(exportAll(empty))).toEqual(empty);
   });
 
@@ -50,6 +51,7 @@ describe("exportAll / importAll round-trip", () => {
           }),
         }),
       ],
+      notes: [],
       cards: [makeCard({ id: "c1", deck_id: "d1", ignored: true })],
       reviews: [{ id: "r1", card_id: "c1", rating: "good", reviewed_at: 5 }],
       completions: [
@@ -66,6 +68,29 @@ describe("exportAll / importAll round-trip", () => {
     expect(restored.tasks[0]!.meta).toBe(data.tasks[0]!.meta);
     expect(restored.cards[0]!.ignored).toBe(true);
     expect(restored.completions[0]!.evidence).toEqual({ type: "youtube", manual: true, minutes: 12 });
+  });
+});
+
+describe("v1 backup upgrade", () => {
+  it("reconstructs notes from cloze siblings in a v1 (notes-less) backup", () => {
+    const blob = JSON.stringify({
+      version: 1,
+      exported_at: 1,
+      decks: [{ id: "d1", name: "Deck", created_at: 1 }],
+      tasks: [],
+      cards: [
+        makeCard({ id: "c0", deck_id: "d1", front: "[...] not b", back: "a" }),
+        makeCard({ id: "c1", deck_id: "d1", front: "a not [...]", back: "b" }),
+      ],
+      reviews: [],
+      completions: [],
+    });
+    const restored = importAll(blob);
+    expect(restored.notes).toHaveLength(1);
+    expect(restored.notes[0]!.kind).toBe("cloze");
+    expect(JSON.parse(restored.notes[0]!.fields)).toEqual({ text: "==a== not ==b==" });
+    // both cards now point at the reconstructed note, schedules untouched
+    expect(restored.cards.every((c) => c.note_id === restored.notes[0]!.id)).toBe(true);
   });
 });
 

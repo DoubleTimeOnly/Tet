@@ -2,6 +2,14 @@ import { siblingKey, burySiblings } from "./siblings";
 import { makeCard } from "./testFixtures";
 
 describe("siblingKey", () => {
+  it("groups by note_id when cards belong to a note", () => {
+    const a = makeCard({ id: "a", note_id: "n1", front: "x", back: "1" });
+    const b = makeCard({ id: "b", note_id: "n1", front: "y", back: "2" });
+    const c = makeCard({ id: "c", note_id: "n2", front: "z", back: "3" });
+    expect(siblingKey(a)).toBe(siblingKey(b));
+    expect(siblingKey(a)).not.toBe(siblingKey(c));
+  });
+
   it("groups the clozes of one line (==a== not ==b==)", () => {
     // buildCloze output for "==a== not ==b==":
     const c0 = makeCard({ id: "c0", front: "[...] not b", back: "a" });

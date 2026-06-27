@@ -17,8 +17,14 @@ import type { Card } from "../db/schema";
  *     from the unordered pair matches both directions.
  *
  * Keys are scoped by deck so identical text in different decks stays separate.
+ *
+ * Cards that DO carry a note_id are grouped by it directly — the real sibling
+ * group, set by the importer / authoring. The content heuristic below only
+ * applies to note-less cards (legacy data not yet backfilled, Anki/transfer
+ * imports), so existing burying behavior is preserved.
  */
 export function siblingKey(card: Card): string {
+  if (card.note_id) return `note:${card.note_id}`;
   if (card.front.includes("[...]")) {
     // split/join (not String.replace) so `back` is spliced literally, never
     // interpreted as a `$1`-style replacement pattern.

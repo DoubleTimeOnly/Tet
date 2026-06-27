@@ -1,7 +1,8 @@
 import { State as FsrsState, type Card as FsrsCard } from "ts-fsrs";
 import { createCard } from "./fsrs";
 import { newId } from "./id";
-import type { Deck, Card } from "../db/schema";
+import { buildCloze, CLOZE, reconstructClozeText } from "./notes";
+import type { Deck, Card, Note } from "../db/schema";
 
 /**
  * Import flashcards authored with the Obsidian "Spaced Repetition" plugin
@@ -56,7 +57,6 @@ export interface ObsidianExport {
 
 const SR_COMMENT = /<!--SR:(.*?)-->/;
 const SR_ENTRY = /!(\d{4}-\d{2}-\d{2}),(\d+),(\d+)/g;
-const CLOZE = /==(.+?)==/g;
 
 /** Pull every `!date,interval,ease` triple out of a line's SR comment, in order. */
 function parseSchedules(text: string): SrSchedule[] {
@@ -83,27 +83,6 @@ function isTagOrHeading(line: string): boolean {
 /** A line that already encodes a complete card (so multiline walk-back must stop). */
 function looksLikeOwnCard(line: string): boolean {
   return line.includes("::") || line.includes("<!--SR:") || line.includes("==");
-}
-
-/**
- * Build one cloze card: blank the `target`-th `==span==`, reveal the rest.
- * Front = sentence with the target replaced by "[...]"; back = the target text.
- */
-function buildCloze(
-  body: string,
-  spans: RegExpMatchArray[],
-  target: number,
-): { front: string; back: string } {
-  let front = "";
-  let cursor = 0;
-  spans.forEach((m, k) => {
-    const start = m.index ?? 0;
-    front += body.slice(cursor, start);
-    front += k === target ? "[...]" : m[1];
-    cursor = start + m[0].length;
-  });
-  front += body.slice(cursor);
-  return { front: front.trim(), back: (spans[target]![1] ?? "").trim() };
 }
 
 /**
@@ -254,16 +233,65 @@ export interface ImportObsidianOptions {
 export interface ImportObsidianResult {
   deck: Deck;
   cards: Card[];
+  /** Notes that own the sibling cards (cloze groups + reversed pairs). */
+  notes: Note[];
   /** How many cards were seeded with a preserved schedule vs. started new. */
   scheduled: number;
   fresh: number;
 }
 
+/** Build one Card row from a ParsedCard, preserving its SM-2 schedule if any. */
+function parsedToCard(
+  pc: ParsedCard,
+  deckId: string,
+  now: Date,
+  id: string,
+  noteId: string | null,
+  template: number,
+): { card: Card; scheduled: boolean } {
+  const fsrsCard = pc.schedule ? srScheduleToFsrsCard(pc.schedule, now) : null;
+  if (fsrsCard === null) {
+    return {
+      card: createCard({ deckId, front: pc.front, back: pc.back, now, id, noteId, template }),
+      scheduled: false,
+    };
+  }
+  return {
+    card: {
+      id,
+      deck_id: deckId,
+      front: pc.front,
+      back: pc.back,
+      note_id: noteId,
+      template,
+      source_task_id: null,
+      created_at: now.getTime(),
+      // Mirrors fsrs.ts syncScheduling: fsrs_state is source of truth, due and
+      // state_label are denormalized for the indexed daily query.
+      fsrs_state: JSON.stringify(fsrsCard),
+      due: fsrsCard.due.getTime(),
+      state_label: "review",
+      ignored: false,
+    },
+    scheduled: true,
+  };
+}
+
+/** Group key collapsing the directions of a reversed/multiline pair. */
+function pairKey(pc: ParsedCard): string {
+  return JSON.stringify([pc.front, pc.back].sort());
+}
+/** Group key collapsing the clozes of one source line (sentence with the answer spliced back). */
+function clozeSentence(pc: ParsedCard): string {
+  return pc.front.split("[...]").join(pc.back);
+}
+
 /**
- * Assemble a single deck of Card rows from an export. Cards with a usable
- * schedule are seeded in Review state with their preserved due/stability/
- * difficulty; everything else (no schedule, or the new-sentinel) starts fresh
- * via the same createCard path Anki import uses.
+ * Assemble a deck of Cards — and the Notes that own their sibling groups — from
+ * an export. Cloze cards of one line collapse to a cloze note; the two
+ * directions of a `:::`/`??` line collapse to a reversed note; everything else
+ * stays a note-less basic card. Cards with a usable schedule keep their
+ * preserved due/stability/difficulty; the rest start fresh via createCard.
  */
 export function importObsidian(
   data: ObsidianExport,
@@ -280,32 +308,70 @@ export function importObsidian(
     created_at: nowMs,
   };
 
+  const notes: Note[] = [];
+  // Per-ParsedCard assignment, decided up-front so cards can still be emitted in
+  // their original order (only the grouping into notes is order-independent).
+  const assign = new Map<ParsedCard, { noteId: string | null; template: number }>();
+
+  // Bucket the flat ParsedCard[] back into sibling groups.
+  const clozeGroups = new Map<string, ParsedCard[]>();
+  const pairGroups = new Map<string, ParsedCard[]>();
+  for (const pc of data.cards) {
+    if (pc.kind === "cloze") {
+      const k = clozeSentence(pc);
+      (clozeGroups.get(k) ?? clozeGroups.set(k, []).get(k)!).push(pc);
+    } else if (pc.kind === "reversed" || pc.kind === "multiline") {
+      const k = pairKey(pc);
+      (pairGroups.get(k) ?? pairGroups.set(k, []).get(k)!).push(pc);
+    }
+    // basic + everything else default to note-less (see fallthrough below).
+  }
+
+  for (const group of clozeGroups.values()) {
+    // Order siblings by span position so template = span index.
+    const ordered = [...group].sort(
+      (a, b) => a.front.indexOf("[...]") - b.front.indexOf("[...]"),
+    );
+    const text = reconstructClozeText(ordered);
+    if (text === null) continue; // couldn't invert -> stays note-less
+    const note: Note = {
+      id: genId(),
+      deck_id: deck.id,
+      kind: "cloze",
+      fields: JSON.stringify({ text }),
+      source_task_id: null,
+      created_at: nowMs,
+    };
+    notes.push(note);
+    ordered.forEach((pc, i) => assign.set(pc, { noteId: note.id, template: i }));
+  }
+
+  for (const group of pairGroups.values()) {
+    if (group.length < 2) continue; // lone basic multiline -> note-less
+    const [fwd, ...rest] = group;
+    const note: Note = {
+      id: genId(),
+      deck_id: deck.id,
+      kind: "reversed",
+      fields: JSON.stringify({ front: fwd!.front, back: fwd!.back }),
+      source_task_id: null,
+      created_at: nowMs,
+    };
+    notes.push(note);
+    assign.set(fwd!, { noteId: note.id, template: 0 });
+    rest.forEach((pc) => assign.set(pc, { noteId: note.id, template: 1 }));
+  }
+
   const cards: Card[] = [];
   let scheduled = 0;
   let fresh = 0;
   for (const pc of data.cards) {
-    const fsrsCard = pc.schedule ? srScheduleToFsrsCard(pc.schedule, now) : null;
-    if (fsrsCard === null) {
-      cards.push(createCard({ deckId: deck.id, front: pc.front, back: pc.back, now, id: genId() }));
-      fresh++;
-    } else {
-      cards.push({
-        id: genId(),
-        deck_id: deck.id,
-        front: pc.front,
-        back: pc.back,
-        source_task_id: null,
-        created_at: nowMs,
-        // Mirrors fsrs.ts syncScheduling: fsrs_state is source of truth, due
-        // and state_label are denormalized for the indexed daily query.
-        fsrs_state: JSON.stringify(fsrsCard),
-        due: fsrsCard.due.getTime(),
-        state_label: "review",
-        ignored: false,
-      });
-      scheduled++;
-    }
+    const a = assign.get(pc) ?? { noteId: null, template: 0 };
+    const { card, scheduled: sched } = parsedToCard(pc, deck.id, now, genId(), a.noteId, a.template);
+    cards.push(card);
+    if (sched) scheduled++;
+    else fresh++;
   }
 
-  return { deck, cards, scheduled, fresh };
+  return { deck, cards, notes, scheduled, fresh };
 }

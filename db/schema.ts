@@ -14,6 +14,14 @@ export type TaskType = "flashcard" | "youtube" | "reading";
 export type Rating = "again" | "hard" | "good" | "easy";
 export type CardState = "new" | "learning" | "review";
 
+/**
+ * A note's shape. `basic` -> 1 card; `reversed` -> 2 cards (both directions);
+ * `cloze` -> 1 card per `==span==`. The note owns the shared source text; its
+ * cards are generated from it (see lib/notes.generateCards), so editing a note
+ * regenerates every sibling.
+ */
+export type NoteKind = "basic" | "reversed" | "cloze";
+
 export interface Deck {
   id: string;
   name: string;
@@ -45,11 +53,40 @@ export interface Task {
   meta: string | null;
 }
 
+/**
+ * A flashcard "instance": shared source text plus a kind, from which the
+ * individual review Cards are generated. Multi-cloze and reversed cards belong
+ * to one note so an edit to the shared text propagates to every sibling. Plain
+ * basic cards (and Anki / transfer imports) stay note-less — their Card carries
+ * its own front/back and note_id is null.
+ */
+export interface Note {
+  id: string;
+  deck_id: string;
+  kind: NoteKind;
+  /**
+   * Shared source as JSON. cloze -> `{ text: "==a== not ==b==" }`;
+   * basic/reversed -> `{ front, back }`. A TEXT blob (like tasks.meta) so new
+   * kinds need no new columns.
+   */
+  fields: string;
+  source_task_id: string | null;
+  created_at: number;
+}
+
 export interface Card {
   id: string;
   deck_id: string;
   front: string;
   back: string;
+  /**
+   * Owning note (sibling group), or null for a standalone basic card. When set,
+   * front/back are a regenerated CACHE of the note's source for this template —
+   * never edit them directly; edit the note (see services/authoring.updateNote).
+   */
+  note_id: string | null;
+  /** Which generated sibling within the note: cloze span index, or reversed 0/1. */
+  template: number;
   source_task_id: string | null;
   created_at: number;
   /** Full ts-fsrs card object (JSON). SOURCE OF TRUTH for scheduling. */
@@ -113,11 +150,22 @@ CREATE TABLE IF NOT EXISTS tasks (
   meta              TEXT
 );
 
+CREATE TABLE IF NOT EXISTS notes (
+  id             TEXT PRIMARY KEY NOT NULL,
+  deck_id        TEXT NOT NULL REFERENCES decks(id),
+  kind           TEXT NOT NULL CHECK (kind IN ('basic','reversed','cloze')),
+  fields         TEXT NOT NULL,
+  source_task_id TEXT REFERENCES tasks(id),
+  created_at     INTEGER NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS cards (
   id             TEXT PRIMARY KEY NOT NULL,
   deck_id        TEXT NOT NULL REFERENCES decks(id),
   front          TEXT NOT NULL,
   back           TEXT NOT NULL,
+  note_id        TEXT REFERENCES notes(id),
+  template       INTEGER NOT NULL DEFAULT 0,
   source_task_id TEXT REFERENCES tasks(id),
   created_at     INTEGER NOT NULL,
   fsrs_state     TEXT NOT NULL,
@@ -127,6 +175,7 @@ CREATE TABLE IF NOT EXISTS cards (
 );
 CREATE INDEX IF NOT EXISTS idx_cards_due ON cards(due);
 CREATE INDEX IF NOT EXISTS idx_cards_source_task ON cards(source_task_id);
+CREATE INDEX IF NOT EXISTS idx_cards_note ON cards(note_id);
 
 CREATE TABLE IF NOT EXISTS reviews (
   id          TEXT PRIMARY KEY NOT NULL,

@@ -2,7 +2,7 @@ import { useCallback, useState } from "react";
 import { TextInput, View, StyleSheet } from "react-native";
 import { useFocusEffect } from "expo-router";
 import { useStore } from "../../ui/StoreProvider";
-import { addCard, addNote, createTask, createDeck } from "../../services/authoring";
+import { addCard, addNote, createTask, createDeck, updateTask } from "../../services/authoring";
 import { setCardIgnored } from "../../services/learning";
 import { countClozeSpans, makeFields } from "../../lib/notes";
 import { fetchYouTubeTitle, fetchPlaylistTitle, parsePlaylistId } from "../../lib/youtube";
@@ -74,14 +74,10 @@ export default function LibraryScreen() {
 
       <Subtitle>Tasks</Subtitle>
       {tasks.map((t) => (
-        <Card key={t.id}>
-          <Body>{t.title}</Body>
-          <Muted>{`${t.type} · cadence ${t.cadence}${t.makes_cards_count ? ` · make ${t.makes_cards_count}` : ""}`}</Muted>
-          <Button label="Remove" kind="neutral" onPress={() => removeTask(t.id)} />
-        </Card>
+        <TaskCard key={t.id} task={t} decks={decks} onRemove={() => removeTask(t.id)} onDone={reload} />
       ))}
 
-      <AddTaskForm onDone={reload} />
+      <AddTaskForm decks={decks} onDone={reload} />
     </Screen>
   );
 }
@@ -181,18 +177,21 @@ function AddCardForm({ decks, onDone }: { decks: Deck[]; onDone: () => void }) {
   );
 }
 
-function AddTaskForm({ onDone }: { onDone: () => void }) {
+function AddTaskForm({ decks, onDone }: { decks: Deck[]; onDone: () => void }) {
   const { store } = useStore();
   const [title, setTitle] = useState("");
   const [type, setType] = useState<TaskType>("youtube");
   const [sourceRef, setSourceRef] = useState("");
+  const [deckId, setDeckId] = useState<string | null>(null); // flashcard scope
   const [pickedDoc, setPickedDoc] = useState<{ id: string; title: string } | null>(null);
   const [cadence, setCadence] = useState("1");
   const [makes, setMakes] = useState("0");
   const [ytKeyStore] = useState(createYoutubeApiKeyStore);
 
-  // For reading tasks the source_ref is the Readwise doc id picked below.
-  const resolvedSourceRef = type === "reading" ? (pickedDoc?.id ?? "") : sourceRef;
+  // source_ref means different things per type: the Readwise doc id (reading),
+  // the deck to review or null=all (flashcard), or the entered URL (youtube).
+  const resolvedSourceRef: string | null =
+    type === "reading" ? (pickedDoc?.id ?? "") : type === "flashcard" ? deckId : sourceRef;
 
   const isPlaylist = type === "youtube" && parsePlaylistId(sourceRef) !== null;
 
@@ -217,7 +216,7 @@ function AddTaskForm({ onDone }: { onDone: () => void }) {
     await createTask(store, {
       type,
       title: title.trim(),
-      sourceRef: resolvedSourceRef.trim() || null,
+      sourceRef: resolvedSourceRef === null ? null : resolvedSourceRef.trim() || null,
       cadence: Math.max(1, parseInt(cadence, 10) || 1),
       // Making cards is optional for YouTube; the make-N gate is reading-only.
       makesCardsCount: type === "reading" ? Math.max(0, parseInt(makes, 10) || 0) : 0,
@@ -225,6 +224,7 @@ function AddTaskForm({ onDone }: { onDone: () => void }) {
     });
     setTitle("");
     setSourceRef("");
+    setDeckId(null);
     setPickedDoc(null);
     onDone();
   };
@@ -252,6 +252,12 @@ function AddTaskForm({ onDone }: { onDone: () => void }) {
           )}
         </>
       )}
+      {type === "flashcard" && (
+        <>
+          <Muted>Deck to review</Muted>
+          <DeckPicker decks={decks} value={deckId} onChange={setDeckId} />
+        </>
+      )}
       {type === "reading" && (
         <ReadwiseDocPicker
           selected={pickedDoc}
@@ -274,6 +280,167 @@ function AddTaskForm({ onDone }: { onDone: () => void }) {
         )}
       </View>
       <Button label="Add task" onPress={submit} />
+    </Card>
+  );
+}
+
+/** Deck selector for flashcard tasks: "All decks" (null) plus each deck. */
+function DeckPicker({
+  decks,
+  value,
+  onChange,
+}: {
+  decks: Deck[];
+  value: string | null;
+  onChange: (id: string | null) => void;
+}) {
+  return (
+    <View style={styles.row}>
+      <Button
+        label="All decks"
+        kind={value === null ? "primary" : "neutral"}
+        onPress={() => onChange(null)}
+      />
+      {decks.map((d) => (
+        <Button
+          key={d.id}
+          label={d.name}
+          kind={d.id === value ? "primary" : "neutral"}
+          onPress={() => onChange(d.id)}
+        />
+      ))}
+    </View>
+  );
+}
+
+function deckLabel(decks: Deck[], deckId: string | null): string {
+  if (!deckId) return "all decks";
+  return decks.find((d) => d.id === deckId)?.name ?? "unknown deck";
+}
+
+/** One task row in the Library: summary + Remove, with an inline edit form. */
+function TaskCard({
+  task,
+  decks,
+  onRemove,
+  onDone,
+}: {
+  task: Task;
+  decks: Deck[];
+  onRemove: () => void;
+  onDone: () => void;
+}) {
+  const [editing, setEditing] = useState(false);
+
+  const summary =
+    task.type === "flashcard"
+      ? `flashcard · ${deckLabel(decks, task.source_ref)} · ${task.cadence}/day`
+      : `${task.type} · cadence ${task.cadence}${task.makes_cards_count ? ` · make ${task.makes_cards_count}` : ""}`;
+
+  if (editing) {
+    return (
+      <TaskEditor
+        task={task}
+        decks={decks}
+        onCancel={() => setEditing(false)}
+        onSaved={() => {
+          setEditing(false);
+          onDone();
+        }}
+      />
+    );
+  }
+
+  return (
+    <Card>
+      <Body>{task.title}</Body>
+      <Muted>{summary}</Muted>
+      <View style={styles.row}>
+        <View style={{ flex: 1 }}>
+          <Button label="Edit" kind="neutral" onPress={() => setEditing(true)} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Button label="Remove" kind="neutral" onPress={onRemove} />
+        </View>
+      </View>
+    </Card>
+  );
+}
+
+/** Inline editor for a task's parameters (deck/cadence/url/etc.). */
+function TaskEditor({
+  task,
+  decks,
+  onCancel,
+  onSaved,
+}: {
+  task: Task;
+  decks: Deck[];
+  onCancel: () => void;
+  onSaved: () => void;
+}) {
+  const { store } = useStore();
+  const [title, setTitle] = useState(task.title);
+  const [sourceRef, setSourceRef] = useState(task.source_ref ?? "");
+  const [deckId, setDeckId] = useState<string | null>(task.source_ref);
+  const [cadence, setCadence] = useState(String(task.cadence));
+  const [makes, setMakes] = useState(String(task.makes_cards_count));
+
+  const save = async () => {
+    if (!title.trim()) return;
+    await updateTask(store, task.id, {
+      title: title.trim(),
+      sourceRef:
+        task.type === "flashcard"
+          ? deckId
+          : task.type === "youtube"
+            ? sourceRef.trim() || null
+            : undefined, // reading source (Readwise doc) isn't edited here
+      cadence: Math.max(1, parseInt(cadence, 10) || 1),
+      makesCardsCount:
+        task.type === "reading" ? Math.max(0, parseInt(makes, 10) || 0) : undefined,
+    });
+    onSaved();
+  };
+
+  return (
+    <Card>
+      <Subtitle>Edit task</Subtitle>
+      <Field placeholder="Title" value={title} onChangeText={setTitle} />
+      {task.type === "flashcard" && (
+        <>
+          <Muted>Deck to review</Muted>
+          <DeckPicker decks={decks} value={deckId} onChange={setDeckId} />
+        </>
+      )}
+      {task.type === "youtube" && (
+        <Field
+          placeholder="YouTube video or playlist URL"
+          value={sourceRef}
+          onChangeText={setSourceRef}
+          autoCapitalize="none"
+        />
+      )}
+      <View style={styles.row}>
+        <View style={{ flex: 1 }}>
+          <Muted>Cadence/day</Muted>
+          <Field placeholder="1" value={cadence} onChangeText={setCadence} keyboardType="number-pad" />
+        </View>
+        {task.type === "reading" && (
+          <View style={{ flex: 1 }}>
+            <Muted>Make N cards</Muted>
+            <Field placeholder="0" value={makes} onChangeText={setMakes} keyboardType="number-pad" />
+          </View>
+        )}
+      </View>
+      <View style={styles.row}>
+        <View style={{ flex: 1 }}>
+          <Button label="Cancel" kind="neutral" onPress={onCancel} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Button label="Save" onPress={save} />
+        </View>
+      </View>
     </Card>
   );
 }

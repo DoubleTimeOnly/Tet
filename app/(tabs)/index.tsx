@@ -23,8 +23,7 @@ export default function TodayScreen() {
   if (!view) return null;
 
   const { slice, streak, maxStreak, xp } = view;
-  const reviewCount = slice.reviewCards.length;
-  const nothingToDo = slice.tasks.length === 0 && reviewCount === 0;
+  const nothingToDo = slice.tasks.length === 0;
 
   return (
     <Screen>
@@ -36,19 +35,6 @@ export default function TodayScreen() {
           {maxStreak > 0 ? ` · best ${maxStreak}` : ""}
         </Muted>
       </Card>
-
-      {reviewCount > 0 && (
-        <Card>
-          <Subtitle>Flashcards due</Subtitle>
-          <Body>
-            {reviewCount} card{reviewCount === 1 ? "" : "s"} ready
-            {slice.reviewOverflow.length > 0
-              ? ` (+${slice.reviewOverflow.length} held for later)`
-              : ""}
-          </Body>
-          <Button label="Review now" onPress={() => router.push("/review")} />
-        </Card>
-      )}
 
       {slice.tasks.map((item) => (
         <TaskRow key={item.task.id} item={item} />
@@ -66,17 +52,23 @@ export default function TodayScreen() {
 
 function TaskRow({ item }: { item: TaskSliceItem }) {
   const router = useRouter();
-  const { task, count } = item;
+  const { task, count, flashcards } = item;
 
   const go = () => {
     if (task.type === "youtube") router.push(`/task/youtube?taskId=${task.id}`);
     else if (task.type === "reading") router.push(`/task/reading?taskId=${task.id}`);
-    else router.push("/review");
+    else router.push(`/review?taskId=${task.id}`);
   };
+
+  // Flashcard tasks show live daily progress; the queue may be empty when the
+  // goal isn't met yet simply because no more cards are due right now.
+  const noneDue = task.type === "flashcard" && (flashcards?.queue.length ?? 0) === 0;
 
   const subtitle =
     task.type === "flashcard"
-      ? `${count} card${count === 1 ? "" : "s"}`
+      ? noneDue
+        ? "no cards due right now"
+        : `${count} card${count === 1 ? "" : "s"} left`
       : task.makes_cards_count > 0
         ? `then make ${task.makes_cards_count} card${task.makes_cards_count === 1 ? "" : "s"}`
         : "1 session";
@@ -85,7 +77,15 @@ function TaskRow({ item }: { item: TaskSliceItem }) {
     <Card>
       <Subtitle>{task.title}</Subtitle>
       <Muted>{`${labelFor(task.type)} · ${subtitle}`}</Muted>
-      <Button label="Open" kind="neutral" onPress={go} />
+      {flashcards && (
+        <Muted>{`${flashcards.reviewedToday} of ${flashcards.goal} done today`}</Muted>
+      )}
+      <Button
+        label={task.type === "flashcard" ? "Review" : "Open"}
+        kind="neutral"
+        onPress={go}
+        disabled={noneDue}
+      />
     </Card>
   );
 }

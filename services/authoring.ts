@@ -3,6 +3,7 @@ import type { Deck, Task, Card, Note, NoteKind, TaskType } from "../db/schema";
 import { createCard } from "../lib/fsrs";
 import { generateCards, reconcileNoteCards } from "../lib/notes";
 import { newId } from "../lib/id";
+import { DEFAULT_REVIEW_CADENCE } from "../lib/dailySlice";
 
 /** Find a deck by exact name, or create it. Used to land cards made from a task. */
 export async function findOrCreateDeck(
@@ -70,6 +71,52 @@ export async function createTask(
   };
   await store.insertTask(task);
   return task;
+}
+
+export interface EditTaskInput {
+  title?: string;
+  sourceRef?: string | null;
+  cadence?: number;
+  makesCardsCount?: number;
+  readingTarget?: number | null;
+}
+
+/**
+ * Edit an existing task's parameters. Merges the patch over the current row so
+ * unspecified fields are left untouched. Changing a YouTube task's source
+ * (single video <-> playlist, or a different playlist) clears its cached
+ * playlist state so the next open rebuilds against the new URL.
+ */
+export async function updateTask(
+  store: Store,
+  id: string,
+  input: EditTaskInput,
+): Promise<Task> {
+  const current = await store.getTask(id);
+  if (!current) throw new Error(`updateTask: no task ${id}`);
+  const next: Task = {
+    ...current,
+    title: input.title?.trim() || current.title,
+    source_ref:
+      input.sourceRef === undefined ? current.source_ref : input.sourceRef,
+    cadence: input.cadence ?? current.cadence,
+    makes_cards_count: input.makesCardsCount ?? current.makes_cards_count,
+    reading_target:
+      input.readingTarget === undefined
+        ? current.reading_target
+        : input.readingTarget,
+  };
+  await store.updateTaskParams(id, {
+    title: next.title,
+    source_ref: next.source_ref,
+    cadence: next.cadence,
+    makes_cards_count: next.makes_cards_count,
+    reading_target: next.reading_target,
+  });
+  if (next.type === "youtube" && next.source_ref !== current.source_ref) {
+    await store.updateTaskMeta(id, null);
+  }
+  return next;
 }
 
 export interface NewCardInput {
@@ -192,7 +239,11 @@ export async function seedStarterDeck(
   }
   const task = await createTask(
     store,
-    { type: "flashcard", title: "Review flashcards", cadence: 10 },
+    {
+      type: "flashcard",
+      title: "Review flashcards",
+      cadence: DEFAULT_REVIEW_CADENCE,
+    },
     now,
   );
   return { deck, task };

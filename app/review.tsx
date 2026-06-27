@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { TextInput, View, StyleSheet } from "react-native";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useStore } from "../ui/StoreProvider";
-import { getTodayView, gradeCard, completeTask, editCard, setCardIgnored } from "../services/learning";
+import { getFlashcardQueue, gradeCard, creditFlashcardTasks, editCard, setCardIgnored } from "../services/learning";
 import { Screen, Card, Title, Body, Muted, Button } from "../ui/components";
 import { MathText } from "../ui/MathText";
 import type { Card as CardRow, Rating } from "../db/schema";
@@ -17,6 +17,7 @@ const GRADES: { label: string; rating: Rating; kind: "danger" | "warn" | "good" 
 
 export default function ReviewScreen() {
   const { store, tz } = useStore();
+  const { taskId } = useLocalSearchParams<{ taskId?: string }>();
   const router = useRouter();
   const [queue, setQueue] = useState<CardRow[]>([]);
   const [index, setIndex] = useState(0);
@@ -25,10 +26,20 @@ export default function ReviewScreen() {
   const [editing, setEditing] = useState(false);
 
   useEffect(() => {
-    // Use the same slice the Today screen shows: capped and with sibling cards
-    // (multi-cloze / reversed) buried so they don't appear back-to-back.
-    getTodayView(store, Date.now(), tz).then((v) => setQueue(v.slice.reviewCards));
-  }, [store, tz]);
+    // Pull this flashcard task's deck-scoped queue: due cards in its deck,
+    // capped to today's remaining goal, with sibling cards (multi-cloze /
+    // reversed) buried so they don't appear back-to-back.
+    if (!taskId) {
+      setQueue([]);
+      return;
+    }
+    store.getTask(taskId).then((task) => {
+      if (!task) return setQueue([]);
+      getFlashcardQueue(store, task, Date.now(), tz).then((fc) =>
+        setQueue(fc.queue),
+      );
+    });
+  }, [store, tz, taskId]);
 
   const advance = useCallback(() => {
     setRevealed(false);
@@ -37,16 +48,12 @@ export default function ReviewScreen() {
   }, []);
 
   const finish = useCallback(async () => {
-    // Credit any active flashcard task with the cards reviewed this session.
-    const tasks = await store.listTasks({ activeOnly: true });
-    const now = Date.now();
-    await Promise.all(
-      tasks
-        .filter((t) => t.type === "flashcard")
-        .map((t) => completeTask(store, t, { type: "flashcard", n: reviewed }, now, tz)),
-    );
+    // Crediting already happens per-grade (creditFlashcardTasks in gradeCard);
+    // run once more to cover the edge where the cadence was met exactly as the
+    // queue emptied, then return to Today.
+    await creditFlashcardTasks(store, Date.now(), tz);
     router.back();
-  }, [store, tz, reviewed, router]);
+  }, [store, tz, router]);
 
   if (queue.length === 0) {
     return (
@@ -71,7 +78,7 @@ export default function ReviewScreen() {
   const card = queue[index]!;
 
   const onGrade = async (rating: Rating) => {
-    await gradeCard(store, card.id, rating, Date.now());
+    await gradeCard(store, card.id, rating, Date.now(), tz);
     setReviewed((n) => n + 1);
     advance();
   };

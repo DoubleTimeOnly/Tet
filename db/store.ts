@@ -1,6 +1,15 @@
 import type { Deck, Task, Card, Note, Review, Completion } from "./schema";
 import type { BackupData } from "../lib/backup";
 
+/** Editable task parameters (everything a user can change after creation). */
+export interface TaskParams {
+  title: string;
+  source_ref: string | null;
+  cadence: number;
+  makes_cards_count: number;
+  reading_target: number | null;
+}
+
 /**
  * Persistence boundary. The app logic and services depend only on this
  * interface, never on expo-sqlite directly, so:
@@ -18,6 +27,8 @@ export interface Store {
   // tasks
   insertTask(task: Task): Promise<void>;
   setTaskActive(id: string, active: boolean): Promise<void>;
+  /** Edit a task's user-facing parameters (title, source, cadence, gates). */
+  updateTaskParams(id: string, params: TaskParams): Promise<void>;
   /** Persist a task's opaque JSON state blob (e.g. YouTube playlist cache). */
   updateTaskMeta(id: string, meta: string | null): Promise<void>;
   listTasks(opts?: { activeOnly?: boolean }): Promise<Task[]>;
@@ -54,6 +65,10 @@ export interface Store {
   insertReview(review: Review): Promise<void>;
   /** Total graded reviews — each is one flashcard reviewed (XP source). */
   countReviews(): Promise<number>;
+  /** Reviews graded at/after `sinceMs` — used to count today's reviews. */
+  countReviewsSince(sinceMs: number): Promise<number>;
+  /** Reviews graded at/after `sinceMs` (rows), to attribute them to decks. */
+  listReviewsSince(sinceMs: number): Promise<Review[]>;
 
   // completions
   insertCompletion(completion: Completion): Promise<void>;

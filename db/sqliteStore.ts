@@ -1,5 +1,5 @@
 import * as SQLite from "expo-sqlite";
-import type { Store } from "./store";
+import type { Store, TaskParams } from "./store";
 import type {
   Deck,
   Task,
@@ -93,6 +93,12 @@ export class SqliteStore implements Store {
   }
   async setTaskActive(id: string, active: boolean): Promise<void> {
     await this.conn.runAsync("UPDATE tasks SET active = ? WHERE id = ?", [active ? 1 : 0, id]);
+  }
+  async updateTaskParams(id: string, p: TaskParams): Promise<void> {
+    await this.conn.runAsync(
+      "UPDATE tasks SET title = ?, source_ref = ?, cadence = ?, makes_cards_count = ?, reading_target = ? WHERE id = ?",
+      [p.title, p.source_ref, p.cadence, p.makes_cards_count, p.reading_target, id],
+    );
   }
   async updateTaskMeta(id: string, meta: string | null): Promise<void> {
     await this.conn.runAsync("UPDATE tasks SET meta = ? WHERE id = ?", [meta, id]);
@@ -193,6 +199,19 @@ export class SqliteStore implements Store {
       "SELECT COUNT(*) AS n FROM reviews",
     );
     return row?.n ?? 0;
+  }
+  async countReviewsSince(sinceMs: number): Promise<number> {
+    const row = await this.conn.getFirstAsync<{ n: number }>(
+      "SELECT COUNT(*) AS n FROM reviews WHERE reviewed_at >= ?",
+      [sinceMs],
+    );
+    return row?.n ?? 0;
+  }
+  async listReviewsSince(sinceMs: number): Promise<Review[]> {
+    return this.conn.getAllAsync<Review>(
+      "SELECT * FROM reviews WHERE reviewed_at >= ?",
+      [sinceMs],
+    );
   }
 
   async insertCompletion(c: Completion): Promise<void> {

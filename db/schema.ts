@@ -32,7 +32,10 @@ export interface Task {
   id: string;
   type: TaskType;
   title: string;
-  /** url for youtube, Readwise document id for reading, null for flashcard. */
+  /**
+   * url for youtube, Readwise document id for reading, and for flashcard the
+   * deck id to review (null = all decks).
+   */
   source_ref: string | null;
   /** Per-day slice count the builder sets (e.g. 10 cards/day, 1 video/day). */
   cadence: number;

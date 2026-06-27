@@ -34,6 +34,26 @@ export function localDayKey(instant: Instant, tz: string): string {
   return local.toFormat("yyyy-LL-dd");
 }
 
+/**
+ * Epoch ms of the current Tet day's start — the 04:00 boundary of the local
+ * calendar date that {@link localDayKey} resolves `instant` to. Use as the
+ * lower bound when counting "things done today" (e.g. reviews) so the window
+ * matches the day boundary everything else keys off.
+ */
+export function startOfTetDay(instant: Instant, tz: string): number {
+  const key = localDayKey(instant, tz);
+  const start = DateTime.fromISO(key, { zone: tz }).set({
+    hour: DAY_START_HOUR,
+    minute: 0,
+    second: 0,
+    millisecond: 0,
+  });
+  if (!start.isValid) {
+    throw new Error(`startOfTetDay: invalid zone or instant (${tz})`);
+  }
+  return start.toMillis();
+}
+
 /** Calendar date one Tet-day earlier, for walking streaks backwards. */
 export function previousDayKey(dayKey: string): string {
   const dt = DateTime.fromISO(dayKey);

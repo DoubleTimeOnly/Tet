@@ -1,4 +1,4 @@
-import { localDayKey, previousDayKey, DAY_START_HOUR } from "./dayKey";
+import { localDayKey, previousDayKey, startOfTetDay, DAY_START_HOUR } from "./dayKey";
 import { DateTime } from "luxon";
 
 /** Build an epoch-ms instant from wall-clock components in a zone. */
@@ -95,5 +95,27 @@ describe("previousDayKey", () => {
 
   it("crosses a leap-day boundary", () => {
     expect(previousDayKey("2024-03-01")).toBe("2024-02-29");
+  });
+});
+
+describe("startOfTetDay", () => {
+  const LA = "America/Los_Angeles";
+
+  it("returns the 04:00 boundary of the current Tet day", () => {
+    const now = DateTime.fromISO("2026-06-15T12:00", { zone: LA }).toMillis();
+    const expected = DateTime.fromISO("2026-06-15T04:00", { zone: LA }).toMillis();
+    expect(startOfTetDay(now, LA)).toBe(expected);
+  });
+
+  it("before 4am belongs to the prior calendar day's boundary", () => {
+    const now = DateTime.fromISO("2026-06-15T02:30", { zone: LA }).toMillis();
+    const expected = DateTime.fromISO("2026-06-14T04:00", { zone: LA }).toMillis();
+    expect(startOfTetDay(now, LA)).toBe(expected);
+  });
+
+  it("a review at the boundary counts as today (>= start)", () => {
+    const now = DateTime.fromISO("2026-06-15T12:00", { zone: LA }).toMillis();
+    const start = startOfTetDay(now, LA);
+    expect(now).toBeGreaterThanOrEqual(start);
   });
 });

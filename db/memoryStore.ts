@@ -1,4 +1,4 @@
-import type { Store } from "./store";
+import type { Store, TaskParams } from "./store";
 import type { Deck, Task, Card, Note, Review, Completion } from "./schema";
 import type { BackupData } from "../lib/backup";
 
@@ -26,6 +26,16 @@ export class MemoryStore implements Store {
   async setTaskActive(id: string, active: boolean): Promise<void> {
     const t = this.tasks.find((x) => x.id === id);
     if (t) t.active = active;
+  }
+  async updateTaskParams(id: string, p: TaskParams): Promise<void> {
+    const t = this.tasks.find((x) => x.id === id);
+    if (t) {
+      t.title = p.title;
+      t.source_ref = p.source_ref;
+      t.cadence = p.cadence;
+      t.makes_cards_count = p.makes_cards_count;
+      t.reading_target = p.reading_target;
+    }
   }
   async updateTaskMeta(id: string, meta: string | null): Promise<void> {
     const t = this.tasks.find((x) => x.id === id);
@@ -107,6 +117,12 @@ export class MemoryStore implements Store {
   }
   async countReviews(): Promise<number> {
     return this.reviews.length;
+  }
+  async countReviewsSince(sinceMs: number): Promise<number> {
+    return this.reviews.filter((r) => r.reviewed_at >= sinceMs).length;
+  }
+  async listReviewsSince(sinceMs: number): Promise<Review[]> {
+    return this.reviews.filter((r) => r.reviewed_at >= sinceMs).map((r) => ({ ...r }));
   }
 
   async insertCompletion(completion: Completion): Promise<void> {

@@ -3,9 +3,11 @@ import { TextInput, View, StyleSheet } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useStore } from "../ui/StoreProvider";
 import { getFlashcardQueue, gradeCard, creditFlashcardTasks, editCard, setCardIgnored } from "../services/learning";
+import { updateNote } from "../services/authoring";
+import { countClozeSpans, makeFields, noteFields, clozeText } from "../lib/notes";
 import { Screen, Card, Title, Body, Muted, Button } from "../ui/components";
 import { MathText } from "../ui/MathText";
-import type { Card as CardRow, Rating } from "../db/schema";
+import type { Card as CardRow, Note, Rating } from "../db/schema";
 import { colors, radius, space } from "../ui/theme";
 
 const GRADES: { label: string; rating: Rating; kind: "danger" | "warn" | "good" | "primary" }[] = [
@@ -24,6 +26,10 @@ export default function ReviewScreen() {
   const [revealed, setRevealed] = useState(false);
   const [reviewed, setReviewed] = useState(0);
   const [editing, setEditing] = useState(false);
+  const [editNote, setEditNote] = useState<Note | null>(null);
+  const [editFront, setEditFront] = useState("");
+  const [editBack, setEditBack] = useState("");
+  const [editText, setEditText] = useState(""); // cloze source
 
   useEffect(() => {
     // Pull this flashcard task's deck-scoped queue: due cards in its deck,
@@ -44,6 +50,7 @@ export default function ReviewScreen() {
   const advance = useCallback(() => {
     setRevealed(false);
     setEditing(false);
+    setEditNote(null);
     setIndex((i) => i + 1);
   }, []);
 
@@ -93,23 +100,67 @@ export default function ReviewScreen() {
     advance(); // not counted as reviewed; recoverable from Library
   };
 
-  const onSaveEdit = async (front: string, back: string) => {
-    await editCard(store, card.id, front, back);
-    setQueue((q) =>
-      q.map((c, i) => (i === index ? { ...c, front: front.trim(), back: back.trim() } : c)),
-    );
-    setEditing(false);
+  const startEdit = async () => {
+    if (card.note_id) {
+      const n = await store.getNote(card.note_id);
+      setEditNote(n);
+      if (n) {
+        const f = noteFields(n);
+        if (n.kind === "cloze") setEditText(clozeText(f));
+        else {
+          setEditFront((f as { front: string }).front);
+          setEditBack((f as { back: string }).back);
+        }
+      }
+    } else {
+      setEditNote(null);
+      setEditFront(card.front);
+      setEditBack(card.back);
+    }
+    setEditing(true);
   };
+
+  const onSaveEdit = async () => {
+    const isCloze = editNote?.kind === "cloze";
+    if (editNote) {
+      const fields = isCloze
+        ? makeFields("cloze", { text: editText })
+        : makeFields(editNote.kind, { front: editFront, back: editBack });
+      await updateNote(store, editNote.id, fields);
+      const refreshed = await store.listCardsByNote(editNote.id);
+      const byId = new Map(refreshed.map((c) => [c.id, c]));
+      setQueue((q) => q.map((c) => byId.get(c.id) ?? c));
+    } else {
+      await editCard(store, card.id, editFront, editBack);
+      setQueue((q) =>
+        q.map((c, i) => (i === index ? { ...c, front: editFront.trim(), back: editBack.trim() } : c)),
+      );
+    }
+    setEditing(false);
+    setEditNote(null);
+  };
+
+  const isCloze = editNote?.kind === "cloze";
+  const spanCount = countClozeSpans(editText);
+  const canSave = isCloze ? spanCount > 0 : Boolean(editFront.trim() && editBack.trim());
 
   if (editing) {
     return (
       <Screen>
         <Muted>{`Editing card ${index + 1} of ${queue.length}`}</Muted>
         <EditCard
-          initialFront={card.front}
-          initialBack={card.back}
+          note={editNote}
+          front={editFront}
+          back={editBack}
+          text={editText}
+          isCloze={isCloze}
+          spanCount={spanCount}
+          canSave={canSave}
+          onChangeFront={setEditFront}
+          onChangeBack={setEditBack}
+          onChangeText={setEditText}
           onSave={onSaveEdit}
-          onCancel={() => setEditing(false)}
+          onCancel={() => { setEditing(false); setEditNote(null); }}
         />
       </Screen>
     );
@@ -142,7 +193,7 @@ export default function ReviewScreen() {
 
       <View style={{ flexDirection: "row", gap: space.sm }}>
         <View style={{ flex: 1 }}>
-          <Button label="Edit" kind="neutral" onPress={() => setEditing(true)} />
+          <Button label="Edit" kind="neutral" onPress={startEdit} />
         </View>
         <View style={{ flex: 1 }}>
           <Button label="Ignore" kind="neutral" onPress={onIgnore} />
@@ -153,44 +204,78 @@ export default function ReviewScreen() {
 }
 
 function EditCard({
-  initialFront,
-  initialBack,
+  note,
+  front,
+  back,
+  text,
+  isCloze,
+  spanCount,
+  canSave,
+  onChangeFront,
+  onChangeBack,
+  onChangeText,
   onSave,
   onCancel,
 }: {
-  initialFront: string;
-  initialBack: string;
-  onSave: (front: string, back: string) => void;
+  note: Note | null;
+  front: string;
+  back: string;
+  text: string;
+  isCloze: boolean;
+  spanCount: number;
+  canSave: boolean;
+  onChangeFront: (v: string) => void;
+  onChangeBack: (v: string) => void;
+  onChangeText: (v: string) => void;
+  onSave: () => void;
   onCancel: () => void;
 }) {
-  const [front, setFront] = useState(initialFront);
-  const [back, setBack] = useState(initialBack);
-  const canSave = front.trim().length > 0 && back.trim().length > 0;
-
   return (
     <Card>
-      <Muted>Question</Muted>
-      <TextInput
-        value={front}
-        onChangeText={setFront}
-        multiline
-        placeholderTextColor={colors.muted}
-        style={styles.input}
-      />
-      <Muted>Answer</Muted>
-      <TextInput
-        value={back}
-        onChangeText={setBack}
-        multiline
-        placeholderTextColor={colors.muted}
-        style={styles.input}
-      />
+      {note && (
+        <Muted>
+          {isCloze
+            ? `Cloze note · ${spanCount} card${spanCount === 1 ? "" : "s"} · editing updates every blank`
+            : `${note.kind === "reversed" ? "Reversed" : "Basic"} note · editing updates both directions`}
+        </Muted>
+      )}
+      {isCloze ? (
+        <>
+          <Muted>Sentence (wrap blanks in ==…==)</Muted>
+          <TextInput
+            value={text}
+            onChangeText={onChangeText}
+            multiline
+            placeholderTextColor={colors.muted}
+            style={styles.input}
+          />
+        </>
+      ) : (
+        <>
+          <Muted>Question</Muted>
+          <TextInput
+            value={front}
+            onChangeText={onChangeFront}
+            multiline
+            placeholderTextColor={colors.muted}
+            style={styles.input}
+          />
+          <Muted>Answer</Muted>
+          <TextInput
+            value={back}
+            onChangeText={onChangeBack}
+            multiline
+            placeholderTextColor={colors.muted}
+            style={styles.input}
+          />
+        </>
+      )}
       <View style={{ flexDirection: "row", gap: space.sm }}>
         <View style={{ flex: 1 }}>
           <Button label="Cancel" kind="neutral" onPress={onCancel} />
         </View>
         <View style={{ flex: 1 }}>
-          <Button label="Save" onPress={() => onSave(front, back)} disabled={!canSave} />
+          <Button label="Save" onPress={onSave} disabled={!canSave} />
         </View>
       </View>
     </Card>

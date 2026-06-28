@@ -1,5 +1,7 @@
 import React from "react";
 import {
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -11,9 +13,14 @@ import { colors, radius, space } from "./theme";
 
 export function Screen({ children }: { children: React.ReactNode }) {
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.screenContent}>
-      {children}
-    </ScrollView>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <ScrollView style={styles.screen} contentContainerStyle={styles.screenContent}>
+        {children}
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 

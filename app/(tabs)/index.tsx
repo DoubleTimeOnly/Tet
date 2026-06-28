@@ -4,6 +4,7 @@ import { useFocusEffect, useRouter } from "expo-router";
 import { useStore } from "../../ui/StoreProvider";
 import { getTodayView, type TodayView } from "../../services/learning";
 import { Screen, Card, Title, Subtitle, Body, Muted, Button, XpBar } from "../../ui/components";
+import { FitnessRings, RING_COLORS, type RingConfig } from "../../ui/FitnessRings";
 import { LootCardView } from "../../ui/LootCardView";
 import { randomRgb, type Rgb } from "../../lib/loot";
 import { localDayKey } from "../../lib/dayKey";
@@ -57,10 +58,21 @@ export default function TodayScreen() {
     setPendingLoot(null);
   };
 
+  const ringConfigs: RingConfig[] = view.allTaskProgress.map((item) => ({
+    color: RING_COLORS[item.task.type] ?? "#1f6feb",
+    totalSegments: item.totalSegments,
+    filledSegments: item.filledSegments,
+  }));
+
   return (
     <Screen>
       <Title>Today</Title>
       <Card>
+        {ringConfigs.length > 0 && (
+          <View style={{ alignItems: "center", paddingVertical: 8 }}>
+            <FitnessRings rings={ringConfigs} size={180} strokeWidth={16} ringGap={8} />
+          </View>
+        )}
         <XpBar level={xp.level} xpIntoLevel={xp.xpIntoLevel} xpForLevel={xp.xpForLevel} />
         <Muted>
           {streak > 0 ? `🔥 ${streak}-day streak` : "Start a streak today"}

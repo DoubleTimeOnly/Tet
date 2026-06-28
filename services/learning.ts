@@ -18,8 +18,18 @@ import { totalXp, levelForXp, type LevelProgress } from "../lib/xp";
  * the full read -> make-cards -> review loop is verified without a device.
  */
 
+export interface TaskProgress {
+  task: Task;
+  /** Segments completed today (reviewedToday for flashcards, 0 or 1 for binary). */
+  filledSegments: number;
+  /** Total segments (daily goal for flashcards, 1 for binary tasks). */
+  totalSegments: number;
+}
+
 export interface TodayView {
   slice: DailySlice;
+  /** Progress for every active task — used to drive fitness rings. */
+  allTaskProgress: TaskProgress[];
   /** Current consecutive-day streak. */
   streak: number;
   /** Best streak ever achieved (for the "best N" display). */
@@ -55,7 +65,23 @@ export async function getTodayView(
   const streak = currentStreak({ completions: allCompletions, now, tz });
   const maxStreak = longestStreak({ completions: allCompletions });
   const xp = levelForXp(totalXp({ reviews, completions: allCompletions }));
-  return { slice, streak, maxStreak, xp, hasActiveTasks: tasks.length > 0 };
+
+  const dayKey = localDayKey(now, tz);
+  const todayDoneIds = new Set(
+    allCompletions.filter((c) => c.date === dayKey && c.verified).map((c) => c.task_id),
+  );
+  const allTaskProgress: TaskProgress[] = tasks.map((task) => {
+    if (task.type === "flashcard") {
+      const reviewed = task.source_ref
+        ? reviewedDeckIds.filter((d) => d === task.source_ref).length
+        : reviewedDeckIds.length;
+      const fc = flashcardSlice(task, dueCards, reviewed);
+      return { task, filledSegments: fc.reviewedToday, totalSegments: fc.goal };
+    }
+    return { task, filledSegments: todayDoneIds.has(task.id) ? 1 : 0, totalSegments: 1 };
+  });
+
+  return { slice, allTaskProgress, streak, maxStreak, xp, hasActiveTasks: tasks.length > 0 };
 }
 
 /**

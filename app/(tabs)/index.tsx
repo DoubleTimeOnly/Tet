@@ -1,29 +1,61 @@
 import { useCallback, useState } from "react";
+import { View } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useStore } from "../../ui/StoreProvider";
 import { getTodayView, type TodayView } from "../../services/learning";
 import { Screen, Card, Title, Subtitle, Body, Muted, Button, XpBar } from "../../ui/components";
+import { LootCardView } from "../../ui/LootCardView";
+import { randomRgb, type Rgb } from "../../lib/loot";
+import { localDayKey } from "../../lib/dayKey";
+import type { LootCard } from "../../db/schema";
 import type { TaskSliceItem } from "../../lib/dailySlice";
+import { newId } from "../../lib/id";
 
 export default function TodayScreen() {
   const { store, tz, version } = useStore();
   const router = useRouter();
   const [view, setView] = useState<TodayView | null>(null);
+  const [lootTakenToday, setLootTakenToday] = useState(false);
+  const [pendingLoot, setPendingLoot] = useState<Rgb | null>(null);
 
   const load = useCallback(() => {
     let active = true;
-    getTodayView(store, Date.now(), tz).then((v) => active && setView(v));
-    return () => {
-      active = false;
-    };
+    const dayKey = localDayKey(Date.now(), tz);
+    Promise.all([
+      getTodayView(store, Date.now(), tz),
+      store.listLootCards(),
+    ]).then(([v, loot]) => {
+      if (!active) return;
+      setView(v);
+      setLootTakenToday(loot.some((c) => localDayKey(c.collected_at, tz) === dayKey));
+      setPendingLoot(null);
+    });
+    return () => { active = false; };
   }, [store, tz, version]);
 
   useFocusEffect(load);
 
   if (!view) return null;
 
-  const { slice, streak, maxStreak, xp } = view;
-  const nothingToDo = slice.tasks.length === 0;
+  const { slice, streak, maxStreak, xp, hasActiveTasks } = view;
+  const allDone = hasActiveTasks && slice.tasks.length === 0;
+  const showLootbox = allDone && !lootTakenToday;
+
+  const openCard = () => setPendingLoot(randomRgb());
+
+  const takeCard = async () => {
+    if (!pendingLoot) return;
+    const card: LootCard = {
+      id: newId(),
+      r: pendingLoot.r,
+      g: pendingLoot.g,
+      b: pendingLoot.b,
+      collected_at: Date.now(),
+    };
+    await store.insertLootCard(card);
+    setLootTakenToday(true);
+    setPendingLoot(null);
+  };
 
   return (
     <Screen>
@@ -40,10 +72,35 @@ export default function TodayScreen() {
         <TaskRow key={item.task.id} item={item} />
       ))}
 
-      {nothingToDo && (
+      {allDone && !showLootbox && !pendingLoot && (
+        <Card>
+          <Subtitle>All clear ✅</Subtitle>
+          <Body>All tasks done for today.</Body>
+        </Card>
+      )}
+
+      {!hasActiveTasks && slice.tasks.length === 0 && (
         <Card>
           <Subtitle>All clear ✅</Subtitle>
           <Body>Nothing left for today. Add tasks in Library.</Body>
+        </Card>
+      )}
+
+      {pendingLoot && (
+        <Card>
+          <Muted>Your card for today</Muted>
+          <View style={{ alignItems: "center", paddingVertical: 8 }}>
+            <LootCardView r={pendingLoot.r} g={pendingLoot.g} b={pendingLoot.b} width={200} />
+          </View>
+          <Button label="Take Card" onPress={takeCard} />
+        </Card>
+      )}
+
+      {showLootbox && !pendingLoot && (
+        <Card>
+          <Subtitle>Daily reward 🎁</Subtitle>
+          <Body>You finished everything today. Open your card!</Body>
+          <Button label="Open Card" onPress={openCard} />
         </Card>
       )}
     </Screen>
@@ -60,8 +117,6 @@ function TaskRow({ item }: { item: TaskSliceItem }) {
     else router.push(`/review?taskId=${task.id}`);
   };
 
-  // Flashcard tasks show live daily progress; the queue may be empty when the
-  // goal isn't met yet simply because no more cards are due right now.
   const noneDue = task.type === "flashcard" && (flashcards?.queue.length ?? 0) === 0;
 
   const subtitle =

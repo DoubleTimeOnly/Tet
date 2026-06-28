@@ -26,6 +26,8 @@ export interface TodayView {
   maxStreak: number;
   /** XP level + progress, derived from reviews + youtube minutes. */
   xp: LevelProgress;
+  /** True when there is at least one active task (distinguishes "all done" from "nothing set up"). */
+  hasActiveTasks: boolean;
 }
 
 export async function getTodayView(
@@ -53,7 +55,7 @@ export async function getTodayView(
   const streak = currentStreak({ completions: allCompletions, now, tz });
   const maxStreak = longestStreak({ completions: allCompletions });
   const xp = levelForXp(totalXp({ reviews, completions: allCompletions }));
-  return { slice, streak, maxStreak, xp };
+  return { slice, streak, maxStreak, xp, hasActiveTasks: tasks.length > 0 };
 }
 
 /**

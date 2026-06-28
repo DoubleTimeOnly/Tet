@@ -129,6 +129,14 @@ export interface Completion {
   completed_at: number;
 }
 
+export interface LootCard {
+  id: string;
+  r: number;
+  g: number;
+  b: number;
+  collected_at: number;
+}
+
 /**
  * DDL applied at startup. `due` is indexed because computeToday's hot path is
  * "cards due on/before now"; everything else is keyed by id or task_id.
@@ -196,4 +204,12 @@ CREATE TABLE IF NOT EXISTS completions (
   completed_at INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_completions_task_date ON completions(task_id, date);
+
+CREATE TABLE IF NOT EXISTS loot_cards (
+  id           TEXT PRIMARY KEY NOT NULL,
+  r            INTEGER NOT NULL,
+  g            INTEGER NOT NULL,
+  b            INTEGER NOT NULL,
+  collected_at INTEGER NOT NULL
+);
 `;

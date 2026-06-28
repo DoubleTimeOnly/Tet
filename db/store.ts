@@ -1,4 +1,4 @@
-import type { Deck, Task, Card, Note, Review, Completion } from "./schema";
+import type { Deck, Task, Card, Note, Review, Completion, LootCard } from "./schema";
 import type { BackupData } from "../lib/backup";
 
 /** Editable task parameters (everything a user can change after creation). */
@@ -82,4 +82,8 @@ export interface Store {
   replaceAll(data: BackupData): Promise<void>;
   /** Append decks + their notes + cards (imports) without touching the rest. */
   insertMany(decks: Deck[], cards: Card[], notes?: Note[]): Promise<void>;
+
+  // loot cards (collection)
+  insertLootCard(card: LootCard): Promise<void>;
+  listLootCards(): Promise<LootCard[]>;
 }

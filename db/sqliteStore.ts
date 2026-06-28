@@ -8,6 +8,7 @@ import type {
   Review,
   Completion,
   CompletionEvidence,
+  LootCard,
 } from "./schema";
 import { SCHEMA_SQL } from "./schema";
 import { backfillNotes } from "../lib/notesBackfill";
@@ -254,6 +255,16 @@ export class SqliteStore implements Store {
       for (const c of data.completions) await this.insertCompletion(c);
     });
   }
+  async insertLootCard(card: LootCard): Promise<void> {
+    await this.conn.runAsync(
+      "INSERT INTO loot_cards (id, r, g, b, collected_at) VALUES (?, ?, ?, ?, ?)",
+      [card.id, card.r, card.g, card.b, card.collected_at],
+    );
+  }
+  async listLootCards(): Promise<LootCard[]> {
+    return this.conn.getAllAsync<LootCard>("SELECT * FROM loot_cards ORDER BY collected_at");
+  }
+
   async insertMany(decks: Deck[], cards: Card[], notes: Note[] = []): Promise<void> {
     await this.conn.withTransactionAsync(async () => {
       for (const d of decks) await this.insertDeck(d);

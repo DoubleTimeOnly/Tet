@@ -1,5 +1,5 @@
 import type { Store, TaskParams } from "./store";
-import type { Deck, Task, Card, Note, Review, Completion } from "./schema";
+import type { Deck, Task, Card, Note, Review, Completion, LootCard } from "./schema";
 import type { BackupData } from "../lib/backup";
 
 /** In-memory Store: powers node tests and the web preview. */
@@ -10,6 +10,7 @@ export class MemoryStore implements Store {
   private cards: Card[] = [];
   private reviews: Review[] = [];
   private completions: Completion[] = [];
+  private lootCards: LootCard[] = [];
 
   async init(): Promise<void> {}
 
@@ -159,5 +160,12 @@ export class MemoryStore implements Store {
     this.decks.push(...decks.map((d) => ({ ...d })));
     this.notes.push(...notes.map((n) => ({ ...n })));
     this.cards.push(...cards.map((c) => ({ ...c })));
+  }
+
+  async insertLootCard(card: LootCard): Promise<void> {
+    this.lootCards.push({ ...card });
+  }
+  async listLootCards(): Promise<LootCard[]> {
+    return this.lootCards.map((c) => ({ ...c }));
   }
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Alert, Platform, TextInput, StyleSheet } from "react-native";
 import * as DocumentPicker from "expo-document-picker";
+import { useRouter } from "expo-router";
 import { useStore } from "../../ui/StoreProvider";
 import { exportBackup, restoreBackup, importAnki, exportFlashcardsJson, importFlashcardsJson } from "../../services/backupService";
 import { saveJsonFile, pickJsonText } from "../../ui/fileTransfer";
@@ -12,6 +13,7 @@ import { colors, radius, space } from "../../ui/theme";
 
 export default function SettingsScreen() {
   const { store, tz, reload } = useStore();
+  const router = useRouter();
   const [token, setToken] = useState("");
   const [tokenStore] = useState(createTokenStore);
   const [ytKey, setYtKey] = useState("");
@@ -146,6 +148,12 @@ export default function SettingsScreen() {
         <Muted>Just decks + cards (schedule preserved), to share a deck. Imports are appended, not replaced — use the full backup to clone an instance.</Muted>
         <Button label="Export flashcards" onPress={doExportFlashcards} />
         <Button label="Import flashcards" kind="neutral" onPress={doImportFlashcards} />
+      </Card>
+
+      <Card>
+        <Subtitle>Import from text</Subtitle>
+        <Muted>Paste notes written in the Obsidian Spaced Repetition format (Q::A, ==cloze==, etc) and preview cards before adding them.</Muted>
+        <Button label="Import from text" kind="neutral" onPress={() => router.push("/import-text")} />
       </Card>
 
       <Card>

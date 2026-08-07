@@ -117,6 +117,31 @@ describe("flashcardSlice — daily goal & deck scope", () => {
     expect(fc.done).toBe(true);
   });
 
+  it("caps the goal to the cards actually available (min(cadence, due))", () => {
+    const task = makeTask({ cadence: 30 });
+    const fc = flashcardSlice(task, dueCards(7), 0);
+    expect(fc.goal).toBe(7);
+    expect(fc.remaining).toBe(7);
+    expect(fc.queue).toHaveLength(7);
+    expect(fc.done).toBe(false);
+  });
+
+  it("completes once the capped goal is reached, without needing the full cadence", () => {
+    // The 7 cards reviewed are no longer due, so the due-card query returns none.
+    const task = makeTask({ cadence: 30 });
+    const fc = flashcardSlice(task, [], 7);
+    expect(fc.goal).toBe(7);
+    expect(fc.done).toBe(true);
+  });
+
+  it("auto-completes when there are zero cards due", () => {
+    const task = makeTask({ cadence: 30 });
+    const fc = flashcardSlice(task, [], 0);
+    expect(fc.goal).toBe(0);
+    expect(fc.done).toBe(true);
+    expect(fc.queue).toHaveLength(0);
+  });
+
   it("scopes the queue to the task's deck (source_ref)", () => {
     const task = makeTask({ cadence: 30, source_ref: "deck-A" });
     const cards = [...dueCards(3, "deck-A"), ...dueCards(4, "deck-B")];
@@ -148,6 +173,17 @@ describe("computeToday — flashcard tasks", () => {
     expect(item.flashcards?.reviewedToday).toBe(3);
     expect(item.count).toBe(7); // 10 goal - 3 done
     expect(item.flashcards?.queue).toHaveLength(7);
+  });
+
+  it("drops a flashcard task with zero cards due (auto-complete)", () => {
+    const slice = computeToday({
+      tasks: [makeTask({ id: "t1", cadence: 30 })],
+      cards: [],
+      completions: [],
+      now,
+      tz: LA,
+    });
+    expect(slice.tasks.map((i) => i.task.id)).not.toContain("t1");
   });
 
   it("drops a flashcard task once its goal is met", () => {

@@ -112,7 +112,11 @@ export interface Review {
 }
 
 export type CompletionEvidence =
-  | { type: "flashcard"; n: number }
+  // `goal` is the effective daily goal credited against (min(cadence, cards
+  // actually available today) — see lib/dailySlice.ts). Optional for
+  // back-compat with completions written before this existed, where it
+  // defaults to the task's cadence.
+  | { type: "flashcard"; n: number; goal?: number }
   // `minutes` is the video's duration, captured from the player at watch time
   // and used for XP (1 XP/min). Optional: completions written before the
   // gamification feature won't carry it, so readers must default to 0.

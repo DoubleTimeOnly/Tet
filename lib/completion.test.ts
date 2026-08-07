@@ -31,10 +31,16 @@ describe("recordCompletion — day keying", () => {
 });
 
 describe("ownConditionMet by task type", () => {
-  it("flashcard verified once n >= cadence", () => {
+  it("flashcard verified once n >= cadence (no goal supplied)", () => {
     const t = makeTask({ type: "flashcard", cadence: 10 });
     expect(ownConditionMet(t, { type: "flashcard", n: 9 })).toBe(false);
     expect(ownConditionMet(t, { type: "flashcard", n: 10 })).toBe(true);
+  });
+
+  it("flashcard verified against the evidence's capped goal, not the raw cadence", () => {
+    const t = makeTask({ type: "flashcard", cadence: 30 });
+    expect(ownConditionMet(t, { type: "flashcard", n: 6, goal: 7 })).toBe(false);
+    expect(ownConditionMet(t, { type: "flashcard", n: 7, goal: 7 })).toBe(true);
   });
 
   it("youtube verified on manual Done (hybrid verification)", () => {

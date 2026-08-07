@@ -71,6 +71,40 @@ describe("daily flashcard quota persists across re-entry", () => {
     expect(flashcardItem(next)?.flashcards?.reviewedToday).toBe(0);
   });
 
+  it("completes at the available card count when it's below cadence", async () => {
+    const store = new MemoryStore();
+    const now = day("2026-06-15T12:00");
+    const deck = await createDeck(store, "D", now);
+    // Only 3 cards exist, but the task asks for 30/day.
+    for (let i = 0; i < 3; i++) {
+      await addCard(store, { deckId: deck.id, front: `q${i}`, back: `a${i}` }, now);
+    }
+    const task = await createTask(store, { type: "flashcard", title: "Review", cadence: 30 }, now);
+
+    let view = await getTodayView(store, now, LA);
+    expect(flashcardItem(view)?.flashcards?.goal).toBe(3);
+    expect(flashcardItem(view)?.flashcards?.queue.length).toBe(3);
+
+    for (const id of flashcardItem(view)!.flashcards!.queue.map((c) => c.id)) {
+      await gradeCard(store, id, "good", now, LA);
+    }
+    view = await getTodayView(store, now, LA);
+    expect(view.slice.tasks.map((t) => t.task.id)).not.toContain(task.id);
+    const completions = await store.listCompletionsForDay("2026-06-15");
+    expect(completions.some((c) => c.task_id === task.id && c.verified)).toBe(true);
+  });
+
+  it("auto-completes a flashcard task with zero cards due, no grading needed", async () => {
+    const store = new MemoryStore();
+    const now = day("2026-06-15T12:00");
+    const task = await createTask(store, { type: "flashcard", title: "Review", cadence: 30 }, now);
+
+    const view = await getTodayView(store, now, LA);
+    expect(view.slice.tasks.map((t) => t.task.id)).not.toContain(task.id);
+    const completions = await store.listCompletionsForDay("2026-06-15");
+    expect(completions.some((c) => c.task_id === task.id && c.verified)).toBe(true);
+  });
+
   it("scopes the daily goal to the task's deck", async () => {
     const store = new MemoryStore();
     const now = day("2026-06-15T12:00");

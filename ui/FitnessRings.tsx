@@ -45,9 +45,11 @@ export function FitnessRings({ rings, size = 200, strokeWidth = 16, ringGap = 8 
           const r = cx - strokeWidth / 2 - ri * (strokeWidth + ringGap);
           if (r <= strokeWidth / 2) return null;
 
+          // A 0/0 ring (e.g. a flashcard task with nothing due) is trivially
+          // complete — show it full rather than empty.
           const ratio = ring.totalSegments > 0
             ? Math.min(ring.filledSegments, ring.totalSegments) / ring.totalSegments
-            : 0;
+            : 1;
 
           // Smooth arc for all ring types
           const cap = polarToCart(cx, cy, r, START_DEG);

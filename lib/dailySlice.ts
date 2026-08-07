@@ -92,7 +92,11 @@ export function flashcardSlice(
     ? dueCards.filter((c) => c.deck_id === deckId)
     : dueCards;
   const { kept, deferred } = burySiblings(scoped);
-  const goal = task.cadence;
+  // Goal can't exceed what's actually achievable today: reviewed-so-far plus
+  // cards still ready. Caps a cadence higher than the available cards down to
+  // reality (e.g. "review 30" with only 7 due completes at 7), and drives the
+  // zero-cards-due case to auto-complete (goal === reviewedToday === 0).
+  const goal = Math.min(task.cadence, reviewedToday + kept.length);
   const remaining = Math.max(0, goal - reviewedToday);
   return {
     deckId,

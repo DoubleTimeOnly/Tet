@@ -38,8 +38,10 @@ export function ownConditionMet(
 ): boolean {
   switch (evidence.type) {
     case "flashcard":
-      // Self-verifying: reviewed at least the day's cadence worth of cards.
-      return evidence.n >= task.cadence;
+      // Self-verifying: reviewed at least the day's goal worth of cards. The
+      // goal is capped to what was actually available (see FlashcardSlice.goal)
+      // so a task never stalls waiting for more cards than exist.
+      return evidence.n >= (evidence.goal ?? task.cadence);
     case "youtube":
       // Hybrid verification: manual "Done" is the signal (no coverage gate).
       return evidence.manual === true;

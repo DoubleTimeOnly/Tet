@@ -45,6 +45,9 @@ export async function getTodayView(
   now: number,
   tz: string,
 ): Promise<TodayView> {
+  // Credit any flashcard task whose goal is already met (e.g. zero cards due)
+  // before reading completions, so it auto-completes without needing a grade.
+  await creditFlashcardTasks(store, now, tz);
   const [tasks, dueCards, allCompletions, reviews, reviewedDeckIds] =
     await Promise.all([
       store.listTasks({ activeOnly: true }),
@@ -156,8 +159,9 @@ export async function creditFlashcardTasks(
   now: number,
   tz: string,
 ): Promise<void> {
-  const [tasks, reviewedDeckIds, todaysCompletions] = await Promise.all([
+  const [tasks, dueCards, reviewedDeckIds, todaysCompletions] = await Promise.all([
     store.listTasks({ activeOnly: true }),
+    store.listDueCards(now),
     reviewedDeckIdsToday(store, now, tz),
     store.listCompletionsForDay(localDayKey(now, tz)),
   ]);
@@ -168,18 +172,16 @@ export async function creditFlashcardTasks(
     task.source_ref
       ? reviewedDeckIds.filter((d) => d === task.source_ref).length
       : reviewedDeckIds.length;
-  const toCredit = tasks.filter(
-    (t) =>
-      t.type === "flashcard" &&
-      !alreadyDone.has(t.id) &&
-      reviewedFor(t) >= t.cadence,
-  );
+  const toCredit = tasks
+    .filter((t) => t.type === "flashcard" && !alreadyDone.has(t.id))
+    .map((task) => ({ task, fc: flashcardSlice(task, dueCards, reviewedFor(task)) }))
+    .filter(({ fc }) => fc.done);
   await Promise.all(
-    toCredit.map((task) =>
+    toCredit.map(({ task, fc }) =>
       completeTask(
         store,
         task,
-        { type: "flashcard", n: reviewedFor(task) },
+        { type: "flashcard", n: fc.reviewedToday, goal: fc.goal },
         now,
         tz,
       ),

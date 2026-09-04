@@ -20,6 +20,7 @@ function sampleData(): BackupData {
         action: "Walk to the gym",
         prompt_note: true,
         active: true,
+        sort_order: 0,
         created_at: 2,
       },
     ],

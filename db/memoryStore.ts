@@ -151,7 +151,13 @@ export class MemoryStore implements Store {
   }
 
   async insertHabit(habit: Habit): Promise<void> {
-    this.habits.push({ ...habit });
+    this.habits.push({ ...habit, sort_order: habit.sort_order ?? 0 });
+  }
+  async reorderHabits(orderedIds: string[]): Promise<void> {
+    for (const [i, id] of orderedIds.entries()) {
+      const h = this.habits.find((x) => x.id === id);
+      if (h) h.sort_order = i;
+    }
   }
   async updateHabitParams(id: string, p: HabitParams): Promise<void> {
     const h = this.habits.find((x) => x.id === id);
@@ -169,7 +175,10 @@ export class MemoryStore implements Store {
   async listHabits(opts: { activeOnly?: boolean } = {}): Promise<Habit[]> {
     return this.habits
       .filter((h) => (opts.activeOnly ? h.active : true))
-      .sort((a, b) => a.created_at - b.created_at)
+      .sort(
+        (a, b) =>
+          (a.sort_order ?? 0) - (b.sort_order ?? 0) || a.created_at - b.created_at,
+      )
       .map((h) => ({ ...h }));
   }
   async getHabit(id: string): Promise<Habit | null> {
@@ -211,7 +220,8 @@ export class MemoryStore implements Store {
     this.cards = data.cards.map((c) => ({ ...c }));
     this.reviews = data.reviews.map((r) => ({ ...r }));
     this.completions = data.completions.map((c) => ({ ...c }));
-    this.habits = (data.habits ?? []).map((h) => ({ ...h }));
+    // sort_order is absent in a backup taken before manual ordering existed.
+    this.habits = (data.habits ?? []).map((h) => ({ ...h, sort_order: h.sort_order ?? 0 }));
     this.habitLogs = (data.habitLogs ?? []).map((l) => ({ ...l }));
     this.lootCards = (data.lootCards ?? []).map((c) => ({ ...c }));
   }

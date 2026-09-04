@@ -156,6 +156,12 @@ export interface Habit {
   prompt_note: boolean;
   /** Soft-archive, mirroring tasks.active — logs survive. */
   active: boolean;
+  /**
+   * Manual position in the Habits list, ascending. Explicit rather than
+   * ordering by created_at: which habit you want at the top is a judgement,
+   * not a function of when you added it. Ties break on created_at.
+   */
+  sort_order: number;
   created_at: number;
 }
 
@@ -254,6 +260,7 @@ CREATE TABLE IF NOT EXISTS habits (
   action      TEXT NOT NULL,
   prompt_note INTEGER NOT NULL DEFAULT 0,
   active      INTEGER NOT NULL DEFAULT 1,
+  sort_order  INTEGER NOT NULL DEFAULT 0,
   created_at  INTEGER NOT NULL
 );
 

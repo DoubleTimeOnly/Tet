@@ -100,6 +100,9 @@ export interface Store {
   updateHabitParams(id: string, params: HabitParams): Promise<void>;
   /** Soft-archive / restore — an inactive habit keeps its logs. */
   setHabitActive(id: string, active: boolean): Promise<void>;
+  /** Write the manual list order: each id's position becomes its sort_order. */
+  reorderHabits(orderedIds: string[]): Promise<void>;
+  /** Ordered by sort_order, then created_at. */
   listHabits(opts?: { activeOnly?: boolean }): Promise<Habit[]>;
   getHabit(id: string): Promise<Habit | null>;
 

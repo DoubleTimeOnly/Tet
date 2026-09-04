@@ -50,6 +50,15 @@ export class SqliteStore implements Store {
     // (no FK clause — SQLite only enforces FKs declared at table-create) then
     // backfill notes for existing cloze/reversed groups so they become
     // editable-as-one. SCHEMA_SQL already created the notes table on init.
+    // Manual habit ordering. A dev build shipped the habits table before
+    // sort_order existed; DEFAULT 0 puts those rows in created_at order until
+    // the first reorder, which matches what they were showing.
+    const habitCols = await this.conn.getAllAsync<{ name: string }>("PRAGMA table_info(habits)");
+    if (habitCols.length > 0 && !habitCols.some((c) => c.name === "sort_order")) {
+      await this.conn.execAsync(
+        "ALTER TABLE habits ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0",
+      );
+    }
     if (!cardCols.some((c) => c.name === "note_id")) {
       await this.conn.execAsync("ALTER TABLE cards ADD COLUMN note_id TEXT");
       await this.conn.execAsync("ALTER TABLE cards ADD COLUMN template INTEGER NOT NULL DEFAULT 0");
@@ -234,10 +243,20 @@ export class SqliteStore implements Store {
 
   async insertHabit(h: Habit): Promise<void> {
     await this.conn.runAsync(
-      `INSERT INTO habits (id, identity, name, action, prompt_note, active, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [h.id, h.identity, h.name, h.action, h.prompt_note ? 1 : 0, h.active ? 1 : 0, h.created_at],
+      `INSERT INTO habits (id, identity, name, action, prompt_note, active, sort_order, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        h.id, h.identity, h.name, h.action, h.prompt_note ? 1 : 0, h.active ? 1 : 0,
+        h.sort_order ?? 0, h.created_at,
+      ],
     );
+  }
+  async reorderHabits(orderedIds: string[]): Promise<void> {
+    await this.conn.withTransactionAsync(async () => {
+      for (const [i, id] of orderedIds.entries()) {
+        await this.conn.runAsync("UPDATE habits SET sort_order = ? WHERE id = ?", [i, id]);
+      }
+    });
   }
   async updateHabitParams(id: string, p: HabitParams): Promise<void> {
     await this.conn.runAsync(
@@ -251,8 +270,8 @@ export class SqliteStore implements Store {
   async listHabits(opts: { activeOnly?: boolean } = {}): Promise<Habit[]> {
     const rows = await this.conn.getAllAsync<HabitRow>(
       opts.activeOnly
-        ? "SELECT * FROM habits WHERE active = 1 ORDER BY created_at"
-        : "SELECT * FROM habits ORDER BY created_at",
+        ? "SELECT * FROM habits WHERE active = 1 ORDER BY sort_order, created_at"
+        : "SELECT * FROM habits ORDER BY sort_order, created_at",
     );
     return rows.map(rowToHabit);
   }
@@ -390,7 +409,13 @@ interface HabitRow extends Omit<Habit, "prompt_note" | "active"> {
   active: number;
 }
 function rowToHabit(r: HabitRow): Habit {
-  return { ...r, prompt_note: r.prompt_note === 1, active: r.active === 1 };
+  return {
+    ...r,
+    prompt_note: r.prompt_note === 1,
+    active: r.active === 1,
+    // A row restored from a backup taken before sort_order existed has none.
+    sort_order: r.sort_order ?? 0,
+  };
 }
 
 interface CompletionRow extends Omit<Completion, "verified" | "evidence"> {

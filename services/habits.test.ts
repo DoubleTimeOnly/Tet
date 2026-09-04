@@ -1,5 +1,5 @@
 import { MemoryStore } from "../db/memoryStore";
-import { createHabit, updateHabit, archiveHabit, logHabit } from "./habits";
+import { createHabit, updateHabit, archiveHabit, logHabit, moveHabit } from "./habits";
 import { exportBackup, restoreBackup } from "./backupService";
 import { DateTime } from "luxon";
 
@@ -25,6 +25,7 @@ describe("createHabit / listHabits", () => {
         action: "Walk to the gym",
         prompt_note: true,
         active: true,
+        sort_order: 0,
         created_at: 100,
       },
     ]);
@@ -43,11 +44,94 @@ describe("createHabit / listHabits", () => {
     expect(habit.action).toBe("Put one item back where it belongs");
   });
 
-  it("lists oldest-first", async () => {
+  it("lists in creation order until reordered", async () => {
     const store = new MemoryStore();
-    await createHabit(store, { ...GYM, name: "Second" }, 200);
     await createHabit(store, { ...GYM, name: "First" }, 100);
+    await createHabit(store, { ...GYM, name: "Second" }, 200);
     expect((await store.listHabits()).map((h) => h.name)).toEqual(["First", "Second"]);
+  });
+
+  it("puts a new habit at the bottom rather than displacing the top", async () => {
+    const store = new MemoryStore();
+    const a = await createHabit(store, { ...GYM, name: "A" }, 100);
+    const b = await createHabit(store, { ...GYM, name: "B" }, 200);
+    await moveHabit(store, b.id, -1); // B now first
+
+    await createHabit(store, { ...GYM, name: "C" }, 300);
+
+    expect((await store.listHabits()).map((h) => h.name)).toEqual(["B", "A", "C"]);
+    expect(a.sort_order).toBe(0);
+    expect(b.sort_order).toBe(1);
+  });
+});
+
+describe("moveHabit", () => {
+  const three = async () => {
+    const store = new MemoryStore();
+    const a = await createHabit(store, { ...GYM, name: "A" }, 100);
+    const b = await createHabit(store, { ...GYM, name: "B" }, 200);
+    const c = await createHabit(store, { ...GYM, name: "C" }, 300);
+    return { store, a, b, c };
+  };
+  const names = async (store: MemoryStore) =>
+    (await store.listHabits({ activeOnly: true })).map((h) => h.name);
+
+  it("moves a habit up", async () => {
+    const { store, c } = await three();
+    await moveHabit(store, c.id, -1);
+    expect(await names(store)).toEqual(["A", "C", "B"]);
+  });
+
+  it("moves a habit down", async () => {
+    const { store, a } = await three();
+    await moveHabit(store, a.id, 1);
+    expect(await names(store)).toEqual(["B", "A", "C"]);
+  });
+
+  it("is a no-op at the top", async () => {
+    const { store, a } = await three();
+    await moveHabit(store, a.id, -1);
+    expect(await names(store)).toEqual(["A", "B", "C"]);
+  });
+
+  it("is a no-op at the bottom", async () => {
+    const { store, c } = await three();
+    await moveHabit(store, c.id, 1);
+    expect(await names(store)).toEqual(["A", "B", "C"]);
+  });
+
+  it("ignores an unknown habit", async () => {
+    const { store } = await three();
+    await moveHabit(store, "nope", -1);
+    expect(await names(store)).toEqual(["A", "B", "C"]);
+  });
+
+  it("keeps positions dense so repeated moves stay correct", async () => {
+    const { store, a } = await three();
+    await moveHabit(store, a.id, 1);
+    await moveHabit(store, a.id, 1);
+    expect(await names(store)).toEqual(["B", "C", "A"]);
+    expect((await store.listHabits()).map((h) => h.sort_order)).toEqual([0, 1, 2]);
+  });
+
+  it("survives a round-trip through backup", async () => {
+    const { store, c } = await three();
+    await moveHabit(store, c.id, -1);
+
+    const restored = new MemoryStore();
+    await restoreBackup(restored, await exportBackup(store, 1000));
+
+    expect((await restored.listHabits()).map((h) => h.name)).toEqual(["A", "C", "B"]);
+  });
+
+  it("orders the visible list even when an archived habit sits between", async () => {
+    const { store, a, b, c } = await three();
+    await archiveHabit(store, b.id);
+    await moveHabit(store, c.id, -1);
+    expect(await names(store)).toEqual(["C", "A"]);
+    // the archived one keeps its own position and is simply not shown
+    expect((await store.getHabit(b.id))!.active).toBe(false);
+    expect(a.id).toBeTruthy();
   });
 });
 

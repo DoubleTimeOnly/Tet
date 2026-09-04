@@ -1,9 +1,10 @@
 import { useCallback, useState } from "react";
-import { TextInput, View, StyleSheet } from "react-native";
+import { Pressable, Text, TextInput, View, StyleSheet } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useStore } from "../../ui/StoreProvider";
-import { createHabit, logHabit } from "../../services/habits";
+import { createHabit, logHabit, moveHabit } from "../../services/habits";
 import { localDayKey } from "../../lib/dayKey";
+import { isAtEdge } from "../../lib/habitOrder";
 import { Screen, Card, Title, Subtitle, Muted, Button } from "../../ui/components";
 import { colors, radius, space } from "../../ui/theme";
 import type { Habit, HabitLog } from "../../db/schema";
@@ -12,6 +13,7 @@ export default function HabitsScreen() {
   const { store, tz, reload, version } = useStore();
   const [habits, setHabits] = useState<Habit[]>([]);
   const [todayLogs, setTodayLogs] = useState<HabitLog[]>([]);
+  const [adding, setAdding] = useState(false);
 
   const load = useCallback(() => {
     let active = true;
@@ -31,39 +33,77 @@ export default function HabitsScreen() {
 
   useFocusEffect(load);
 
+  const move = async (id: string, delta: -1 | 1) => {
+    await moveHabit(store, id, delta);
+    reload();
+  };
+
   return (
     <Screen>
-      <Title>Habits</Title>
+      <View style={styles.header}>
+        <Title>Habits</Title>
+        <IconButton
+          label="+ Add habit"
+          accessibilityLabel="Add habit"
+          onPress={() => setAdding((v) => !v)}
+          active={adding}
+          wide
+        />
+      </View>
 
-      {habits.length === 0 && (
-        <Muted>
-          No habits yet. A habit is an identity you're voting for, plus one small
-          action you can do today.
-        </Muted>
+      {adding && (
+        <AddHabitForm
+          onDone={() => {
+            setAdding(false);
+            reload();
+          }}
+          onCancel={() => setAdding(false)}
+        />
       )}
 
-      {habits.map((h) => (
+      {habits.length === 0 && !adding && (
+        <Card>
+          <Subtitle>No habits yet</Subtitle>
+          <Muted>
+            A habit is an identity you&apos;re voting for plus one small action you
+            can do today. Tap &quot;+ Add habit&quot; to make your first one.
+          </Muted>
+        </Card>
+      )}
+
+      {habits.map((h, i) => (
         <HabitCard
           key={h.id}
           habit={h}
           doneToday={todayLogs.filter((l) => l.habit_id === h.id).length}
+          canMoveUp={!isAtEdge(i, habits.length, -1)}
+          canMoveDown={!isAtEdge(i, habits.length, 1)}
+          onMove={(delta) => move(h.id, delta)}
           onLogged={reload}
         />
       ))}
-
-      <AddHabitForm onDone={reload} />
     </Screen>
   );
 }
 
-/** One habit: identity + name, the action as the log button, today's count. */
+/**
+ * One habit. The top row carries the reorder handles on the left, the name and
+ * identity in the middle, and the detail/log button on the right; the action
+ * itself is the wide button below, since logging is the thing you came to do.
+ */
 function HabitCard({
   habit,
   doneToday,
+  canMoveUp,
+  canMoveDown,
+  onMove,
   onLogged,
 }: {
   habit: Habit;
   doneToday: number;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
+  onMove: (delta: -1 | 1) => void;
   onLogged: () => void;
 }) {
   const { store, tz } = useStore();
@@ -84,9 +124,34 @@ function HabitCard({
 
   return (
     <Card>
-      <Subtitle>{habit.name}</Subtitle>
-      {habit.identity.length > 0 && <Muted>{habit.identity}</Muted>}
+      <View style={styles.topRow}>
+        <View style={styles.handles}>
+          <IconButton
+            label="▲"
+            accessibilityLabel={`Move ${habit.name} up`}
+            onPress={() => onMove(-1)}
+            disabled={!canMoveUp}
+          />
+          <IconButton
+            label="▼"
+            accessibilityLabel={`Move ${habit.name} down`}
+            onPress={() => onMove(1)}
+            disabled={!canMoveDown}
+          />
+        </View>
+        <View style={styles.titleBlock}>
+          <Subtitle>{habit.name}</Subtitle>
+          {habit.identity.length > 0 && <Muted>{habit.identity}</Muted>}
+        </View>
+        <IconButton
+          label="📋"
+          accessibilityLabel={`${habit.name} log and settings`}
+          onPress={() => router.push(`/habit?habitId=${habit.id}`)}
+        />
+      </View>
+
       <Button label={habit.action} onPress={onAction} />
+
       {note !== null && (
         <>
           <Field
@@ -106,19 +171,13 @@ function HabitCard({
           </View>
         </>
       )}
-      <Muted>
-        {doneToday === 0 ? "not done today" : `${doneToday}× today`}
-      </Muted>
-      <Button
-        label="View log"
-        kind="neutral"
-        onPress={() => router.push(`/habit?habitId=${habit.id}`)}
-      />
+
+      <Muted>{doneToday === 0 ? "not done today" : `${doneToday}× today`}</Muted>
     </Card>
   );
 }
 
-function AddHabitForm({ onDone }: { onDone: () => void }) {
+function AddHabitForm({ onDone, onCancel }: { onDone: () => void; onCancel: () => void }) {
   const { store } = useStore();
   const [identity, setIdentity] = useState("");
   const [name, setName] = useState("");
@@ -130,10 +189,6 @@ function AddHabitForm({ onDone }: { onDone: () => void }) {
   const submit = async () => {
     if (!canSubmit) return;
     await createHabit(store, { identity, name, action, promptNote });
-    setIdentity("");
-    setName("");
-    setAction("");
-    setPromptNote(false);
     onDone();
   };
 
@@ -141,11 +196,7 @@ function AddHabitForm({ onDone }: { onDone: () => void }) {
     <Card>
       <Subtitle>New habit</Subtitle>
       <Muted>Identity — who this makes you</Muted>
-      <Field
-        placeholder="I care about my health"
-        value={identity}
-        onChangeText={setIdentity}
-      />
+      <Field placeholder="I care about my health" value={identity} onChangeText={setIdentity} />
       <Muted>Habit — the overarching goal</Muted>
       <Field placeholder="Work out" value={name} onChangeText={setName} />
       <Muted>Action — the small thing you do today</Muted>
@@ -163,8 +214,50 @@ function AddHabitForm({ onDone }: { onDone: () => void }) {
           onPress={() => setPromptNote(true)}
         />
       </View>
-      <Button label="Add habit" onPress={submit} disabled={!canSubmit} />
+      <View style={styles.row}>
+        <View style={{ flex: 1 }}>
+          <Button label="Cancel" kind="neutral" onPress={onCancel} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Button label="Add habit" onPress={submit} disabled={!canSubmit} />
+        </View>
+      </View>
     </Card>
+  );
+}
+
+/** Compact square button for the glyph controls (reorder, open detail, add). */
+function IconButton({
+  label,
+  accessibilityLabel,
+  onPress,
+  disabled,
+  active,
+  wide,
+}: {
+  label: string;
+  accessibilityLabel: string;
+  onPress: () => void;
+  disabled?: boolean;
+  active?: boolean;
+  wide?: boolean;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={disabled}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      style={({ pressed }) => [
+        styles.icon,
+        wide && styles.iconWide,
+        active && { backgroundColor: colors.accent },
+        pressed && { opacity: 0.6 },
+        disabled && { opacity: 0.25 },
+      ]}
+    >
+      <Text style={styles.iconText}>{label}</Text>
+    </Pressable>
   );
 }
 
@@ -173,7 +266,29 @@ function Field(props: React.ComponentProps<typeof TextInput>) {
 }
 
 const styles = StyleSheet.create({
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: space.sm,
+  },
+  topRow: { flexDirection: "row", alignItems: "center", gap: space.sm },
+  handles: { gap: space.xs },
+  titleBlock: { flex: 1, gap: space.xs },
   row: { flexDirection: "row", gap: space.sm, flexWrap: "wrap" },
+  icon: {
+    backgroundColor: colors.bg,
+    borderColor: colors.border,
+    borderWidth: 1,
+    borderRadius: radius,
+    minWidth: 40,
+    paddingVertical: space.xs,
+    paddingHorizontal: space.sm,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  iconWide: { paddingHorizontal: space.md, paddingVertical: space.sm },
+  iconText: { color: colors.text, fontSize: 16, fontWeight: "600" },
   input: {
     backgroundColor: colors.bg,
     borderColor: colors.border,

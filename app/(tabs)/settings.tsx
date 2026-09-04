@@ -10,6 +10,7 @@ import { createTokenStore, createYoutubeApiKeyStore } from "../../adapters/token
 import { createApkgReader } from "../../adapters/apkgReader";
 import { Screen, Card, Title, Subtitle, Muted, Button } from "../../ui/components";
 import { colors, radius, space } from "../../ui/theme";
+import { AutoBackupSection } from "../../ui/AutoBackupSection";
 
 export default function SettingsScreen() {
   const { store, tz, reload } = useStore();
@@ -142,6 +143,8 @@ export default function SettingsScreen() {
         <Button label="Export backup" onPress={doExport} />
         <Button label="Import backup" kind="neutral" onPress={doImportJson} />
       </Card>
+
+      <AutoBackupSection />
 
       <Card>
         <Subtitle>Flashcards only</Subtitle>

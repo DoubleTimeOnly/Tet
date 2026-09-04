@@ -11,6 +11,8 @@ import type { Store } from "../db/store";
 import { createStore } from "../db/createStore";
 import { seedStarterDeck } from "../services/authoring";
 import { seedObsidianFlashcards } from "../services/seedObsidian";
+import { runAutoBackup } from "../services/autoBackupService";
+import { backupFiles } from "../adapters/backupFiles";
 
 interface StoreContextValue {
   store: Store;
@@ -48,6 +50,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         await seedStarterDeck(s);
       }
       if (!cancelled) setStore(s);
+      // Daily safety snapshot. Deliberately not awaited: the app renders as
+      // soon as the store is ready, and runAutoBackup swallows its own errors,
+      // so a slow or failing write is never visible here. It no-ops unless a
+      // day has passed since the last one.
+      void runAutoBackup(s, backupFiles);
     })();
     return () => {
       cancelled = true;

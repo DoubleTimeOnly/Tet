@@ -37,7 +37,7 @@ export async function runAutoBackup(
   files: BackupFiles,
   now: number = Date.now(),
 ): Promise<AutoBackupResult> {
-  if (!files.available) return { wrote: false, pruned: [] };
+  if (!files.supported) return { wrote: false, pruned: [] };
   try {
     const existing = await files.list();
     if (!shouldBackup(existing, now)) return { wrote: false, pruned: [] };
@@ -59,7 +59,7 @@ export async function runAutoBackup(
 
 /** Existing snapshots, newest first, for the Settings list. */
 export async function listAutoBackups(files: BackupFiles): Promise<AutoBackupFile[]> {
-  if (!files.available) return [];
+  if (!files.supported) return [];
   try {
     return sortNewestFirst(await files.list());
   } catch (err) {

@@ -14,7 +14,7 @@ function fakeFiles(seed: Record<string, string> = {}) {
   const disk = new Map(Object.entries(seed));
   const files: BackupFiles & { disk: Map<string, string> } = {
     disk,
-    available: true,
+    supported: true,
     async list() {
       return [...disk.keys()];
     },
@@ -29,7 +29,15 @@ function fakeFiles(seed: Record<string, string> = {}) {
     async remove(name) {
       disk.delete(name);
     },
-    uriFor: (name) => name,
+    async describe() {
+      return "fake folder";
+    },
+    async hasFolder() {
+      return true;
+    },
+    async chooseFolder() {
+      return true;
+    },
   };
   return files;
 }
@@ -106,7 +114,7 @@ describe("runAutoBackup", () => {
 
   it("is a no-op where storage isn't available (web)", async () => {
     const store = new MemoryStore();
-    const files = { ...fakeFiles(), available: false };
+    const files = { ...fakeFiles(), supported: false };
     expect((await runAutoBackup(store, files, now)).wrote).toBe(false);
   });
 
@@ -174,6 +182,6 @@ describe("listAutoBackups", () => {
   });
 
   it("is empty where storage isn't available", async () => {
-    expect(await listAutoBackups({ ...fakeFiles(), available: false })).toEqual([]);
+    expect(await listAutoBackups({ ...fakeFiles(), supported: false })).toEqual([]);
   });
 });

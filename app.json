@@ -9,11 +9,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.doubletimeonly.tet",
-      "infoPlist": {
-        "UIFileSharingEnabled": true,
-        "LSSupportsOpeningDocumentsInPlace": true
-      }
+      "bundleIdentifier": "com.doubletimeonly.tet"
     },
     "android": {
       "package": "com.doubletimeonly.tet"

@@ -6,6 +6,8 @@ import {
   sortNewestFirst,
   shouldBackup,
   staleBackups,
+  stripExtension,
+  filenameFromUri,
 } from "./autoBackup";
 import { DateTime } from "luxon";
 
@@ -38,6 +40,53 @@ describe("backupFilename / parseBackupTime", () => {
     expect(parseBackupTime("notes.txt")).toBeNull();
     expect(parseBackupTime("tet-auto-nonsense.json")).toBeNull();
     expect(parseBackupTime("tet-auto-2026-13-45T999999.json")).toBeNull();
+  });
+});
+
+describe("stripExtension (SAF createFileAsync wants no extension)", () => {
+  it("drops the .json", () => {
+    expect(stripExtension("tet-auto-2026-09-04T183000.json")).toBe(
+      "tet-auto-2026-09-04T183000",
+    );
+  });
+
+  it("leaves a name that has no extension alone", () => {
+    expect(stripExtension("tet-auto-2026-09-04T183000")).toBe("tet-auto-2026-09-04T183000");
+  });
+
+  it("round-trips with backupFilename", () => {
+    const now = utc("2026-09-04T18:30:00");
+    expect(`${stripExtension(backupFilename(now))}.json`).toBe(backupFilename(now));
+  });
+});
+
+describe("filenameFromUri (SAF lists document uris, not names)", () => {
+  it("pulls the name out of a percent-encoded SAF document uri", () => {
+    const uri =
+      "content://com.android.externalstorage.documents/document/" +
+      "primary%3ADownload%2FTet%2Ftet-auto-2026-09-04T120000.json";
+    expect(filenameFromUri(uri)).toBe("tet-auto-2026-09-04T120000.json");
+  });
+
+  it("handles a uri whose id ends at the volume colon", () => {
+    const uri = "content://com.android.externalstorage.documents/document/primary%3Anotes.json";
+    expect(filenameFromUri(uri)).toBe("notes.json");
+  });
+
+  it("handles a plain file uri", () => {
+    expect(filenameFromUri("file:///data/user/0/com.tet/files/backups/a.json")).toBe("a.json");
+  });
+
+  it("feeds parseBackupTime so a SAF listing schedules correctly", () => {
+    const now = utc("2026-09-04T12:00:00");
+    const uri =
+      "content://com.android.externalstorage.documents/document/" +
+      `primary%3ATet%2F${backupFilename(now)}`;
+    expect(parseBackupTime(filenameFromUri(uri))).toBe(now);
+  });
+
+  it("survives a malformed escape rather than throwing", () => {
+    expect(() => filenameFromUri("content://x/%E0%A4%A")).not.toThrow();
   });
 });
 

@@ -5,11 +5,20 @@ export type { BackupFiles } from "./backupFiles";
 /**
  * Web has no automatic backups: the web preview runs on MemoryStore, so the
  * dataset is already gone when the tab closes and there is nothing durable to
- * snapshot. `available: false` makes the Settings section say so instead of
+ * snapshot. `supported: false` makes the Settings section say so instead of
  * showing an empty list that never fills.
  */
 export const backupFiles: BackupFiles = {
-  available: false,
+  supported: false,
+  async describe() {
+    return null;
+  },
+  async hasFolder() {
+    return false;
+  },
+  async chooseFolder() {
+    return false;
+  },
   async list() {
     return [];
   },
@@ -21,8 +30,5 @@ export const backupFiles: BackupFiles = {
   },
   async remove() {
     /* no-op */
-  },
-  uriFor(name: string) {
-    return name;
   },
 };

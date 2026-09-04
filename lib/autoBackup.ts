@@ -39,6 +39,33 @@ export function backupFilename(now: number): string {
   return `${PREFIX}${stamp}${SUFFIX}`;
 }
 
+/**
+ * The name without its extension — what SAF's createFileAsync wants, since it
+ * appends the extension itself from the mime type.
+ */
+export function stripExtension(filename: string): string {
+  return filename.endsWith(SUFFIX) ? filename.slice(0, -SUFFIX.length) : filename;
+}
+
+/**
+ * Filename out of a SAF content:// uri. Android's Storage Access Framework
+ * enumerates a directory as document uris whose id is a percent-encoded path,
+ * e.g.
+ *   content://…/document/primary%3ADownload%2FTet%2Ftet-auto-2026-09-04T120000.json
+ * so the name is whatever follows the last separator once decoded. Works for
+ * plain file:// uris too. Returns the input unchanged if it can't be decoded.
+ */
+export function filenameFromUri(uri: string): string {
+  let decoded = uri;
+  try {
+    decoded = decodeURIComponent(uri);
+  } catch {
+    // Malformed escape sequence — fall back to the raw string.
+  }
+  const cut = Math.max(decoded.lastIndexOf("/"), decoded.lastIndexOf(":"));
+  return cut === -1 ? decoded : decoded.slice(cut + 1);
+}
+
 /** Epoch ms for one of our filenames, or null for anything else in the dir. */
 export function parseBackupTime(filename: string): number | null {
   if (!filename.startsWith(PREFIX) || !filename.endsWith(SUFFIX)) return null;

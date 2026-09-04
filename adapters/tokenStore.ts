@@ -43,3 +43,12 @@ export function createTokenStore(): WritableTokenStore {
 export function createYoutubeApiKeyStore(): WritableTokenStore {
   return makeKeyStore("youtube_api_key");
 }
+
+/**
+ * The SAF tree uri the user granted for automatic backups (Android). Not a
+ * secret, but it needs the same small persistent key/value storage the tokens
+ * use, and the grant itself is what makes the uri usable.
+ */
+export function createBackupFolderStore(): WritableTokenStore {
+  return makeKeyStore("backup_folder_uri");
+}

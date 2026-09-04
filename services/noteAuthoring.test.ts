@@ -4,6 +4,8 @@ import { gradeCard } from "./learning";
 import { makeFields } from "../lib/notes";
 import { burySiblings } from "../lib/siblings";
 
+const LA = "America/Los_Angeles";
+
 /**
  * End-to-end (against MemoryStore): a cloze note generates sibling cards, an
  * edit to its shared text propagates to every sibling without disturbing their
@@ -44,7 +46,7 @@ describe("cloze note authoring + edit propagation", () => {
 
     // Review one sibling so it carries a distinct, non-new schedule.
     const before = await store.listCardsByNote(note.id);
-    const graded = await gradeCard(store, before[0]!.id, "good", 1000);
+    const graded = await gradeCard(store, before[0]!.id, "good", 1000, LA);
 
     // Edit the note's shared sentence; both siblings should re-render.
     await updateNote(store, note.id, makeFields("cloze", { text: "==a== really not ==b==" }), 2000);

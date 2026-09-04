@@ -33,6 +33,7 @@ function sampleData(): BackupData {
         done_at: 7,
       },
     ],
+    lootCards: [{ id: "loot-1", r: 12, g: 200, b: 87, collected_at: 9 }],
   };
 }
 
@@ -50,7 +51,7 @@ describe("exportAll / importAll round-trip", () => {
   });
 
   it("round-trips an empty dataset", () => {
-    const empty: BackupData = { decks: [], tasks: [], notes: [], cards: [], reviews: [], completions: [], habits: [], habitLogs: [] };
+    const empty: BackupData = { decks: [], tasks: [], notes: [], cards: [], reviews: [], completions: [], habits: [], habitLogs: [], lootCards: [] };
     expect(importAll(exportAll(empty))).toEqual(empty);
   });
 
@@ -84,6 +85,7 @@ describe("exportAll / importAll round-trip", () => {
       ],
       habits: [],
       habitLogs: [],
+      lootCards: [],
     };
     const restored = importAll(exportAll(data, 1000));
     expect(restored).toEqual(data);
@@ -117,6 +119,42 @@ describe("v1 backup upgrade", () => {
   });
 });
 
+describe("loot cards (the Collection)", () => {
+  // Regression: loot cards were absent from the backup entirely through v2, so
+  // a Collection could not survive a move to a new device. They are a v3 table
+  // now — this pins that they are both written and read back.
+  it("round-trips the Collection", () => {
+    const data = sampleData();
+    const blob = exportAll(data, 1000);
+    expect(JSON.parse(blob).lootCards).toEqual(data.lootCards);
+    expect(importAll(blob).lootCards).toEqual(data.lootCards);
+  });
+
+  it("keeps every colour channel and the collected timestamp intact", () => {
+    const data = sampleData();
+    // 0 and 255 are the values a truthiness bug would silently drop.
+    data.lootCards = [
+      { id: "l0", r: 0, g: 0, b: 0, collected_at: 0 },
+      { id: "l1", r: 255, g: 255, b: 255, collected_at: 1750000000000 },
+    ];
+    expect(importAll(exportAll(data, 1000)).lootCards).toEqual(data.lootCards);
+  });
+
+  it("still rejects a lootCards table that isn't an array", () => {
+    const blob = JSON.stringify({
+      version: BACKUP_VERSION,
+      decks: [],
+      tasks: [],
+      notes: [],
+      cards: [],
+      reviews: [],
+      completions: [],
+      lootCards: {},
+    });
+    expect(() => importAll(blob)).toThrow(/lootCards/);
+  });
+});
+
 describe("v2 backup upgrade (pre-habits)", () => {
   it("imports a v2 blob with empty habit tables rather than rejecting it", () => {
     const blob = JSON.stringify({
@@ -132,6 +170,7 @@ describe("v2 backup upgrade (pre-habits)", () => {
     const restored = importAll(blob);
     expect(restored.habits).toEqual([]);
     expect(restored.habitLogs).toEqual([]);
+    expect(restored.lootCards).toEqual([]);
   });
 
   it("still rejects a habits table that isn't an array", () => {

@@ -265,6 +265,35 @@ describe("backup round-trip + anki import (Store-backed)", () => {
     expect(await fresh.exportAll()).toEqual(await store.exportAll());
   });
 
+  // Regression: the Collection was invisible to backup through v2, so it could
+  // not follow you to a new device. Guards both halves — that export writes the
+  // loot cards, and that replaceAll inserts them back after clearing the table
+  // (adding loot_cards to the delete list without a matching insert would wipe
+  // every Collection on restore).
+  it("carries the loot card Collection to a fresh install", async () => {
+    const store = new MemoryStore();
+    const now = day("2026-06-15T12:00");
+    await store.insertLootCard({ id: "l1", r: 0, g: 128, b: 255, collected_at: now });
+    await store.insertLootCard({ id: "l2", r: 255, g: 0, b: 0, collected_at: now + 1 });
+
+    const fresh = new MemoryStore();
+    await restoreBackup(fresh, await exportBackup(store, now));
+
+    expect(await fresh.listLootCards()).toEqual(await store.listLootCards());
+  });
+
+  it("restoring replaces the Collection rather than duplicating it", async () => {
+    const store = new MemoryStore();
+    const now = day("2026-06-15T12:00");
+    await store.insertLootCard({ id: "l1", r: 1, g: 2, b: 3, collected_at: now });
+    const blob = await exportBackup(store, now);
+
+    // Restoring onto itself must not double the cards (a merge would collide
+    // on the primary key against SqliteStore).
+    await restoreBackup(store, blob);
+    expect(await store.listLootCards()).toHaveLength(1);
+  });
+
   it("imports an .apkg as a fresh deck of due cards", async () => {
     const store = new MemoryStore();
     const reader: AnkiNoteReader = {

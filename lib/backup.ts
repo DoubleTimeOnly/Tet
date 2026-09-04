@@ -7,15 +7,17 @@ import type {
   Completion,
   Habit,
   HabitLog,
+  LootCard,
 } from "../db/schema";
 import { backfillNotes } from "./notesBackfill";
 
 /**
  * Complete JSON export/import — the whole instance in one file. Every table
  * round-trips: decks, cards (with FSRS schedule + ignored flag), tasks (with
- * playlist `meta` progress), reviews, and completions. Derived state isn't
- * stored and so isn't listed here — XP/levels (lib/xp) and streaks (lib/streak)
- * recompute from reviews + completions, so a restore reconstructs them exactly.
+ * playlist `meta` progress), reviews, completions, habits + their logs, and
+ * collected loot cards. Derived state isn't stored and so isn't listed here —
+ * XP/levels (lib/xp) and streaks (lib/streak) recompute from reviews +
+ * completions, so a restore reconstructs them exactly.
  *
  * Importing REPLACES the local dataset (store.replaceAll), so exporting from one
  * Tet and importing into another recreates the original. No cloud, no partial
@@ -26,7 +28,9 @@ import { backfillNotes } from "./notesBackfill";
 
 // v2 adds the notes table (sibling groups). v1 backups predate it and are
 // upgraded on import by reconstructing notes from card content (backfillNotes).
-// v3 adds habits + their logs; older backups simply restore with none.
+// v3 adds habits + their logs, and loot cards — which no earlier version
+// carried at all, so a Collection could never survive a move to a new device.
+// Older backups simply restore with none of these.
 export const BACKUP_VERSION = 3;
 
 export interface BackupData {
@@ -38,6 +42,7 @@ export interface BackupData {
   completions: Completion[];
   habits: Habit[];
   habitLogs: HabitLog[];
+  lootCards: LootCard[];
 }
 
 export interface Backup extends BackupData {
@@ -68,6 +73,7 @@ export function exportAll(
     completions: data.completions,
     habits: data.habits,
     habitLogs: data.habitLogs,
+    lootCards: data.lootCards,
   };
   return JSON.stringify(backup);
 }
@@ -127,6 +133,7 @@ export function importAll(json: string): BackupData {
       completions: obj.completions as Completion[],
       habits: [],
       habitLogs: [],
+      lootCards: [],
     };
   }
 
@@ -142,6 +149,7 @@ export function importAll(json: string): BackupData {
     completions: obj.completions as Completion[],
     habits: optionalTable<Habit>(obj, "habits"),
     habitLogs: optionalTable<HabitLog>(obj, "habitLogs"),
+    lootCards: optionalTable<LootCard>(obj, "lootCards"),
   };
 }
 

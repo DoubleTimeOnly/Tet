@@ -279,7 +279,7 @@ export class SqliteStore implements Store {
   }
 
   async exportAll(): Promise<BackupData> {
-    const [decks, tasks, notes, cards, reviews, completions, habits, habitLogs] =
+    const [decks, tasks, notes, cards, reviews, completions, habits, habitLogs, lootCards] =
       await Promise.all([
         this.listDecks(),
         this.listTasks(),
@@ -289,8 +289,9 @@ export class SqliteStore implements Store {
         this.listCompletions(),
         this.listHabits(),
         this.conn.getAllAsync<HabitLog>("SELECT * FROM habit_logs ORDER BY done_at"),
+        this.listLootCards(),
       ]);
-    return { decks, tasks, notes, cards, reviews, completions, habits, habitLogs };
+    return { decks, tasks, notes, cards, reviews, completions, habits, habitLogs, lootCards };
   }
   async replaceAll(data: BackupData): Promise<void> {
     await this.conn.withTransactionAsync(async () => {
@@ -305,6 +306,7 @@ export class SqliteStore implements Store {
         "decks",
         "habit_logs",
         "habits",
+        "loot_cards",
       ]) {
         await this.conn.runAsync(`DELETE FROM ${table}`);
       }
@@ -316,6 +318,7 @@ export class SqliteStore implements Store {
       for (const c of data.completions) await this.insertCompletion(c);
       for (const h of data.habits ?? []) await this.insertHabit(h);
       for (const l of data.habitLogs ?? []) await this.insertHabitLog(l);
+      for (const c of data.lootCards ?? []) await this.insertLootCard(c);
     });
   }
   async insertLootCard(card: LootCard): Promise<void> {

@@ -201,6 +201,7 @@ export class MemoryStore implements Store {
       completions: this.completions.map((c) => ({ ...c })),
       habits: this.habits.map((h) => ({ ...h })),
       habitLogs: this.habitLogs.map((l) => ({ ...l })),
+      lootCards: this.lootCards.map((c) => ({ ...c })),
     };
   }
   async replaceAll(data: BackupData): Promise<void> {
@@ -212,6 +213,7 @@ export class MemoryStore implements Store {
     this.completions = data.completions.map((c) => ({ ...c }));
     this.habits = (data.habits ?? []).map((h) => ({ ...h }));
     this.habitLogs = (data.habitLogs ?? []).map((l) => ({ ...l }));
+    this.lootCards = (data.lootCards ?? []).map((c) => ({ ...c }));
   }
   async insertMany(decks: Deck[], cards: Card[], notes: Note[] = []): Promise<void> {
     this.decks.push(...decks.map((d) => ({ ...d })));

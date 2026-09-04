@@ -1,5 +1,6 @@
 import { MemoryStore } from "../db/memoryStore";
 import { createHabit, updateHabit, archiveHabit, logHabit } from "./habits";
+import { exportBackup, restoreBackup } from "./backupService";
 import { DateTime } from "luxon";
 
 const LA = "America/Los_Angeles";
@@ -177,15 +178,71 @@ describe("archiveHabit", () => {
 });
 
 describe("backup round-trip", () => {
-  it("carries habits and their logs through exportAll / replaceAll", async () => {
+  // Goes through the real Settings path (exportBackup -> JSON -> restoreBackup)
+  // rather than store.exportAll/replaceAll, so the serialize + validate layer
+  // in lib/backup is exercised too.
+  it("carries habits and their logs through a JSON export and restore", async () => {
     const source = new MemoryStore();
     const habit = await createHabit(source, { ...GYM, promptNote: true }, 100);
     await logHabit(source, habit, { note: "rainy" }, at("2026-06-15T09:00"), LA);
+    await logHabit(source, habit, {}, at("2026-06-15T18:00"), LA);
+    const edited = await updateHabit(source, habit.id, { action: "Work out for 5 minutes" });
+    await logHabit(source, edited, {}, at("2026-06-16T09:00"), LA);
+
+    const json = await exportBackup(source, 1000);
 
     const restored = new MemoryStore();
-    await restored.replaceAll(await source.exportAll());
+    await restoreBackup(restored, json);
 
     expect(await restored.listHabits()).toEqual(await source.listHabits());
     expect(await restored.listHabitLogs(habit.id)).toEqual(await source.listHabitLogs(habit.id));
+    // The per-log action snapshots survive, so edited history stays truthful.
+    expect((await restored.listHabitLogs(habit.id)).map((l) => l.action)).toEqual([
+      "Work out for 5 minutes",
+      "Walk to the gym",
+      "Walk to the gym",
+    ]);
+    // Notes and the note-prompt setting survive too.
+    expect((await restored.listHabitLogs(habit.id)).map((l) => l.note)).toEqual([
+      null,
+      null,
+      "rainy",
+    ]);
+    expect((await restored.getHabit(habit.id))!.prompt_note).toBe(true);
+  });
+
+  it("restores an archived habit as archived, logs intact", async () => {
+    const source = new MemoryStore();
+    const habit = await createHabit(source, GYM, 100);
+    await logHabit(source, habit, {}, at("2026-06-15T09:00"), LA);
+    await archiveHabit(source, habit.id);
+
+    const restored = new MemoryStore();
+    await restoreBackup(restored, await exportBackup(source, 1000));
+
+    expect(await restored.listHabits({ activeOnly: true })).toEqual([]);
+    expect(await restored.listHabitLogs(habit.id)).toHaveLength(1);
+  });
+
+  it("restoring a pre-habits (v2) backup clears habits rather than failing", async () => {
+    const store = new MemoryStore();
+    const habit = await createHabit(store, GYM, 100);
+    await logHabit(store, habit, {}, at("2026-06-15T09:00"), LA);
+
+    // A backup taken before habits existed: no habits/habitLogs keys at all.
+    const v2 = JSON.stringify({
+      version: 2,
+      exported_at: 1,
+      decks: [],
+      tasks: [],
+      notes: [],
+      cards: [],
+      reviews: [],
+      completions: [],
+    });
+    await restoreBackup(store, v2);
+
+    expect(await store.listHabits()).toEqual([]);
+    expect(await store.listHabitLogs(habit.id)).toEqual([]);
   });
 });

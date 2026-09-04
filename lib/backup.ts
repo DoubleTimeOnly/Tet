@@ -5,6 +5,8 @@ import type {
   Note,
   Review,
   Completion,
+  Habit,
+  HabitLog,
 } from "../db/schema";
 import { backfillNotes } from "./notesBackfill";
 
@@ -24,7 +26,8 @@ import { backfillNotes } from "./notesBackfill";
 
 // v2 adds the notes table (sibling groups). v1 backups predate it and are
 // upgraded on import by reconstructing notes from card content (backfillNotes).
-export const BACKUP_VERSION = 2;
+// v3 adds habits + their logs; older backups simply restore with none.
+export const BACKUP_VERSION = 3;
 
 export interface BackupData {
   decks: Deck[];
@@ -33,6 +36,8 @@ export interface BackupData {
   cards: Card[];
   reviews: Review[];
   completions: Completion[];
+  habits: Habit[];
+  habitLogs: HabitLog[];
 }
 
 export interface Backup extends BackupData {
@@ -61,11 +66,14 @@ export function exportAll(
     cards: data.cards,
     reviews: data.reviews,
     completions: data.completions,
+    habits: data.habits,
+    habitLogs: data.habitLogs,
   };
   return JSON.stringify(backup);
 }
 
-// `notes` is validated separately (absent in v1) so old backups still import.
+// `notes` (absent in v1) and habits (absent before v3) are validated separately
+// so old backups still import.
 const TABLES: (keyof BackupData)[] = [
   "decks",
   "tasks",
@@ -92,9 +100,10 @@ export function importAll(json: string): BackupData {
   }
   const obj = parsed as Record<string, unknown>;
 
-  if (obj.version !== 1 && obj.version !== BACKUP_VERSION) {
+  const SUPPORTED = [1, 2, BACKUP_VERSION];
+  if (!SUPPORTED.includes(obj.version as number)) {
     throw new BackupImportError(
-      `Unsupported backup version ${String(obj.version)} (expected 1 or ${BACKUP_VERSION})`,
+      `Unsupported backup version ${String(obj.version)} (expected ${SUPPORTED.join(", ")})`,
     );
   }
 
@@ -116,6 +125,8 @@ export function importAll(json: string): BackupData {
       cards: stamped,
       reviews: obj.reviews as Review[],
       completions: obj.completions as Completion[],
+      habits: [],
+      habitLogs: [],
     };
   }
 
@@ -129,5 +140,18 @@ export function importAll(json: string): BackupData {
     cards,
     reviews: obj.reviews as Review[],
     completions: obj.completions as Completion[],
+    habits: optionalTable<Habit>(obj, "habits"),
+    habitLogs: optionalTable<HabitLog>(obj, "habitLogs"),
   };
+}
+
+/** A table added after v2: absent in an older backup, but must be an array
+ *  when present so a corrupt file can't half-apply. */
+function optionalTable<T>(obj: Record<string, unknown>, key: string): T[] {
+  const value = obj[key];
+  if (value === undefined) return [];
+  if (!Array.isArray(value)) {
+    throw new BackupImportError(`Invalid "${key}" array`);
+  }
+  return value as T[];
 }

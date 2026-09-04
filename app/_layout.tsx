@@ -19,6 +19,7 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="review" options={{ title: "Review", presentation: "modal" }} />
           <Stack.Screen name="import-text" options={{ title: "Import from text", presentation: "modal" }} />
+          <Stack.Screen name="habit" options={{ title: "Habit" }} />
           <Stack.Screen name="task/youtube" options={{ title: "Watch" }} />
           <Stack.Screen name="task/reading" options={{ title: "Read" }} />
         </Stack>

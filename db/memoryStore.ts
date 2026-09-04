@@ -1,5 +1,15 @@
-import type { Store, TaskParams } from "./store";
-import type { Deck, Task, Card, Note, Review, Completion, LootCard } from "./schema";
+import type { Store, TaskParams, HabitParams } from "./store";
+import type {
+  Deck,
+  Task,
+  Card,
+  Note,
+  Review,
+  Completion,
+  Habit,
+  HabitLog,
+  LootCard,
+} from "./schema";
 import type { BackupData } from "../lib/backup";
 
 /** In-memory Store: powers node tests and the web preview. */
@@ -10,6 +20,8 @@ export class MemoryStore implements Store {
   private cards: Card[] = [];
   private reviews: Review[] = [];
   private completions: Completion[] = [];
+  private habits: Habit[] = [];
+  private habitLogs: HabitLog[] = [];
   private lootCards: LootCard[] = [];
 
   async init(): Promise<void> {}
@@ -138,6 +150,47 @@ export class MemoryStore implements Store {
     return this.completions.map((c) => ({ ...c }));
   }
 
+  async insertHabit(habit: Habit): Promise<void> {
+    this.habits.push({ ...habit });
+  }
+  async updateHabitParams(id: string, p: HabitParams): Promise<void> {
+    const h = this.habits.find((x) => x.id === id);
+    if (h) {
+      h.identity = p.identity;
+      h.name = p.name;
+      h.action = p.action;
+      h.prompt_note = p.prompt_note;
+    }
+  }
+  async setHabitActive(id: string, active: boolean): Promise<void> {
+    const h = this.habits.find((x) => x.id === id);
+    if (h) h.active = active;
+  }
+  async listHabits(opts: { activeOnly?: boolean } = {}): Promise<Habit[]> {
+    return this.habits
+      .filter((h) => (opts.activeOnly ? h.active : true))
+      .sort((a, b) => a.created_at - b.created_at)
+      .map((h) => ({ ...h }));
+  }
+  async getHabit(id: string): Promise<Habit | null> {
+    const h = this.habits.find((x) => x.id === id);
+    return h ? { ...h } : null;
+  }
+
+  async insertHabitLog(log: HabitLog): Promise<void> {
+    this.habitLogs.push({ ...log });
+  }
+  async listHabitLogs(habitId: string, limit?: number): Promise<HabitLog[]> {
+    const logs = this.habitLogs
+      .filter((l) => l.habit_id === habitId)
+      .sort((a, b) => b.done_at - a.done_at)
+      .map((l) => ({ ...l }));
+    return limit === undefined ? logs : logs.slice(0, limit);
+  }
+  async listHabitLogsForDay(dayKey: string): Promise<HabitLog[]> {
+    return this.habitLogs.filter((l) => l.date === dayKey).map((l) => ({ ...l }));
+  }
+
   async exportAll(): Promise<BackupData> {
     return {
       decks: this.decks.map((d) => ({ ...d })),
@@ -146,6 +199,8 @@ export class MemoryStore implements Store {
       cards: this.cards.map((c) => ({ ...c })),
       reviews: this.reviews.map((r) => ({ ...r })),
       completions: this.completions.map((c) => ({ ...c })),
+      habits: this.habits.map((h) => ({ ...h })),
+      habitLogs: this.habitLogs.map((l) => ({ ...l })),
     };
   }
   async replaceAll(data: BackupData): Promise<void> {
@@ -155,6 +210,8 @@ export class MemoryStore implements Store {
     this.cards = data.cards.map((c) => ({ ...c }));
     this.reviews = data.reviews.map((r) => ({ ...r }));
     this.completions = data.completions.map((c) => ({ ...c }));
+    this.habits = (data.habits ?? []).map((h) => ({ ...h }));
+    this.habitLogs = (data.habitLogs ?? []).map((l) => ({ ...l }));
   }
   async insertMany(decks: Deck[], cards: Card[], notes: Note[] = []): Promise<void> {
     this.decks.push(...decks.map((d) => ({ ...d })));

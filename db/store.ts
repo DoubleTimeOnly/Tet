@@ -1,4 +1,14 @@
-import type { Deck, Task, Card, Note, Review, Completion, LootCard } from "./schema";
+import type {
+  Deck,
+  Task,
+  Card,
+  Note,
+  Review,
+  Completion,
+  Habit,
+  HabitLog,
+  LootCard,
+} from "./schema";
 import type { BackupData } from "../lib/backup";
 
 /** Editable task parameters (everything a user can change after creation). */
@@ -8,6 +18,14 @@ export interface TaskParams {
   cadence: number;
   makes_cards_count: number;
   reading_target: number | null;
+}
+
+/** Editable habit fields (everything a user can change after creation). */
+export interface HabitParams {
+  identity: string;
+  name: string;
+  action: string;
+  prompt_note: boolean;
 }
 
 /**
@@ -75,6 +93,22 @@ export interface Store {
   listCompletionsForDay(dayKey: string): Promise<Completion[]>;
   /** All completions (callers bound the window, e.g. streak). */
   listCompletions(): Promise<Completion[]>;
+
+  // habits
+  insertHabit(habit: Habit): Promise<void>;
+  /** Edit a habit's user-facing fields (identity, name, action, note prompt). */
+  updateHabitParams(id: string, params: HabitParams): Promise<void>;
+  /** Soft-archive / restore — an inactive habit keeps its logs. */
+  setHabitActive(id: string, active: boolean): Promise<void>;
+  listHabits(opts?: { activeOnly?: boolean }): Promise<Habit[]>;
+  getHabit(id: string): Promise<Habit | null>;
+
+  // habit logs
+  insertHabitLog(log: HabitLog): Promise<void>;
+  /** One habit's log, newest first; `limit` bounds the detail screen. */
+  listHabitLogs(habitId: string, limit?: number): Promise<HabitLog[]>;
+  /** Every habit's logs for one local day — powers the "N today" counts. */
+  listHabitLogsForDay(dayKey: string): Promise<HabitLog[]>;
 
   // bulk (backup / anki import)
   exportAll(): Promise<BackupData>;

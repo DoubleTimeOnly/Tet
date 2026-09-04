@@ -133,6 +133,44 @@ export interface Completion {
   completed_at: number;
 }
 
+/**
+ * A behavioural habit, in the Atomic Habits sense: an `identity` you are
+ * casting a vote for, a `name` (the overarching goal), and the `action` you
+ * actually perform right now. The action is deliberately easy at the start and
+ * gets edited upward as the habit sticks — which is why it is separate from the
+ * name, and why every log row snapshots the action as it read at the time.
+ *
+ * Habits are their own tables rather than a fourth `tasks.type`: SQLite can't
+ * alter the CHECK constraint on tasks.type, and habits share none of the task
+ * scheduling fields.
+ */
+export interface Habit {
+  id: string;
+  /** Identity this habit serves, e.g. "I care about my health". */
+  identity: string;
+  /** Overarching goal, e.g. "Work out". */
+  name: string;
+  /** The concrete thing you do right now, e.g. "Walk to the gym". */
+  action: string;
+  /** Ask for a note when logging this habit. */
+  prompt_note: boolean;
+  /** Soft-archive, mirroring tasks.active — logs survive. */
+  active: boolean;
+  created_at: number;
+}
+
+/** One "I did it". Habits are unlimited per day, so each tap is its own row. */
+export interface HabitLog {
+  id: string;
+  habit_id: string;
+  /** local-day key via lib/dayKey.localDayKey — "YYYY-MM-DD". */
+  date: string;
+  /** The habit's action AS IT READ when done, so history stays truthful. */
+  action: string;
+  note: string | null;
+  done_at: number;
+}
+
 export interface LootCard {
   id: string;
   r: number;
@@ -208,6 +246,27 @@ CREATE TABLE IF NOT EXISTS completions (
   completed_at INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_completions_task_date ON completions(task_id, date);
+
+CREATE TABLE IF NOT EXISTS habits (
+  id          TEXT PRIMARY KEY NOT NULL,
+  identity    TEXT NOT NULL,
+  name        TEXT NOT NULL,
+  action      TEXT NOT NULL,
+  prompt_note INTEGER NOT NULL DEFAULT 0,
+  active      INTEGER NOT NULL DEFAULT 1,
+  created_at  INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS habit_logs (
+  id       TEXT PRIMARY KEY NOT NULL,
+  habit_id TEXT NOT NULL REFERENCES habits(id),
+  date     TEXT NOT NULL,
+  action   TEXT NOT NULL,
+  note     TEXT,
+  done_at  INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_habit_logs_habit ON habit_logs(habit_id, done_at);
+CREATE INDEX IF NOT EXISTS idx_habit_logs_date ON habit_logs(date);
 
 CREATE TABLE IF NOT EXISTS loot_cards (
   id           TEXT PRIMARY KEY NOT NULL,

@@ -12,6 +12,27 @@ function sampleData(): BackupData {
     cards: [makeCard({ id: "card-1", deck_id: "d1" })],
     reviews: [review],
     completions: [makeCompletion({ id: "comp-1", task_id: "t1" })],
+    habits: [
+      {
+        id: "h1",
+        identity: "I care about my health",
+        name: "Work out",
+        action: "Walk to the gym",
+        prompt_note: true,
+        active: true,
+        created_at: 2,
+      },
+    ],
+    habitLogs: [
+      {
+        id: "hl1",
+        habit_id: "h1",
+        date: "2026-06-19",
+        action: "Walk to the gym",
+        note: "felt easy",
+        done_at: 7,
+      },
+    ],
   };
 }
 
@@ -29,7 +50,7 @@ describe("exportAll / importAll round-trip", () => {
   });
 
   it("round-trips an empty dataset", () => {
-    const empty: BackupData = { decks: [], tasks: [], notes: [], cards: [], reviews: [], completions: [] };
+    const empty: BackupData = { decks: [], tasks: [], notes: [], cards: [], reviews: [], completions: [], habits: [], habitLogs: [] };
     expect(importAll(exportAll(empty))).toEqual(empty);
   });
 
@@ -61,6 +82,8 @@ describe("exportAll / importAll round-trip", () => {
           evidence: { type: "youtube", manual: true, minutes: 12 },
         }),
       ],
+      habits: [],
+      habitLogs: [],
     };
     const restored = importAll(exportAll(data, 1000));
     expect(restored).toEqual(data);
@@ -91,6 +114,38 @@ describe("v1 backup upgrade", () => {
     expect(JSON.parse(restored.notes[0]!.fields)).toEqual({ text: "==a== not ==b==" });
     // both cards now point at the reconstructed note, schedules untouched
     expect(restored.cards.every((c) => c.note_id === restored.notes[0]!.id)).toBe(true);
+  });
+});
+
+describe("v2 backup upgrade (pre-habits)", () => {
+  it("imports a v2 blob with empty habit tables rather than rejecting it", () => {
+    const blob = JSON.stringify({
+      version: 2,
+      exported_at: 1,
+      decks: [],
+      tasks: [],
+      notes: [],
+      cards: [],
+      reviews: [],
+      completions: [],
+    });
+    const restored = importAll(blob);
+    expect(restored.habits).toEqual([]);
+    expect(restored.habitLogs).toEqual([]);
+  });
+
+  it("still rejects a habits table that isn't an array", () => {
+    const blob = JSON.stringify({
+      version: BACKUP_VERSION,
+      decks: [],
+      tasks: [],
+      notes: [],
+      cards: [],
+      reviews: [],
+      completions: [],
+      habits: {},
+    });
+    expect(() => importAll(blob)).toThrow(/habits/);
   });
 });
 

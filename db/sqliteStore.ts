@@ -1,5 +1,5 @@
 import * as SQLite from "expo-sqlite";
-import type { Store, TaskParams } from "./store";
+import type { Store, TaskParams, HabitParams } from "./store";
 import type {
   Deck,
   Task,
@@ -8,6 +8,8 @@ import type {
   Review,
   Completion,
   CompletionEvidence,
+  Habit,
+  HabitLog,
   LootCard,
 } from "./schema";
 import { SCHEMA_SQL } from "./schema";
@@ -230,21 +232,80 @@ export class SqliteStore implements Store {
     return rows.map(rowToCompletion);
   }
 
+  async insertHabit(h: Habit): Promise<void> {
+    await this.conn.runAsync(
+      `INSERT INTO habits (id, identity, name, action, prompt_note, active, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [h.id, h.identity, h.name, h.action, h.prompt_note ? 1 : 0, h.active ? 1 : 0, h.created_at],
+    );
+  }
+  async updateHabitParams(id: string, p: HabitParams): Promise<void> {
+    await this.conn.runAsync(
+      "UPDATE habits SET identity = ?, name = ?, action = ?, prompt_note = ? WHERE id = ?",
+      [p.identity, p.name, p.action, p.prompt_note ? 1 : 0, id],
+    );
+  }
+  async setHabitActive(id: string, active: boolean): Promise<void> {
+    await this.conn.runAsync("UPDATE habits SET active = ? WHERE id = ?", [active ? 1 : 0, id]);
+  }
+  async listHabits(opts: { activeOnly?: boolean } = {}): Promise<Habit[]> {
+    const rows = await this.conn.getAllAsync<HabitRow>(
+      opts.activeOnly
+        ? "SELECT * FROM habits WHERE active = 1 ORDER BY created_at"
+        : "SELECT * FROM habits ORDER BY created_at",
+    );
+    return rows.map(rowToHabit);
+  }
+  async getHabit(id: string): Promise<Habit | null> {
+    const row = await this.conn.getFirstAsync<HabitRow>("SELECT * FROM habits WHERE id = ?", [id]);
+    return row ? rowToHabit(row) : null;
+  }
+
+  async insertHabitLog(l: HabitLog): Promise<void> {
+    await this.conn.runAsync(
+      "INSERT INTO habit_logs (id, habit_id, date, action, note, done_at) VALUES (?, ?, ?, ?, ?, ?)",
+      [l.id, l.habit_id, l.date, l.action, l.note, l.done_at],
+    );
+  }
+  async listHabitLogs(habitId: string, limit?: number): Promise<HabitLog[]> {
+    const sql =
+      "SELECT * FROM habit_logs WHERE habit_id = ? ORDER BY done_at DESC" +
+      (limit !== undefined ? " LIMIT ?" : "");
+    const args = limit !== undefined ? [habitId, limit] : [habitId];
+    return this.conn.getAllAsync<HabitLog>(sql, args);
+  }
+  async listHabitLogsForDay(dayKey: string): Promise<HabitLog[]> {
+    return this.conn.getAllAsync<HabitLog>("SELECT * FROM habit_logs WHERE date = ?", [dayKey]);
+  }
+
   async exportAll(): Promise<BackupData> {
-    const [decks, tasks, notes, cards, reviews, completions] = await Promise.all([
-      this.listDecks(),
-      this.listTasks(),
-      this.listNotes(),
-      this.listAllCards(),
-      this.conn.getAllAsync<Review>("SELECT * FROM reviews"),
-      this.listCompletions(),
-    ]);
-    return { decks, tasks, notes, cards, reviews, completions };
+    const [decks, tasks, notes, cards, reviews, completions, habits, habitLogs] =
+      await Promise.all([
+        this.listDecks(),
+        this.listTasks(),
+        this.listNotes(),
+        this.listAllCards(),
+        this.conn.getAllAsync<Review>("SELECT * FROM reviews"),
+        this.listCompletions(),
+        this.listHabits(),
+        this.conn.getAllAsync<HabitLog>("SELECT * FROM habit_logs ORDER BY done_at"),
+      ]);
+    return { decks, tasks, notes, cards, reviews, completions, habits, habitLogs };
   }
   async replaceAll(data: BackupData): Promise<void> {
     await this.conn.withTransactionAsync(async () => {
       // notes before cards (cards reference notes); reverse order on delete.
-      for (const table of ["completions", "reviews", "cards", "notes", "tasks", "decks"]) {
+      // habit_logs reference habits, so they go first too.
+      for (const table of [
+        "completions",
+        "reviews",
+        "cards",
+        "notes",
+        "tasks",
+        "decks",
+        "habit_logs",
+        "habits",
+      ]) {
         await this.conn.runAsync(`DELETE FROM ${table}`);
       }
       for (const d of data.decks) await this.insertDeck(d);
@@ -253,6 +314,8 @@ export class SqliteStore implements Store {
       await this.bulkInsertCards(data.cards);
       for (const r of data.reviews) await this.insertReview(r);
       for (const c of data.completions) await this.insertCompletion(c);
+      for (const h of data.habits ?? []) await this.insertHabit(h);
+      for (const l of data.habitLogs ?? []) await this.insertHabitLog(l);
     });
   }
   async insertLootCard(card: LootCard): Promise<void> {
@@ -317,6 +380,14 @@ interface TaskRow extends Omit<Task, "active"> {
 }
 function rowToTask(r: TaskRow): Task {
   return { ...r, active: r.active === 1 };
+}
+
+interface HabitRow extends Omit<Habit, "prompt_note" | "active"> {
+  prompt_note: number;
+  active: number;
+}
+function rowToHabit(r: HabitRow): Habit {
+  return { ...r, prompt_note: r.prompt_note === 1, active: r.active === 1 };
 }
 
 interface CompletionRow extends Omit<Completion, "verified" | "evidence"> {

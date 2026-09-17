@@ -66,11 +66,25 @@ export function filenameFromUri(uri: string): string {
   return cut === -1 ? decoded : decoded.slice(cut + 1);
 }
 
-/** Epoch ms for one of our filenames, or null for anything else in the dir. */
+/**
+ * Epoch ms for one of our filenames, or null for anything else in the dir.
+ *
+ * Both the extension and a " (1)" suffix are optional, because on Android we
+ * don't get to pick the final name: SAF's createFileAsync appends the extension
+ * itself from the mime type (and some providers don't know `application/json`,
+ * so they append nothing), and it de-duplicates a clashing name by adding a
+ * counter. Requiring an exact ".json" made every such snapshot unparseable —
+ * which silently emptied the Settings list AND kept shouldBackup true forever,
+ * so each open wrote another file that could never be listed or pruned.
+ */
+const NAME_RE = new RegExp(
+  `^${PREFIX}(\\d{4}-\\d{2}-\\d{2}T\\d{6})(?: \\(\\d+\\))?(?:\\${SUFFIX})?$`,
+);
+
 export function parseBackupTime(filename: string): number | null {
-  if (!filename.startsWith(PREFIX) || !filename.endsWith(SUFFIX)) return null;
-  const stamp = filename.slice(PREFIX.length, filename.length - SUFFIX.length);
-  const dt = DateTime.fromFormat(stamp, STAMP_FORMAT, { zone: "utc" });
+  const match = NAME_RE.exec(filename);
+  if (!match) return null;
+  const dt = DateTime.fromFormat(match[1] as string, STAMP_FORMAT, { zone: "utc" });
   return dt.isValid ? dt.toMillis() : null;
 }
 

@@ -6,7 +6,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, AppState, View } from "react-native";
 import type { Store } from "../db/store";
 import { createStore } from "../db/createStore";
 import { seedStarterDeck } from "../services/authoring";
@@ -64,6 +64,24 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       cancelled = true;
     };
   }, []);
+
+  /**
+   * Re-check the daily snapshot whenever the app comes back to the foreground.
+   *
+   * The startup call below only fires on a COLD start — a fresh JS context.
+   * Android keeps a process alive for days, so "close and reopen the app" in
+   * the normal sense (background, then back) never re-ran it, and a user who
+   * doesn't force-stop the app could go weeks between snapshots while Settings
+   * claimed it backs up "when you open it". runAutoBackup is cheap when nothing
+   * is due (one directory listing) and never throws.
+   */
+  useEffect(() => {
+    if (!store) return;
+    const sub = AppState.addEventListener("change", (next) => {
+      if (next === "active") void runAutoBackup(store, backupFiles);
+    });
+    return () => sub.remove();
+  }, [store]);
 
   const reload = useCallback(() => setVersion((v) => v + 1), []);
 

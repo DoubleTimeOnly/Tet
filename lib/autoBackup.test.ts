@@ -41,6 +41,43 @@ describe("backupFilename / parseBackupTime", () => {
     expect(parseBackupTime("tet-auto-nonsense.json")).toBeNull();
     expect(parseBackupTime("tet-auto-2026-13-45T999999.json")).toBeNull();
   });
+
+  // SAF picks the final filename itself: it appends the extension from the mime
+  // type (nothing at all, if it doesn't know application/json) and adds a
+  // counter when the name clashes. Requiring an exact ".json" made every such
+  // snapshot invisible to the Settings list AND invisible to the schedule, so
+  // each open wrote another file that could never be listed or pruned.
+  it("accepts a name the filesystem renamed", () => {
+    const expected = DateTime.fromISO("2026-09-04T18:30:00Z").toMillis();
+    expect(parseBackupTime("tet-auto-2026-09-04T183000.json")).toBe(expected);
+    expect(parseBackupTime("tet-auto-2026-09-04T183000")).toBe(expected);
+    expect(parseBackupTime("tet-auto-2026-09-04T183000 (1).json")).toBe(expected);
+    expect(parseBackupTime("tet-auto-2026-09-04T183000 (12)")).toBe(expected);
+  });
+
+  it("still rejects a near-miss rather than parsing anything", () => {
+    expect(parseBackupTime("tet-auto-2026-09-04T183000.txt")).toBeNull();
+    expect(parseBackupTime("tet-auto-2026-09-04T183000 copy.json")).toBeNull();
+    expect(parseBackupTime("tet-auto-2026-09-04T183000.json.bak")).toBeNull();
+    expect(parseBackupTime("my-tet-auto-2026-09-04T183000.json")).toBeNull();
+  });
+
+  it("sorts and schedules off a renamed name like any other", () => {
+    const names = [
+      "tet-auto-2026-09-01T120000",
+      "tet-auto-2026-09-04T120000 (1).json",
+      "tet-auto-2026-09-02T120000.json",
+    ];
+    expect(sortNewestFirst(names).map((f) => f.name)).toEqual([
+      "tet-auto-2026-09-04T120000 (1).json",
+      "tet-auto-2026-09-02T120000.json",
+      "tet-auto-2026-09-01T120000",
+    ]);
+    // An hour after the newest, nothing is due.
+    expect(shouldBackup(names, DateTime.fromISO("2026-09-04T13:00:00Z").toMillis())).toBe(
+      false,
+    );
+  });
 });
 
 describe("stripExtension (SAF createFileAsync wants no extension)", () => {

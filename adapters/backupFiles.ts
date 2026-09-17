@@ -33,7 +33,13 @@ export interface BackupFiles {
   /** Filenames (not uris) of everything in the active directory. */
   list(): Promise<string[]>;
   read(name: string): Promise<string>;
-  write(name: string, text: string): Promise<void>;
+  /**
+   * Write a snapshot and resolve with the name it actually landed under.
+   * On SAF that is not necessarily the name asked for: the provider appends the
+   * extension itself and de-duplicates clashes, so the caller must use the
+   * returned name for listing and pruning rather than assuming.
+   */
+  write(name: string, text: string): Promise<string>;
   remove(name: string): Promise<void>;
 }
 
@@ -107,10 +113,11 @@ export const backupFiles: BackupFiles = {
       // SAF appends the extension itself, from the mime type.
       const uri = await SAF.createFileAsync(tree, stripExtension(name), MIME);
       await SAF.writeAsStringAsync(uri, text);
-      return;
+      return filenameFromUri(uri);
     }
     await ensurePrivateDir();
     await FileSystem.writeAsStringAsync(`${PRIVATE_DIR}${name}`, text);
+    return name;
   },
 
   async remove(name) {

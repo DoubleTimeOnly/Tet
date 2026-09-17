@@ -19,12 +19,28 @@ import {
  */
 
 export interface AutoBackupResult {
-  /** false when skipped: too soon, or the platform has no storage. */
+  /** false when skipped: too soon, not due, or the platform has no storage. */
   wrote: boolean;
-  /** Filename written, when one was. */
+  /** The name actually written, when one was (SAF may rename — see BackupFiles). */
   name?: string;
   /** Old snapshots deleted to stay under the cap. */
   pruned: string[];
+  /**
+   * Why nothing was written, when the cause was a failure rather than the
+   * schedule. Reported rather than thrown so a broken backup can't stop the app
+   * opening — but it must reach the Settings card, because "no snapshots" and
+   * "snapshots are failing" look identical to the user otherwise.
+   */
+  error?: string;
+}
+
+export interface AutoBackupOptions {
+  /**
+   * Snapshot even if one isn't due. Used when the user has just picked a
+   * folder or asked for a backup explicitly — in both cases the interval is
+   * beside the point and they expect a file to appear now.
+   */
+  force?: boolean;
 }
 
 /**
@@ -36,14 +52,16 @@ export async function runAutoBackup(
   store: Store,
   files: BackupFiles,
   now: number = Date.now(),
+  { force = false }: AutoBackupOptions = {},
 ): Promise<AutoBackupResult> {
   if (!files.supported) return { wrote: false, pruned: [] };
   try {
     const existing = await files.list();
-    if (!shouldBackup(existing, now)) return { wrote: false, pruned: [] };
+    if (!force && !shouldBackup(existing, now)) return { wrote: false, pruned: [] };
 
-    const name = backupFilename(now);
-    await files.write(name, await exportBackup(store, now));
+    // What the file is CALLED is the adapter's to decide: SAF appends the
+    // extension and de-duplicates clashes, so prune against what came back.
+    const name = await files.write(backupFilename(now), await exportBackup(store, now));
 
     // Prune against the list INCLUDING the snapshot just written, so the cap
     // counts what's actually on disk.
@@ -53,19 +71,19 @@ export async function runAutoBackup(
     return { wrote: true, name, pruned };
   } catch (err) {
     console.warn("[autoBackup] snapshot failed:", err);
-    return { wrote: false, pruned: [] };
+    return { wrote: false, pruned: [], error: (err as Error).message };
   }
 }
 
-/** Existing snapshots, newest first, for the Settings list. */
+/**
+ * Existing snapshots, newest first, for the Settings list. Throws if the
+ * directory can't be read — an unreadable folder (a revoked SAF grant, say) is
+ * exactly what the user needs told, and swallowing it into an empty list made
+ * a broken folder indistinguishable from a new one.
+ */
 export async function listAutoBackups(files: BackupFiles): Promise<AutoBackupFile[]> {
   if (!files.supported) return [];
-  try {
-    return sortNewestFirst(await files.list());
-  } catch (err) {
-    console.warn("[autoBackup] could not list snapshots:", err);
-    return [];
-  }
+  return sortNewestFirst(await files.list());
 }
 
 /**

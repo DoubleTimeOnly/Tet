@@ -25,8 +25,8 @@ export const backupFiles: BackupFiles = {
   async read() {
     throw new Error("Automatic backups are not available on web");
   },
-  async write() {
-    /* no-op */
+  async write(name: string) {
+    return name;
   },
   async remove() {
     /* no-op */

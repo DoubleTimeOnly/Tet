@@ -9,8 +9,15 @@ import { DateTime } from "luxon";
 const LA = "America/Los_Angeles";
 const at = (iso: string) => DateTime.fromISO(iso, { zone: "utc" }).toMillis();
 
-/** In-memory stand-in for the document directory. */
-function fakeFiles(seed: Record<string, string> = {}) {
+/**
+ * In-memory stand-in for the document directory. `rename` models SAF, which
+ * picks the final filename itself (appending the extension from the mime type,
+ * de-duplicating clashes) rather than using the one it was handed.
+ */
+function fakeFiles(
+  seed: Record<string, string> = {},
+  rename: (name: string) => string = (n) => n,
+) {
   const disk = new Map(Object.entries(seed));
   const files: BackupFiles & { disk: Map<string, string> } = {
     disk,
@@ -24,7 +31,9 @@ function fakeFiles(seed: Record<string, string> = {}) {
       return text;
     },
     async write(name, text) {
-      disk.set(name, text);
+      const actual = rename(name);
+      disk.set(actual, text);
+      return actual;
     },
     async remove(name) {
       disk.delete(name);
@@ -125,10 +134,100 @@ describe("runAutoBackup", () => {
       throw new Error("disk full");
     };
 
+    // Reported, not thrown, and not swallowed: Settings needs to be able to
+    // tell "nothing due" apart from "every snapshot is failing".
     await expect(runAutoBackup(store, files, now)).resolves.toEqual({
       wrote: false,
       pruned: [],
+      error: "disk full",
     });
+  });
+
+  it("forces a snapshot even when one isn't due", async () => {
+    const store = new MemoryStore();
+    const fresh = at("2026-09-04T11:00:00"); // an hour old
+    const files = fakeFiles({ [`tet-auto-2026-09-04T110000.json`]: "{}" });
+
+    expect((await runAutoBackup(store, files, now)).wrote).toBe(false);
+
+    const forced = await runAutoBackup(store, files, now, { force: true });
+    expect(forced.wrote).toBe(true);
+    expect(files.disk.size).toBe(2);
+    expect(fresh).toBeLessThan(now);
+  });
+
+  it("reports a forced failure rather than claiming success", async () => {
+    const store = new MemoryStore();
+    const files = fakeFiles();
+    files.write = async () => {
+      throw new Error("permission denied");
+    };
+
+    const res = await runAutoBackup(store, files, now, { force: true });
+    expect(res.wrote).toBe(false);
+    expect(res.error).toBe("permission denied");
+  });
+
+  describe("when the filesystem renames the file (SAF)", () => {
+    // SAF appends the extension from the mime type and de-duplicates clashes,
+    // so the name we ask for is not necessarily the name on disk.
+    it("reports the name actually written, not the one requested", async () => {
+      const store = new MemoryStore();
+      const files = fakeFiles({}, (n) => n.replace(".json", " (1).json"));
+
+      const res = await runAutoBackup(store, files, now);
+
+      expect(res.name).toBe("tet-auto-2026-09-04T120000 (1).json");
+      expect([...files.disk.keys()]).toEqual(["tet-auto-2026-09-04T120000 (1).json"]);
+    });
+
+    it("still schedules and lists when no extension is appended", async () => {
+      const store = new MemoryStore();
+      // A provider that doesn't know application/json appends nothing.
+      const files = fakeFiles({}, (n) => n.replace(".json", ""));
+
+      const first = await runAutoBackup(store, files, now);
+      expect(first.wrote).toBe(true);
+
+      // The snapshot must be visible to the Settings list...
+      expect((await listAutoBackups(files)).map((f) => f.name)).toEqual([
+        "tet-auto-2026-09-04T120000",
+      ]);
+      // ...and must count against the schedule, or every open writes another
+      // file that can never be listed or pruned.
+      expect((await runAutoBackup(store, files, now)).wrote).toBe(false);
+      expect(files.disk.size).toBe(1);
+    });
+
+    it("prunes renamed files against the cap", async () => {
+      const store = new MemoryStore();
+      const seed: Record<string, string> = {};
+      for (let i = 0; i < MAX_AUTO_BACKUPS; i++) {
+        const day = String(i + 1).padStart(2, "0");
+        seed[`tet-auto-2026-08-${day}T120000`] = "{}";
+      }
+      const files = fakeFiles(seed, (n) => n.replace(".json", ""));
+
+      const res = await runAutoBackup(store, files, now);
+
+      expect(res.pruned).toEqual(["tet-auto-2026-08-01T120000"]);
+      expect(files.disk.size).toBe(MAX_AUTO_BACKUPS);
+    });
+  });
+});
+
+describe("listAutoBackups", () => {
+  it("surfaces an unreadable directory instead of showing an empty list", async () => {
+    const files = fakeFiles();
+    files.list = async () => {
+      throw new Error("permission revoked");
+    };
+
+    await expect(listAutoBackups(files)).rejects.toThrow("permission revoked");
+  });
+
+  it("is empty, not an error, where storage isn't available (web)", async () => {
+    await expect(listAutoBackups({ ...fakeFiles(), supported: false })).resolves.toEqual([]);
   });
 });
 

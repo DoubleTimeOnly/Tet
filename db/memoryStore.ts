@@ -9,6 +9,9 @@ import type {
   Habit,
   HabitLog,
   LootCard,
+  PromptItem,
+  PromptPractice,
+  PromptDraw,
 } from "./schema";
 import type { BackupData } from "../lib/backup";
 
@@ -23,6 +26,9 @@ export class MemoryStore implements Store {
   private habits: Habit[] = [];
   private habitLogs: HabitLog[] = [];
   private lootCards: LootCard[] = [];
+  private promptItems: PromptItem[] = [];
+  private promptPractices: PromptPractice[] = [];
+  private promptDraws: PromptDraw[] = [];
 
   async init(): Promise<void> {}
 
@@ -200,6 +206,46 @@ export class MemoryStore implements Store {
     return this.habitLogs.filter((l) => l.date === dayKey).map((l) => ({ ...l }));
   }
 
+  async insertPromptItems(items: PromptItem[]): Promise<void> {
+    this.promptItems.push(...items.map((i) => ({ ...i })));
+  }
+  async listPromptItems(kind?: string): Promise<PromptItem[]> {
+    return this.promptItems
+      .filter((i) => (kind === undefined ? true : i.kind === kind))
+      .sort((a, b) => a.created_at - b.created_at)
+      .map((i) => ({ ...i }));
+  }
+  async deletePromptItem(id: string): Promise<void> {
+    this.promptItems = this.promptItems.filter((i) => i.id !== id);
+  }
+  async insertPromptPractice(
+    practice: PromptPractice,
+    draws: PromptDraw[],
+  ): Promise<void> {
+    this.promptPractices.push({ ...practice });
+    this.promptDraws.push(...draws.map((d) => ({ ...d })));
+  }
+  async listPromptPractices(limit?: number): Promise<PromptPractice[]> {
+    const rows = this.promptPractices
+      .slice()
+      .sort((a, b) => b.started_at - a.started_at)
+      .map((p) => ({ ...p }));
+    return limit === undefined ? rows : rows.slice(0, limit);
+  }
+  async listPromptDraws(practiceId: string): Promise<PromptDraw[]> {
+    return this.promptDraws
+      .filter((d) => d.practice_id === practiceId)
+      .sort((a, b) => a.position - b.position)
+      .map((d) => ({ ...d }));
+  }
+  async listRecentPromptDraws(kind: string, limit: number): Promise<PromptDraw[]> {
+    return this.promptDraws
+      .filter((d) => d.kind === kind)
+      .sort((a, b) => b.drawn_at - a.drawn_at || b.position - a.position)
+      .slice(0, limit)
+      .map((d) => ({ ...d }));
+  }
+
   async exportAll(): Promise<BackupData> {
     return {
       decks: this.decks.map((d) => ({ ...d })),
@@ -211,6 +257,9 @@ export class MemoryStore implements Store {
       habits: this.habits.map((h) => ({ ...h })),
       habitLogs: this.habitLogs.map((l) => ({ ...l })),
       lootCards: this.lootCards.map((c) => ({ ...c })),
+      promptItems: this.promptItems.map((i) => ({ ...i })),
+      promptPractices: this.promptPractices.map((p) => ({ ...p })),
+      promptDraws: this.promptDraws.map((d) => ({ ...d })),
     };
   }
   async replaceAll(data: BackupData): Promise<void> {
@@ -224,6 +273,9 @@ export class MemoryStore implements Store {
     this.habits = (data.habits ?? []).map((h) => ({ ...h, sort_order: h.sort_order ?? 0 }));
     this.habitLogs = (data.habitLogs ?? []).map((l) => ({ ...l }));
     this.lootCards = (data.lootCards ?? []).map((c) => ({ ...c }));
+    this.promptItems = (data.promptItems ?? []).map((i) => ({ ...i }));
+    this.promptPractices = (data.promptPractices ?? []).map((p) => ({ ...p }));
+    this.promptDraws = (data.promptDraws ?? []).map((d) => ({ ...d }));
   }
   async insertMany(decks: Deck[], cards: Card[], notes: Note[] = []): Promise<void> {
     this.decks.push(...decks.map((d) => ({ ...d })));

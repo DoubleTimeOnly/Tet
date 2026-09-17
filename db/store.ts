@@ -8,6 +8,9 @@ import type {
   Habit,
   HabitLog,
   LootCard,
+  PromptItem,
+  PromptPractice,
+  PromptDraw,
 } from "./schema";
 import type { BackupData } from "../lib/backup";
 
@@ -119,6 +122,22 @@ export interface Store {
   replaceAll(data: BackupData): Promise<void>;
   /** Append decks + their notes + cards (imports) without touching the rest. */
   insertMany(decks: Deck[], cards: Card[], notes?: Note[]): Promise<void>;
+
+  // improv prompts (pools, practice runs, dealt prompts)
+  /** Append pool entries (bundled seed or a bulk paste). */
+  insertPromptItems(items: PromptItem[]): Promise<void>;
+  /** One pool's entries, or every pool when `kind` is omitted. */
+  listPromptItems(kind?: string): Promise<PromptItem[]>;
+  /** Hard-delete a pool entry — a removed word has no history worth keeping. */
+  deletePromptItem(id: string): Promise<void>;
+  /** A run and the prompts it dealt, written together so neither can orphan. */
+  insertPromptPractice(practice: PromptPractice, draws: PromptDraw[]): Promise<void>;
+  /** Practice history, newest first. */
+  listPromptPractices(limit?: number): Promise<PromptPractice[]>;
+  /** One run's prompts, in the order they were revealed. */
+  listPromptDraws(practiceId: string): Promise<PromptDraw[]>;
+  /** The last `limit` prompts of a kind, newest first (recent-repeat avoidance). */
+  listRecentPromptDraws(kind: string, limit: number): Promise<PromptDraw[]>;
 
   // loot cards (collection)
   insertLootCard(card: LootCard): Promise<void>;

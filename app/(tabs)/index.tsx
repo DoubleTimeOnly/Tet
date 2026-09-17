@@ -84,6 +84,12 @@ export default function TodayScreen() {
         <TaskRow key={item.task.id} item={item} />
       ))}
 
+      <Card>
+        <Subtitle>Improv practice 🎭</Subtitle>
+        <Muted>Random words or relationships, one at a time. No score, no schedule.</Muted>
+        <Button label="Draw prompts" kind="neutral" onPress={() => router.push("/prompts")} />
+      </Card>
+
       {allDone && !showLootbox && !pendingLoot && (
         <Card>
           <Subtitle>All clear ✅</Subtitle>

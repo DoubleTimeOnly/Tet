@@ -11,6 +11,9 @@ import type {
   Habit,
   HabitLog,
   LootCard,
+  PromptItem,
+  PromptPractice,
+  PromptDraw,
 } from "./schema";
 import { SCHEMA_SQL } from "./schema";
 import { backfillNotes } from "../lib/notesBackfill";
@@ -297,20 +300,114 @@ export class SqliteStore implements Store {
     return this.conn.getAllAsync<HabitLog>("SELECT * FROM habit_logs WHERE date = ?", [dayKey]);
   }
 
+  async insertPromptItems(items: PromptItem[]): Promise<void> {
+    if (items.length === 0) return;
+    await this.conn.withTransactionAsync(async () => {
+      for (const i of items) {
+        await this.conn.runAsync(
+          "INSERT INTO prompt_items (id, kind, text, builtin, created_at) VALUES (?, ?, ?, ?, ?)",
+          [i.id, i.kind, i.text, i.builtin ? 1 : 0, i.created_at],
+        );
+      }
+    });
+  }
+  async listPromptItems(kind?: string): Promise<PromptItem[]> {
+    const rows =
+      kind === undefined
+        ? await this.conn.getAllAsync<PromptItemRow>(
+            "SELECT * FROM prompt_items ORDER BY created_at",
+          )
+        : await this.conn.getAllAsync<PromptItemRow>(
+            "SELECT * FROM prompt_items WHERE kind = ? ORDER BY created_at",
+            [kind],
+          );
+    return rows.map(rowToPromptItem);
+  }
+  async deletePromptItem(id: string): Promise<void> {
+    await this.conn.runAsync("DELETE FROM prompt_items WHERE id = ?", [id]);
+  }
+  async insertPromptPractice(
+    practice: PromptPractice,
+    draws: PromptDraw[],
+  ): Promise<void> {
+    await this.conn.withTransactionAsync(async () => {
+      await this.conn.runAsync(
+        "INSERT INTO prompt_practices (id, kind, n, seconds, started_at) VALUES (?, ?, ?, ?, ?)",
+        [practice.id, practice.kind, practice.n, practice.seconds, practice.started_at],
+      );
+      for (const d of draws) {
+        await this.conn.runAsync(
+          "INSERT INTO prompt_draws (id, practice_id, kind, position, text, drawn_at) VALUES (?, ?, ?, ?, ?, ?)",
+          [d.id, d.practice_id, d.kind, d.position, d.text, d.drawn_at],
+        );
+      }
+    });
+  }
+  async listPromptPractices(limit?: number): Promise<PromptPractice[]> {
+    return limit === undefined
+      ? this.conn.getAllAsync<PromptPractice>(
+          "SELECT * FROM prompt_practices ORDER BY started_at DESC",
+        )
+      : this.conn.getAllAsync<PromptPractice>(
+          "SELECT * FROM prompt_practices ORDER BY started_at DESC LIMIT ?",
+          [limit],
+        );
+  }
+  async listPromptDraws(practiceId: string): Promise<PromptDraw[]> {
+    return this.conn.getAllAsync<PromptDraw>(
+      "SELECT * FROM prompt_draws WHERE practice_id = ? ORDER BY position",
+      [practiceId],
+    );
+  }
+  async listRecentPromptDraws(kind: string, limit: number): Promise<PromptDraw[]> {
+    return this.conn.getAllAsync<PromptDraw>(
+      "SELECT * FROM prompt_draws WHERE kind = ? ORDER BY drawn_at DESC, position DESC LIMIT ?",
+      [kind, limit],
+    );
+  }
+
   async exportAll(): Promise<BackupData> {
-    const [decks, tasks, notes, cards, reviews, completions, habits, habitLogs, lootCards] =
-      await Promise.all([
-        this.listDecks(),
-        this.listTasks(),
-        this.listNotes(),
-        this.listAllCards(),
-        this.conn.getAllAsync<Review>("SELECT * FROM reviews"),
-        this.listCompletions(),
-        this.listHabits(),
-        this.conn.getAllAsync<HabitLog>("SELECT * FROM habit_logs ORDER BY done_at"),
-        this.listLootCards(),
-      ]);
-    return { decks, tasks, notes, cards, reviews, completions, habits, habitLogs, lootCards };
+    const [
+      decks,
+      tasks,
+      notes,
+      cards,
+      reviews,
+      completions,
+      habits,
+      habitLogs,
+      lootCards,
+      promptItems,
+      promptPractices,
+      promptDraws,
+    ] = await Promise.all([
+      this.listDecks(),
+      this.listTasks(),
+      this.listNotes(),
+      this.listAllCards(),
+      this.conn.getAllAsync<Review>("SELECT * FROM reviews"),
+      this.listCompletions(),
+      this.listHabits(),
+      this.conn.getAllAsync<HabitLog>("SELECT * FROM habit_logs ORDER BY done_at"),
+      this.listLootCards(),
+      this.listPromptItems(),
+      this.listPromptPractices(),
+      this.conn.getAllAsync<PromptDraw>("SELECT * FROM prompt_draws ORDER BY drawn_at, position"),
+    ]);
+    return {
+      decks,
+      tasks,
+      notes,
+      cards,
+      reviews,
+      completions,
+      habits,
+      habitLogs,
+      lootCards,
+      promptItems,
+      promptPractices,
+      promptDraws,
+    };
   }
   async replaceAll(data: BackupData): Promise<void> {
     await this.conn.withTransactionAsync(async () => {
@@ -326,6 +423,10 @@ export class SqliteStore implements Store {
         "habit_logs",
         "habits",
         "loot_cards",
+        // draws reference practices, so they go first.
+        "prompt_draws",
+        "prompt_practices",
+        "prompt_items",
       ]) {
         await this.conn.runAsync(`DELETE FROM ${table}`);
       }
@@ -338,6 +439,24 @@ export class SqliteStore implements Store {
       for (const h of data.habits ?? []) await this.insertHabit(h);
       for (const l of data.habitLogs ?? []) await this.insertHabitLog(l);
       for (const c of data.lootCards ?? []) await this.insertLootCard(c);
+      for (const i of data.promptItems ?? []) {
+        await this.conn.runAsync(
+          "INSERT INTO prompt_items (id, kind, text, builtin, created_at) VALUES (?, ?, ?, ?, ?)",
+          [i.id, i.kind, i.text, i.builtin ? 1 : 0, i.created_at],
+        );
+      }
+      for (const p of data.promptPractices ?? []) {
+        await this.conn.runAsync(
+          "INSERT INTO prompt_practices (id, kind, n, seconds, started_at) VALUES (?, ?, ?, ?, ?)",
+          [p.id, p.kind, p.n, p.seconds, p.started_at],
+        );
+      }
+      for (const d of data.promptDraws ?? []) {
+        await this.conn.runAsync(
+          "INSERT INTO prompt_draws (id, practice_id, kind, position, text, drawn_at) VALUES (?, ?, ?, ?, ?, ?)",
+          [d.id, d.practice_id, d.kind, d.position, d.text, d.drawn_at],
+        );
+      }
     });
   }
   async insertLootCard(card: LootCard): Promise<void> {
@@ -416,6 +535,13 @@ function rowToHabit(r: HabitRow): Habit {
     // A row restored from a backup taken before sort_order existed has none.
     sort_order: r.sort_order ?? 0,
   };
+}
+
+interface PromptItemRow extends Omit<PromptItem, "builtin"> {
+  builtin: number;
+}
+function rowToPromptItem(r: PromptItemRow): PromptItem {
+  return { ...r, builtin: r.builtin === 1 };
 }
 
 interface CompletionRow extends Omit<Completion, "verified" | "evidence"> {

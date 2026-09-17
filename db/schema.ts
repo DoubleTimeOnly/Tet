@@ -177,6 +177,67 @@ export interface HabitLog {
   done_at: number;
 }
 
+/**
+ * Improv practice prompts. Deliberately NOT a fourth `tasks.type`: SQLite can't
+ * alter the CHECK constraint on tasks.type (same reason habits got their own
+ * tables), and a prompt shares none of the task machinery — no cadence, no FSRS,
+ * no verified completion. A prompt has no correct answer and no difficulty; it
+ * exists only to make you generate something on the spot.
+ *
+ * `kind` is a bare string with no CHECK constraint, precisely so a future kind
+ * ("emotion", "location", "first line") is a data change and never a migration.
+ */
+export type PromptItemKind = "word" | "role";
+
+/** One entry in a prompt pool: a word to riff on, or a role to pair up. */
+export interface PromptItem {
+  id: string;
+  /** Which pool this belongs to — see PromptItemKind. */
+  kind: string;
+  text: string;
+  /** Shipped in data/improv-prompts.json rather than typed in by the user. */
+  builtin: boolean;
+  created_at: number;
+}
+
+/**
+ * What a practice run draws. `words` deals single words; `relationships` pairs
+ * two distinct roles per prompt (composed at draw time, so the combinations are
+ * effectively unlimited).
+ */
+export type PracticeKind = "words" | "relationships";
+
+/** One run-through: N prompts, revealed one at a time. */
+export interface PromptPractice {
+  id: string;
+  kind: string;
+  /** How many prompts this run deals. */
+  n: number;
+  /**
+   * Auto-advance interval in whole seconds, or null for tap-to-advance. A tap
+   * always advances early, so this is a ceiling on how long you can stall.
+   */
+  seconds: number | null;
+  started_at: number;
+}
+
+/**
+ * One prompt as it was dealt. Recorded for history and so the next run can
+ * avoid what you just saw (see lib/prompts.drawWords) — never scored, never
+ * graded, and deliberately not a `completions` row: there is nothing to verify.
+ */
+export interface PromptDraw {
+  id: string;
+  practice_id: string;
+  /** Denormalized from the practice so recent-draw lookups need no join. */
+  kind: string;
+  /** 0-based position within the run. */
+  position: number;
+  /** The rendered prompt ("cactus", or "A dentist and a stowaway"). */
+  text: string;
+  drawn_at: number;
+}
+
 export interface LootCard {
   id: string;
   r: number;
@@ -274,6 +335,34 @@ CREATE TABLE IF NOT EXISTS habit_logs (
 );
 CREATE INDEX IF NOT EXISTS idx_habit_logs_habit ON habit_logs(habit_id, done_at);
 CREATE INDEX IF NOT EXISTS idx_habit_logs_date ON habit_logs(date);
+
+CREATE TABLE IF NOT EXISTS prompt_items (
+  id         TEXT PRIMARY KEY NOT NULL,
+  kind       TEXT NOT NULL,
+  text       TEXT NOT NULL,
+  builtin    INTEGER NOT NULL DEFAULT 0,
+  created_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_prompt_items_kind ON prompt_items(kind);
+
+CREATE TABLE IF NOT EXISTS prompt_practices (
+  id         TEXT PRIMARY KEY NOT NULL,
+  kind       TEXT NOT NULL,
+  n          INTEGER NOT NULL,
+  seconds    INTEGER,
+  started_at INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS prompt_draws (
+  id          TEXT PRIMARY KEY NOT NULL,
+  practice_id TEXT NOT NULL REFERENCES prompt_practices(id),
+  kind        TEXT NOT NULL,
+  position    INTEGER NOT NULL,
+  text        TEXT NOT NULL,
+  drawn_at    INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_prompt_draws_practice ON prompt_draws(practice_id, position);
+CREATE INDEX IF NOT EXISTS idx_prompt_draws_kind ON prompt_draws(kind, drawn_at);
 
 CREATE TABLE IF NOT EXISTS loot_cards (
   id           TEXT PRIMARY KEY NOT NULL,

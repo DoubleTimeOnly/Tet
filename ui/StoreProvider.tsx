@@ -11,6 +11,7 @@ import type { Store } from "../db/store";
 import { createStore } from "../db/createStore";
 import { seedStarterDeck } from "../services/authoring";
 import { seedObsidianFlashcards } from "../services/seedObsidian";
+import { seedPromptPools } from "../services/prompts";
 import { runAutoBackup } from "../services/autoBackupService";
 import { backupFiles } from "../adapters/backupFiles";
 
@@ -49,6 +50,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         await seedObsidianFlashcards(s);
         await seedStarterDeck(s);
       }
+      // Idempotent and independent of the deck seed, so an install that
+      // predates improv prompts picks up the bundled pools on next launch.
+      await seedPromptPools(s);
       if (!cancelled) setStore(s);
       // Daily safety snapshot. Deliberately not awaited: the app renders as
       // soon as the store is ready, and runAutoBackup swallows its own errors,

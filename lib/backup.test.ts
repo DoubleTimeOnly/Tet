@@ -35,6 +35,23 @@ function sampleData(): BackupData {
       },
     ],
     lootCards: [{ id: "loot-1", r: 12, g: 200, b: 87, collected_at: 9 }],
+    promptItems: [
+      { id: "pi1", kind: "word", text: "escalator", builtin: true, created_at: 3 },
+      { id: "pi2", kind: "role", text: "a dentist", builtin: false, created_at: 4 },
+    ],
+    promptPractices: [
+      { id: "pp1", kind: "words", n: 1, seconds: 7, started_at: 8 },
+    ],
+    promptDraws: [
+      {
+        id: "pd1",
+        practice_id: "pp1",
+        kind: "words",
+        position: 0,
+        text: "escalator",
+        drawn_at: 8,
+      },
+    ],
   };
 }
 
@@ -52,7 +69,7 @@ describe("exportAll / importAll round-trip", () => {
   });
 
   it("round-trips an empty dataset", () => {
-    const empty: BackupData = { decks: [], tasks: [], notes: [], cards: [], reviews: [], completions: [], habits: [], habitLogs: [], lootCards: [] };
+    const empty: BackupData = { decks: [], tasks: [], notes: [], cards: [], reviews: [], completions: [], habits: [], habitLogs: [], lootCards: [], promptItems: [], promptPractices: [], promptDraws: [] };
     expect(importAll(exportAll(empty))).toEqual(empty);
   });
 
@@ -87,6 +104,9 @@ describe("exportAll / importAll round-trip", () => {
       habits: [],
       habitLogs: [],
       lootCards: [],
+      promptItems: [],
+      promptPractices: [],
+      promptDraws: [],
     };
     const restored = importAll(exportAll(data, 1000));
     expect(restored).toEqual(data);

@@ -152,6 +152,7 @@ describe("restoreAutoBackup", () => {
     await store.replaceAll({
       decks: [], tasks: [], notes: [], cards: [], reviews: [],
       completions: [], habits: [], habitLogs: [], lootCards: [],
+      promptItems: [], promptPractices: [], promptDraws: [],
     });
     expect(await store.listHabits()).toEqual([]);
 

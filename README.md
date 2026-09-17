@@ -121,7 +121,7 @@ The thing Tet is built around — do this once to see it work end to end:
 All business logic is covered by a fast headless test suite (no device needed):
 
 ```bash
-npm test           # jest — 112 tests
+npm test           # jest — 360 tests
 npm run typecheck  # tsc, whole app
 ```
 
@@ -131,11 +131,12 @@ backup round-trip, and `.apkg` import against an in-memory store.
 ## Project layout
 
 ```
-app/            expo-router screens (Today, Review, Library, Settings, task/*)
+app/            expo-router screens (Today, Review, Library, Settings, task/*,
+                prompts/*)
 ui/             React components (StoreProvider, shared widgets, theme)
 services/       orchestration: Store + lib glue (learning, authoring, backup, notifications)
 lib/            pure, tested logic (dayKey, dailySlice, fsrs, completion, streak,
-                readwise, backup, ankiImport, notifications, youtube)
+                readwise, backup, ankiImport, notifications, youtube, prompts)
 db/             schema + Store interface; SqliteStore (native) / MemoryStore (web & tests)
 adapters/       device plumbing (secure-store token, .apkg reader)
 ```
@@ -143,6 +144,23 @@ adapters/       device plumbing (secure-store token, .apkg reader)
 Persistence is behind a `Store` interface: `SqliteStore` on device, `MemoryStore` on
 web and in tests — which is why the web preview and the test suite run without native
 SQLite.
+
+## Improv practice
+
+Separate from the flashcard system: **Today → Draw prompts**. It deals N random
+prompts one at a time — either a single **word**, or a **relationship** composed
+from two randomly paired roles ("A dentist and a stowaway") — to practise
+generating ideas on the spot.
+
+There is no schedule, no difficulty and no correct answer, so nothing here is
+graded, scored, or counted toward XP or the streak. A prompt advances on a tap,
+or on an optional auto-advance timer you can set to any interval (7s, 15s, 30s,
+or type your own) when you want the pressure of not being able to stall.
+
+Both lists ship with a curated default pool (`data/improv-prompts.json`) and can
+be extended by pasting your own, one per line, the same way the flashcard text
+import works. Draws are logged, so consecutive runs avoid repeating what you
+just saw, and the pools + history are carried in the backup.
 
 ## Other features
 

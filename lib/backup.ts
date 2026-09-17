@@ -8,6 +8,9 @@ import type {
   Habit,
   HabitLog,
   LootCard,
+  PromptItem,
+  PromptPractice,
+  PromptDraw,
 } from "../db/schema";
 import { backfillNotes } from "./notesBackfill";
 
@@ -30,8 +33,10 @@ import { backfillNotes } from "./notesBackfill";
 // upgraded on import by reconstructing notes from card content (backfillNotes).
 // v3 adds habits + their logs, and loot cards — which no earlier version
 // carried at all, so a Collection could never survive a move to a new device.
+// v4 adds improv prompt pools + practice history, so a curated word list isn't
+// lost on reinstall (the whole point of having curated it).
 // Older backups simply restore with none of these.
-export const BACKUP_VERSION = 3;
+export const BACKUP_VERSION = 4;
 
 export interface BackupData {
   decks: Deck[];
@@ -43,6 +48,9 @@ export interface BackupData {
   habits: Habit[];
   habitLogs: HabitLog[];
   lootCards: LootCard[];
+  promptItems: PromptItem[];
+  promptPractices: PromptPractice[];
+  promptDraws: PromptDraw[];
 }
 
 export interface Backup extends BackupData {
@@ -74,6 +82,9 @@ export function exportAll(
     habits: data.habits,
     habitLogs: data.habitLogs,
     lootCards: data.lootCards,
+    promptItems: data.promptItems,
+    promptPractices: data.promptPractices,
+    promptDraws: data.promptDraws,
   };
   return JSON.stringify(backup);
 }
@@ -106,7 +117,7 @@ export function importAll(json: string): BackupData {
   }
   const obj = parsed as Record<string, unknown>;
 
-  const SUPPORTED = [1, 2, BACKUP_VERSION];
+  const SUPPORTED = [1, 2, 3, BACKUP_VERSION];
   if (!SUPPORTED.includes(obj.version as number)) {
     throw new BackupImportError(
       `Unsupported backup version ${String(obj.version)} (expected ${SUPPORTED.join(", ")})`,
@@ -134,6 +145,9 @@ export function importAll(json: string): BackupData {
       habits: [],
       habitLogs: [],
       lootCards: [],
+      promptItems: [],
+      promptPractices: [],
+      promptDraws: [],
     };
   }
 
@@ -150,6 +164,9 @@ export function importAll(json: string): BackupData {
     habits: optionalTable<Habit>(obj, "habits"),
     habitLogs: optionalTable<HabitLog>(obj, "habitLogs"),
     lootCards: optionalTable<LootCard>(obj, "lootCards"),
+    promptItems: optionalTable<PromptItem>(obj, "promptItems"),
+    promptPractices: optionalTable<PromptPractice>(obj, "promptPractices"),
+    promptDraws: optionalTable<PromptDraw>(obj, "promptDraws"),
   };
 }
 

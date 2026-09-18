@@ -20,8 +20,16 @@ import type { Card, Review, Rating, CardState } from "../db/schema";
 
 let scheduler: FSRS | null = null;
 function getScheduler(): FSRS {
-  // Default FSRS-6 parameters; deterministic (fuzz left at its default off).
-  if (!scheduler) scheduler = fsrs();
+  // Default FSRS-6 parameters, with fuzz on: FSRS' own symmetric jitter nudges
+  // each review interval by a few percent so cards authored together stop
+  // travelling as a convoy. Without it scheduling is fully deterministic, and a
+  // batch of cards made in one sitting and graded the same way lands on exactly
+  // the same dates forever — which trains recall of a card's neighbours rather
+  // than its content. Fuzz only touches review-state intervals of >=2.5 days
+  // (learning steps stay exact) and is seeded from the review timestamp plus the
+  // card's own state, so it is reproducible for a given card+moment but
+  // independent between cards graded milliseconds apart.
+  if (!scheduler) scheduler = fsrs({ enable_fuzz: true });
   return scheduler;
 }
 

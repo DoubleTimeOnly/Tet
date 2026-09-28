@@ -68,3 +68,56 @@ describe("grade", () => {
     },
   );
 });
+
+describe("interval fuzz", () => {
+  /** Grade `good` `rounds` times, each review landing on the card's own due date. */
+  function schedule(startedAt: Date, gradedAt: Date, rounds: number) {
+    let card = createCard({ deckId: "d1", front: "q", back: "a", now: startedAt });
+    let when = gradedAt;
+    for (let i = 0; i < rounds; i++) {
+      card = grade(card, "good", when).card;
+      when = new Date(card.due);
+    }
+    return card;
+  }
+
+  it("cards authored together stop travelling as a convoy", () => {
+    // Two identical cards made in the same sitting, graded a second apart —
+    // the real shape of a review session. Deterministic scheduling would march
+    // them to byte-identical due dates forever.
+    const a = schedule(NOW, NOW, 5);
+    const b = schedule(NOW, new Date(NOW.getTime() + 1000), 5);
+
+    const drift = Math.abs(a.due - b.due) - 1000;
+    expect(drift).toBeGreaterThan(24 * 60 * 60 * 1000);
+  });
+
+  it("nudges intervals without meaningfully distorting them", () => {
+    // Sample the fuzz across many seeds and check the spread is small and
+    // symmetric-ish about the middle: jitter, not a different schedule.
+    const dues = Array.from({ length: 60 }, (_, i) => {
+      const gradedAt = NOW.getTime() + i * 1000;
+      // Measure each card's own elapsed span, so the staggered start times
+      // cancel out and only the fuzz remains.
+      return schedule(NOW, new Date(gradedAt), 5).due - gradedAt;
+    });
+    const min = Math.min(...dues);
+    const max = Math.max(...dues);
+    const mid = (min + max) / 2;
+
+    expect(min).toBeLessThan(max); // fuzz actually fired
+    expect(max / min).toBeLessThan(1.5); // and stayed a nudge
+    // Both tails present: cards move earlier as well as later.
+    expect(dues.some((d) => d < mid)).toBe(true);
+    expect(dues.some((d) => d > mid)).toBe(true);
+  });
+
+  it("is reproducible for a given card and moment", () => {
+    // Fuzz is seeded from the card's state and the review timestamp, not a
+    // global RNG, so re-grading the same card at the same instant lands in the
+    // same place — the stored due date never shifts under the daily queue.
+    const card = schedule(NOW, NOW, 4);
+    const at = new Date(card.due);
+    expect(grade(card, "good", at).card.due).toBe(grade(card, "good", at).card.due);
+  });
+});

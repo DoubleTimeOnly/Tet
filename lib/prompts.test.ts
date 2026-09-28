@@ -1,4 +1,5 @@
 import {
+  improvDoneSince,
   drawRelationships,
   drawWords,
   formatRelationship,
@@ -204,5 +205,32 @@ describe("kind mapping", () => {
   it("needs two roles for a relationship, one word for a word", () => {
     expect(minPoolSize("words")).toBe(1);
     expect(minPoolSize("relationships")).toBe(2);
+  });
+});
+
+describe("improvDoneSince", () => {
+  const since = 1000;
+
+  it("reports neither kind with no runs today", () => {
+    expect(improvDoneSince([{ kind: "words", started_at: 999 }], since)).toEqual({
+      words: false,
+      relationships: false,
+    });
+  });
+
+  it("reports each kind independently", () => {
+    expect(improvDoneSince([{ kind: "words", started_at: 1000 }], since)).toEqual({
+      words: true,
+      relationships: false,
+    });
+    expect(
+      improvDoneSince(
+        [
+          { kind: "relationships", started_at: 1500 },
+          { kind: "words", started_at: 2000 },
+        ],
+        since,
+      ),
+    ).toEqual({ words: true, relationships: true });
   });
 });

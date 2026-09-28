@@ -28,3 +28,36 @@ export function isAtEdge(index: number, count: number, delta: number): boolean {
   const target = index + delta;
   return target < 0 || target >= count;
 }
+
+/**
+ * Stable split for display: not-done-today first, then done, each group keeping
+ * its manual order. Surfaces what's still left without losing the user's
+ * ranking inside either group.
+ */
+export function partitionByDone<T>(items: readonly T[], isDone: (item: T) => boolean): T[] {
+  return [...items.filter((i) => !isDone(i)), ...items.filter(isDone)];
+}
+
+/**
+ * Move `id` one place within `group` (a subsequence of `order`, as shown on
+ * screen), returning the new full order. It lands just past its on-screen
+ * neighbour, so an arrow press always changes what you see even when entries
+ * from the other group sit between them in the full order. Unchanged (same
+ * reference) at the edge of the group or for an unknown id.
+ */
+export function moveWithinGroup<T>(
+  order: T[],
+  group: readonly T[],
+  id: T,
+  delta: -1 | 1,
+): T[] {
+  const gi = group.indexOf(id);
+  const from = order.indexOf(id);
+  if (gi === -1 || from === -1 || isAtEdge(gi, group.length, delta)) return order;
+  const to = order.indexOf(group[gi + delta] as T);
+  if (to === -1) return order;
+  const next = [...order];
+  next.splice(from, 1);
+  next.splice(to, 0, id);
+  return next;
+}

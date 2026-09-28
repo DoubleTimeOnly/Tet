@@ -2,7 +2,7 @@ import type { Store, HabitParams } from "../db/store";
 import type { Habit, HabitLog } from "../db/schema";
 import { newId } from "../lib/id";
 import { localDayKey } from "../lib/dayKey";
-import { moveItem } from "../lib/habitOrder";
+import { moveItem, moveWithinGroup } from "../lib/habitOrder";
 
 /**
  * Habit orchestration — the screens call these and stay dumb, mirroring
@@ -88,14 +88,21 @@ export async function moveHabit(
   store: Store,
   id: string,
   delta: -1 | 1,
+  /**
+   * Ids of the group the habit is shown in (e.g. not-done-today), in display
+   * order. When given, the habit steps past its on-screen neighbour rather than
+   * its neighbour in the full list.
+   */
+  within?: string[],
 ): Promise<void> {
   const active = await store.listHabits({ activeOnly: true });
-  const index = active.findIndex((h) => h.id === id);
-  if (index === -1) return;
+  const ids = active.map((h) => h.id);
 
-  const reordered = moveItem(active, index, delta);
-  if (reordered === active) return; // already at the edge
-  await store.reorderHabits(reordered.map((h) => h.id));
+  const reordered = within
+    ? moveWithinGroup(ids, within, id, delta)
+    : moveItem(ids, ids.indexOf(id), delta);
+  if (reordered === ids) return; // already at the edge
+  await store.reorderHabits(reordered);
 }
 
 /**

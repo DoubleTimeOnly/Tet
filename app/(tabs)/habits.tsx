@@ -4,9 +4,10 @@ import { useFocusEffect, useRouter } from "expo-router";
 import { useStore } from "../../ui/StoreProvider";
 import { createHabit, logHabit, moveHabit } from "../../services/habits";
 import { localDayKey } from "../../lib/dayKey";
-import { isAtEdge } from "../../lib/habitOrder";
+import { isAtEdge, partitionByDone } from "../../lib/habitOrder";
 import { Screen, Card, Title, Subtitle, Muted, Button } from "../../ui/components";
 import { colors, radius, space } from "../../ui/theme";
+import { FitnessRings, RING_COLORS } from "../../ui/FitnessRings";
 import type { Habit, HabitLog } from "../../db/schema";
 
 export default function HabitsScreen() {
@@ -33,8 +34,16 @@ export default function HabitsScreen() {
 
   useFocusEffect(load);
 
-  const move = async (id: string, delta: -1 | 1) => {
-    await moveHabit(store, id, delta);
+  const countFor = (id: string) => todayLogs.filter((l) => l.habit_id === id).length;
+  const isDone = (h: Habit) => countFor(h.id) > 0;
+  // Still-to-do habits float to the top; each group keeps its manual order.
+  const shown = partitionByDone(habits, isDone);
+  const doneCount = habits.filter(isDone).length;
+
+  const move = async (habit: Habit, delta: -1 | 1) => {
+    // Arrows step within the habit's own group, matching what's on screen.
+    const group = shown.filter((h) => isDone(h) === isDone(habit)).map((h) => h.id);
+    await moveHabit(store, habit.id, delta, group);
     reload();
   };
 
@@ -61,6 +70,30 @@ export default function HabitsScreen() {
         />
       )}
 
+      {habits.length > 0 && (
+        <Card>
+          <View style={styles.ringRow}>
+            <FitnessRings
+              rings={[
+                {
+                  color: RING_COLORS.habits!,
+                  totalSegments: habits.length,
+                  filledSegments: doneCount,
+                },
+              ]}
+              size={96}
+              strokeWidth={14}
+            />
+            <View style={styles.titleBlock}>
+              <Subtitle>
+                {doneCount === habits.length ? "All habits done 🎉" : `${doneCount} of ${habits.length} done`}
+              </Subtitle>
+              <Muted>today</Muted>
+            </View>
+          </View>
+        </Card>
+      )}
+
       {habits.length === 0 && !adding && (
         <Card>
           <Subtitle>No habits yet</Subtitle>
@@ -71,17 +104,21 @@ export default function HabitsScreen() {
         </Card>
       )}
 
-      {habits.map((h, i) => (
-        <HabitCard
-          key={h.id}
-          habit={h}
-          doneToday={todayLogs.filter((l) => l.habit_id === h.id).length}
-          canMoveUp={!isAtEdge(i, habits.length, -1)}
-          canMoveDown={!isAtEdge(i, habits.length, 1)}
-          onMove={(delta) => move(h.id, delta)}
-          onLogged={reload}
-        />
-      ))}
+      {shown.map((h) => {
+        const group = shown.filter((g) => isDone(g) === isDone(h));
+        const gi = group.indexOf(h);
+        return (
+          <HabitCard
+            key={h.id}
+            habit={h}
+            doneToday={countFor(h.id)}
+            canMoveUp={!isAtEdge(gi, group.length, -1)}
+            canMoveDown={!isAtEdge(gi, group.length, 1)}
+            onMove={(delta) => move(h, delta)}
+            onLogged={reload}
+          />
+        );
+      })}
     </Screen>
   );
 }
@@ -272,6 +309,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     gap: space.sm,
   },
+  ringRow: { flexDirection: "row", alignItems: "center", gap: space.md },
   topRow: { flexDirection: "row", alignItems: "center", gap: space.sm },
   handles: { gap: space.xs },
   titleBlock: { flex: 1, gap: space.xs },

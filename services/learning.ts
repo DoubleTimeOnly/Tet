@@ -11,6 +11,7 @@ import { startOfTetDay, localDayKey } from "../lib/dayKey";
 import { grade } from "../lib/fsrs";
 import { recordCompletion } from "../lib/completion";
 import { totalXp, levelForXp, type LevelProgress } from "../lib/xp";
+import { improvDoneSince, type ImprovDone } from "../lib/prompts";
 
 /**
  * Orchestration: Store reads/writes + pure lib logic. Screens call these and
@@ -38,6 +39,8 @@ export interface TodayView {
   xp: LevelProgress;
   /** True when there is at least one active task (distinguishes "all done" from "nothing set up"). */
   hasActiveTasks: boolean;
+  /** Which improv kinds have been practised today (Today ring + loot gate). */
+  improv: ImprovDone;
 }
 
 export async function getTodayView(
@@ -48,13 +51,14 @@ export async function getTodayView(
   // Credit any flashcard task whose goal is already met (e.g. zero cards due)
   // before reading completions, so it auto-completes without needing a grade.
   await creditFlashcardTasks(store, now, tz);
-  const [tasks, dueCards, allCompletions, reviews, reviewedDeckIds] =
+  const [tasks, dueCards, allCompletions, reviews, reviewedDeckIds, practices] =
     await Promise.all([
       store.listTasks({ activeOnly: true }),
       store.listDueCards(now),
       store.listCompletions(),
       store.countReviews(),
       reviewedDeckIdsToday(store, now, tz),
+      store.listPromptPractices(),
     ]);
   // computeToday derives the dayKey itself and filters completions to today.
   const slice = computeToday({
@@ -84,7 +88,17 @@ export async function getTodayView(
     return { task, filledSegments: todayDoneIds.has(task.id) ? 1 : 0, totalSegments: 1 };
   });
 
-  return { slice, allTaskProgress, streak, maxStreak, xp, hasActiveTasks: tasks.length > 0 };
+  const improv = improvDoneSince(practices, startOfTetDay(now, tz));
+
+  return {
+    slice,
+    allTaskProgress,
+    streak,
+    maxStreak,
+    xp,
+    hasActiveTasks: tasks.length > 0,
+    improv,
+  };
 }
 
 /**

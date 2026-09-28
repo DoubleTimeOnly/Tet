@@ -1,6 +1,7 @@
 import { MemoryStore } from "../db/memoryStore";
 import { getTodayView, gradeCard, completeTask, getFlashcardQueue } from "./learning";
 import { seedStarterDeck, createTask, addCard, createDeck, addCardFromTask, findOrCreateDeck, updateTask } from "./authoring";
+import { startPractice } from "./prompts";
 import { exportBackup, restoreBackup, importAnki } from "./backupService";
 import { DateTime } from "luxon";
 import type { AnkiNoteReader } from "../lib/ankiImport";
@@ -27,6 +28,41 @@ describe("getTodayView (against MemoryStore)", () => {
     const view = await getTodayView(store, now, LA);
     expect(view.slice.tasks.map((t) => t.task.title)).toEqual(["Review flashcards"]);
     expect(flashcardItem(view)?.flashcards?.queue.length).toBe(3); // fresh cards due
+  });
+});
+
+describe("getTodayView improv progress", () => {
+  it("counts each kind once a run of it is dealt today, and resets tomorrow", async () => {
+    const store = new MemoryStore();
+    await store.insertPromptItems(
+      ["cat", "dog", "owl"].flatMap((text, i) => [
+        { id: `w${i}`, kind: "word", text, builtin: true, created_at: i },
+        { id: `r${i}`, kind: "role", text, builtin: true, created_at: i },
+      ]),
+    );
+    const now = day("2026-06-15T12:00");
+    expect((await getTodayView(store, now, LA)).improv).toEqual({
+      words: false,
+      relationships: false,
+    });
+
+    await startPractice(store, { kind: "words", n: 1, seconds: null }, now);
+    expect((await getTodayView(store, now, LA)).improv).toEqual({
+      words: true,
+      relationships: false,
+    });
+
+    await startPractice(store, { kind: "relationships", n: 1, seconds: null }, now);
+    expect((await getTodayView(store, now, LA)).improv).toEqual({
+      words: true,
+      relationships: true,
+    });
+
+    const tomorrow = day("2026-06-16T12:00");
+    expect((await getTodayView(store, tomorrow, LA)).improv).toEqual({
+      words: false,
+      relationships: false,
+    });
   });
 });
 

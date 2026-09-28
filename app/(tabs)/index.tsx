@@ -38,9 +38,11 @@ export default function TodayScreen() {
 
   if (!view) return null;
 
-  const { slice, streak, maxStreak, xp, hasActiveTasks } = view;
+  const { slice, streak, maxStreak, xp, hasActiveTasks, improv } = view;
   const allDone = hasActiveTasks && slice.tasks.length === 0;
-  const showLootbox = allDone && !lootTakenToday;
+  const improvDone = improv.words && improv.relationships;
+  // The daily card needs both the tasks and one run of each improv kind.
+  const showLootbox = allDone && improvDone && !lootTakenToday;
 
   const openCard = () => setPendingLoot(randomRgb());
 
@@ -63,6 +65,11 @@ export default function TodayScreen() {
     totalSegments: item.totalSegments,
     filledSegments: item.filledSegments,
   }));
+  ringConfigs.push({
+    color: RING_COLORS.improv!,
+    totalSegments: 2,
+    filledSegments: Number(improv.words) + Number(improv.relationships),
+  });
 
   return (
     <Screen>
@@ -86,11 +93,21 @@ export default function TodayScreen() {
 
       <Card>
         <Subtitle>Improv practice 🎭</Subtitle>
-        <Muted>Random words or relationships, one at a time. No score, no schedule.</Muted>
+        <Muted>Random words or relationships, one at a time. Do one run of each to unlock today&apos;s card.</Muted>
+        <Muted>
+          {`${improv.words ? "✅" : "⬜"} Words   ${improv.relationships ? "✅" : "⬜"} Relationships`}
+        </Muted>
         <Button label="Draw prompts" kind="neutral" onPress={() => router.push("/prompts")} />
       </Card>
 
-      {allDone && !showLootbox && !pendingLoot && (
+      {allDone && !improvDone && !lootTakenToday && (
+        <Card>
+          <Subtitle>Almost there 🎭</Subtitle>
+          <Body>Tasks done. Finish a words run and a relationships run to open today&apos;s card.</Body>
+        </Card>
+      )}
+
+      {allDone && improvDone && !showLootbox && !pendingLoot && (
         <Card>
           <Subtitle>All clear ✅</Subtitle>
           <Body>All tasks done for today.</Body>
@@ -117,7 +134,7 @@ export default function TodayScreen() {
       {showLootbox && !pendingLoot && (
         <Card>
           <Subtitle>Daily reward 🎁</Subtitle>
-          <Body>You finished everything today. Open your card!</Body>
+          <Body>You finished everything today, improv included. Open your card!</Body>
           <Button label="Open Card" onPress={openCard} />
         </Card>
       )}

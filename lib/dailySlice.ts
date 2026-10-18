@@ -1,6 +1,7 @@
 import { localDayKey, type Instant } from "./dayKey";
 import { burySiblings } from "./siblings";
-import type { Task, Card, Completion } from "../db/schema";
+import { excerptSlice, type ExcerptSlice } from "./excerpts";
+import type { Task, Card, Completion, Excerpt, ExcerptReview } from "../db/schema";
 
 /**
  * computeToday — the day's to-do list: each active task that isn't yet done.
@@ -12,6 +13,9 @@ import type { Task, Card, Completion } from "../db/schema";
  * count is remembered across leaving and re-entering review, and the task drops
  * out of the slice once its goal is met — even if more cards are technically due
  * (the surplus rolls to later days, standard SRS carry-over).
+ *
+ * Excerpt tasks work the same way over the excerpt queue (lib/excerpts), with
+ * progress derived from persisted triage decisions.
  *
  * Fixed-cadence tasks (youtube/reading) don't roll over: a task verified today
  * simply drops out of the slice (post-completion shrink).
@@ -33,6 +37,12 @@ export interface DailySliceInput {
    * (source_ref null) counts the full list.
    */
   reviewedDeckIds?: string[];
+  /**
+   * Every excerpt plus today's decisions on them, for excerpt tasks. Absent ->
+   * an excerpt task sees an empty queue (and so auto-completes, like a
+   * flashcard task with nothing due).
+   */
+  excerpts?: { excerpts: Excerpt[]; reviewsToday: ExcerptReview[] };
 }
 
 /** Deck-scoped daily review state for a flashcard task. */
@@ -59,6 +69,8 @@ export interface TaskSliceItem {
   count: number;
   /** Present for flashcard tasks: the deck-scoped review state. */
   flashcards?: FlashcardSlice;
+  /** Present for excerpt tasks: today's excerpt queue + progress. */
+  excerpts?: ExcerptSlice;
 }
 
 export interface DailySlice {
@@ -134,6 +146,16 @@ export function computeToday(input: DailySliceInput): DailySlice {
       // Goal met -> drop for the day (its surplus rolls over via FSRS).
       if (fc.done) continue;
       items.push({ task, count: fc.remaining, flashcards: fc });
+    } else if (task.type === "excerpt") {
+      const ex = excerptSlice(
+        task,
+        input.excerpts?.excerpts ?? [],
+        input.excerpts?.reviewsToday ?? [],
+        now,
+      );
+      // Same rule as flashcards: goal met -> off the list for today.
+      if (ex.done) continue;
+      items.push({ task, count: ex.remaining, excerpts: ex });
     } else {
       if (doneToday.has(task.id)) continue;
       items.push({ task, count: task.cadence });

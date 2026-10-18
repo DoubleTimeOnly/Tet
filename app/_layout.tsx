@@ -25,6 +25,8 @@ export default function RootLayout() {
           <Stack.Screen name="prompts/pool" options={{ title: "Prompt list" }} />
           <Stack.Screen name="task/youtube" options={{ title: "Watch" }} />
           <Stack.Screen name="task/reading" options={{ title: "Read" }} />
+          <Stack.Screen name="excerpts/review" options={{ title: "Excerpts" }} />
+          <Stack.Screen name="excerpts/pile" options={{ title: "Set aside" }} />
         </Stack>
       </StoreProvider>
     </SafeAreaProvider>

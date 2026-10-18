@@ -14,8 +14,11 @@ import type {
   PromptItem,
   PromptPractice,
   PromptDraw,
+  Excerpt,
+  ExcerptReview,
+  CardExcerpt,
 } from "./schema";
-import { SCHEMA_SQL } from "./schema";
+import { SCHEMA_SQL, tasksTableSql } from "./schema";
 import { backfillNotes } from "../lib/notesBackfill";
 import type { BackupData } from "../lib/backup";
 
@@ -66,6 +69,40 @@ export class SqliteStore implements Store {
       await this.conn.execAsync("ALTER TABLE cards ADD COLUMN note_id TEXT");
       await this.conn.execAsync("ALTER TABLE cards ADD COLUMN template INTEGER NOT NULL DEFAULT 0");
       await this.backfillNotes();
+    }
+    // The excerpt task type. tasks.type has a CHECK constraint SQLite can't
+    // ALTER, so a DB created before 'excerpt' existed has its tasks table
+    // rebuilt (the create-copy-drop-rename procedure from the SQLite docs).
+    const tasksDdl = await this.conn.getFirstAsync<{ sql: string }>(
+      "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'tasks'",
+    );
+    if (tasksDdl && !tasksDdl.sql.includes("'excerpt'")) {
+      await this.rebuildTasksTable();
+    }
+  }
+
+  /**
+   * Recreate `tasks` under the current DDL, keeping every row. Foreign keys
+   * must be off for the swap (completions/cards/notes reference tasks, and
+   * DROP TABLE would otherwise cascade-check them); the pragma is a no-op
+   * inside a transaction, so it brackets the transaction rather than living in
+   * it. References resolve by table name, so they point at the new table once
+   * it is renamed into place.
+   */
+  private async rebuildTasksTable(): Promise<void> {
+    const cols =
+      "id, type, title, source_ref, cadence, makes_cards_count, reading_target, active, created_at, meta";
+    await this.conn.execAsync("PRAGMA foreign_keys = OFF;");
+    try {
+      await this.conn.withTransactionAsync(async () => {
+        await this.conn.execAsync("DROP TABLE IF EXISTS tasks_new;");
+        await this.conn.execAsync(tasksTableSql("tasks_new"));
+        await this.conn.execAsync(`INSERT INTO tasks_new (${cols}) SELECT ${cols} FROM tasks;`);
+        await this.conn.execAsync("DROP TABLE tasks;");
+        await this.conn.execAsync("ALTER TABLE tasks_new RENAME TO tasks;");
+      });
+    } finally {
+      await this.conn.execAsync("PRAGMA foreign_keys = ON;");
     }
   }
 
@@ -166,6 +203,7 @@ export class SqliteStore implements Store {
     );
   }
   async deleteCard(id: string): Promise<void> {
+    await this.conn.runAsync("DELETE FROM card_excerpts WHERE card_id = ?", [id]);
     await this.conn.runAsync("DELETE FROM cards WHERE id = ?", [id]);
   }
   async setCardIgnored(id: string, ignored: boolean): Promise<void> {
@@ -380,6 +418,9 @@ export class SqliteStore implements Store {
       promptItems,
       promptPractices,
       promptDraws,
+      excerpts,
+      excerptReviews,
+      cardExcerpts,
     ] = await Promise.all([
       this.listDecks(),
       this.listTasks(),
@@ -393,6 +434,9 @@ export class SqliteStore implements Store {
       this.listPromptItems(),
       this.listPromptPractices(),
       this.conn.getAllAsync<PromptDraw>("SELECT * FROM prompt_draws ORDER BY drawn_at, position"),
+      this.listExcerpts(),
+      this.listExcerptReviewsSince(0),
+      this.listCardExcerpts(),
     ]);
     return {
       decks,
@@ -407,6 +451,9 @@ export class SqliteStore implements Store {
       promptItems,
       promptPractices,
       promptDraws,
+      excerpts,
+      excerptReviews,
+      cardExcerpts,
     };
   }
   async replaceAll(data: BackupData): Promise<void> {
@@ -414,6 +461,10 @@ export class SqliteStore implements Store {
       // notes before cards (cards reference notes); reverse order on delete.
       // habit_logs reference habits, so they go first too.
       for (const table of [
+        // links + triage history reference cards and excerpts, so they go first.
+        "card_excerpts",
+        "excerpt_reviews",
+        "excerpts",
         "completions",
         "reviews",
         "cards",
@@ -457,6 +508,9 @@ export class SqliteStore implements Store {
           [d.id, d.practice_id, d.kind, d.position, d.text, d.drawn_at],
         );
       }
+      await this.writeExcerpts(data.excerpts ?? []);
+      await this.writeExcerptReviews(data.excerptReviews ?? []);
+      await this.writeCardExcerpts(data.cardExcerpts ?? []);
     });
   }
   async insertLootCard(card: LootCard): Promise<void> {
@@ -467,6 +521,99 @@ export class SqliteStore implements Store {
   }
   async listLootCards(): Promise<LootCard[]> {
     return this.conn.getAllAsync<LootCard>("SELECT * FROM loot_cards ORDER BY collected_at");
+  }
+
+  async insertExcerpts(excerpts: Excerpt[]): Promise<void> {
+    if (excerpts.length === 0) return;
+    await this.conn.withTransactionAsync(() => this.writeExcerpts(excerpts));
+  }
+  async updateExcerpts(excerpts: Excerpt[]): Promise<void> {
+    if (excerpts.length === 0) return;
+    await this.conn.withTransactionAsync(async () => {
+      for (const e of excerpts) {
+        await this.conn.runAsync(
+          `UPDATE excerpts SET text = ?, note = ?, book_title = ?, book_author = ?, url = ?,
+             highlighted_at = ?, source_updated_at = ?, source_deleted = ?, backlog = ?,
+             status = ?, due = ?, pass_count = ?, resolved_at = ?
+           WHERE id = ?`,
+          [
+            e.text, e.note, e.book_title, e.book_author, e.url, e.highlighted_at,
+            e.source_updated_at, e.source_deleted ? 1 : 0, e.backlog ? 1 : 0, e.status,
+            e.due, e.pass_count, e.resolved_at, e.id,
+          ],
+        );
+      }
+    });
+  }
+  async getExcerpt(id: string): Promise<Excerpt | null> {
+    const row = await this.conn.getFirstAsync<ExcerptRow>("SELECT * FROM excerpts WHERE id = ?", [id]);
+    return row ? rowToExcerpt(row) : null;
+  }
+  async listExcerpts(): Promise<Excerpt[]> {
+    const rows = await this.conn.getAllAsync<ExcerptRow>("SELECT * FROM excerpts ORDER BY created_at");
+    return rows.map(rowToExcerpt);
+  }
+  async insertExcerptReviews(reviews: ExcerptReview[]): Promise<void> {
+    if (reviews.length === 0) return;
+    await this.conn.withTransactionAsync(() => this.writeExcerptReviews(reviews));
+  }
+  async deleteExcerptReview(id: string): Promise<void> {
+    await this.conn.runAsync("DELETE FROM excerpt_reviews WHERE id = ?", [id]);
+  }
+  async listExcerptReviewsSince(sinceMs: number): Promise<ExcerptReview[]> {
+    return this.conn.getAllAsync<ExcerptReview>(
+      "SELECT * FROM excerpt_reviews WHERE reviewed_at >= ? ORDER BY reviewed_at",
+      [sinceMs],
+    );
+  }
+  async insertCardExcerpts(links: CardExcerpt[]): Promise<void> {
+    if (links.length === 0) return;
+    await this.conn.withTransactionAsync(() => this.writeCardExcerpts(links));
+  }
+  async listCardExcerpts(): Promise<CardExcerpt[]> {
+    return this.conn.getAllAsync<CardExcerpt>("SELECT * FROM card_excerpts");
+  }
+  async listExcerptsForCard(cardId: string): Promise<Excerpt[]> {
+    const rows = await this.conn.getAllAsync<ExcerptRow>(
+      `SELECT e.* FROM excerpts e JOIN card_excerpts l ON l.excerpt_id = e.id
+       WHERE l.card_id = ? ORDER BY e.created_at`,
+      [cardId],
+    );
+    return rows.map(rowToExcerpt);
+  }
+
+  // Un-transacted writers, shared by the public inserts and replaceAll (which
+  // already holds a transaction — expo-sqlite transactions don't nest).
+  private async writeExcerpts(excerpts: Excerpt[]): Promise<void> {
+    for (const e of excerpts) {
+      await this.conn.runAsync(
+        `INSERT INTO excerpts (id, readwise_id, text, note, book_title, book_author, url,
+           highlighted_at, source_updated_at, source_deleted, backlog, status, due,
+           pass_count, created_at, resolved_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          e.id, e.readwise_id, e.text, e.note, e.book_title, e.book_author, e.url,
+          e.highlighted_at, e.source_updated_at, e.source_deleted ? 1 : 0, e.backlog ? 1 : 0,
+          e.status, e.due, e.pass_count, e.created_at, e.resolved_at,
+        ],
+      );
+    }
+  }
+  private async writeExcerptReviews(reviews: ExcerptReview[]): Promise<void> {
+    for (const r of reviews) {
+      await this.conn.runAsync(
+        "INSERT INTO excerpt_reviews (id, excerpt_id, action, card_id, reviewed_at) VALUES (?, ?, ?, ?, ?)",
+        [r.id, r.excerpt_id, r.action, r.card_id, r.reviewed_at],
+      );
+    }
+  }
+  private async writeCardExcerpts(links: CardExcerpt[]): Promise<void> {
+    for (const l of links) {
+      await this.conn.runAsync(
+        "INSERT OR IGNORE INTO card_excerpts (card_id, excerpt_id) VALUES (?, ?)",
+        [l.card_id, l.excerpt_id],
+      );
+    }
   }
 
   async insertMany(decks: Deck[], cards: Card[], notes: Note[] = []): Promise<void> {
@@ -542,6 +689,14 @@ interface PromptItemRow extends Omit<PromptItem, "builtin"> {
 }
 function rowToPromptItem(r: PromptItemRow): PromptItem {
   return { ...r, builtin: r.builtin === 1 };
+}
+
+interface ExcerptRow extends Omit<Excerpt, "source_deleted" | "backlog"> {
+  source_deleted: number;
+  backlog: number;
+}
+function rowToExcerpt(r: ExcerptRow): Excerpt {
+  return { ...r, source_deleted: r.source_deleted === 1, backlog: r.backlog === 1 };
 }
 
 interface CompletionRow extends Omit<Completion, "verified" | "evidence"> {

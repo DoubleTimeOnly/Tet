@@ -1,4 +1,4 @@
-import type { Task, Card, Completion, CompletionEvidence } from "../db/schema";
+import type { Task, Card, Completion, CompletionEvidence, Excerpt } from "../db/schema";
 
 /** Minimal builders so tests state only the fields they care about. */
 
@@ -48,6 +48,28 @@ export function makeCompletion(over: Partial<Completion> = {}): Completion {
     verified: true,
     evidence,
     completed_at: 0,
+    ...over,
+  };
+}
+
+export function makeExcerpt(over: Partial<Excerpt> = {}): Excerpt {
+  return {
+    id: "ex-1",
+    readwise_id: "rw-1",
+    text: "A highlight",
+    note: null,
+    book_title: "A Book",
+    book_author: "An Author",
+    url: "https://readwise.io/open/rw-1",
+    highlighted_at: 0,
+    source_updated_at: 0,
+    source_deleted: false,
+    backlog: false,
+    status: "queued",
+    due: 0,
+    pass_count: 0,
+    created_at: 0,
+    resolved_at: null,
     ...over,
   };
 }

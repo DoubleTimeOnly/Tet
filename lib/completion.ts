@@ -49,6 +49,9 @@ export function ownConditionMet(
       const target = task.reading_target ?? DEFAULT_READING_TARGET;
       return evidence.readwise_fraction >= target;
     }
+    case "excerpt":
+      // Self-verifying like flashcards: today's points met the (capped) goal.
+      return evidence.points >= evidence.goal;
   }
 }
 

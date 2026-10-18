@@ -92,4 +92,5 @@ export const RING_COLORS: Record<string, string> = {
   flashcard: "#ff453a",
   youtube:   "#30d158",
   reading:   "#ffd60a",
+  excerpt:   "#bf5af2",
 };

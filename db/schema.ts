@@ -10,7 +10,7 @@
  * backup). Land schema changes here sequentially to avoid migration conflicts.
  */
 
-export type TaskType = "flashcard" | "youtube" | "reading";
+export type TaskType = "flashcard" | "youtube" | "reading" | "excerpt";
 export type Rating = "again" | "hard" | "good" | "easy";
 export type CardState = "new" | "learning" | "review";
 
@@ -34,7 +34,8 @@ export interface Task {
   title: string;
   /**
    * url for youtube, Readwise document id for reading, and for flashcard the
-   * deck id to review (null = all decks).
+   * deck id to review (null = all decks). Unused (null) for excerpt tasks,
+   * which always draw from the one shared excerpt queue.
    */
   source_ref: string | null;
   /** Per-day slice count the builder sets (e.g. 10 cards/day, 1 video/day). */
@@ -121,7 +122,11 @@ export type CompletionEvidence =
   // and used for XP (1 XP/min). Optional: completions written before the
   // gamification feature won't carry it, so readers must default to 0.
   | { type: "youtube"; manual: true; minutes?: number }
-  | { type: "reading"; readwise_fraction: number };
+  | { type: "reading"; readwise_fraction: number }
+  // `points` is today's excerpt-review progress (lib/excerpts.excerptPoints:
+  // 1 per triage decision, more per card written); `goal` is the effective
+  // daily goal, capped like a flashcard task's to what was available.
+  | { type: "excerpt"; points: number; goal: number };
 
 export interface Completion {
   id: string;
@@ -247,6 +252,97 @@ export interface LootCard {
 }
 
 /**
+ * Excerpts — Readwise highlights imported for incremental reading. Each one is
+ * triaged in a daily review until it is resolved: ignored, or turned into a
+ * card (alone or combined with others from the set-aside pile).
+ *
+ *   queued    -> in the review queue, shown once `due` has passed
+ *   set_aside -> parked in the pile, waiting to be combined into one card
+ *   carded    -> a card was written from it (resolved)
+ *   ignored   -> never shown again (resolved)
+ *
+ * `status` is a bare string without a CHECK constraint, like prompt kinds, so a
+ * new state never needs a table rebuild.
+ */
+export type ExcerptStatus = "queued" | "set_aside" | "carded" | "ignored";
+
+export interface Excerpt {
+  id: string;
+  /** Readwise highlight id — UNIQUE, the dedup key across syncs. */
+  readwise_id: string;
+  text: string;
+  /** The note you attached to the highlight in Readwise, if any. */
+  note: string | null;
+  book_title: string;
+  book_author: string | null;
+  /** Link that opens the highlight on Readwise. */
+  url: string | null;
+  highlighted_at: number | null;
+  /** Readwise's updated_at for the highlight — sync cursor + edit detection. */
+  source_updated_at: number;
+  /**
+   * Deleted (or discarded) in Readwise after import. Unresolved excerpts drop
+   * out of the queue and pile; a carded one keeps its card and its link.
+   */
+  source_deleted: boolean;
+  /**
+   * Imported as part of the initial backlog rather than highlighted recently.
+   * Backlog excerpts queue behind everything else, in a stable shuffled order,
+   * so day one isn't a wall of old highlights and fresh ones aren't buried.
+   */
+  backlog: boolean;
+  status: ExcerptStatus;
+  /** Epoch ms after which a queued excerpt is shown (pushed out by Pass). */
+  due: number;
+  /** Times passed — capped (lib/excerpts.MAX_PASSES) so nothing loops forever. */
+  pass_count: number;
+  created_at: number;
+  /** When it was carded or ignored; null while unresolved. */
+  resolved_at: number | null;
+}
+
+/** A triage decision. `unset_aside` = pulled back out of the pile, uncarded. */
+export type ExcerptAction = "ignore" | "pass" | "set_aside" | "card" | "unset_aside";
+
+/**
+ * One triage decision, the excerpt analogue of `reviews`: daily progress is
+ * derived from these rows, so it survives leaving and re-entering review.
+ */
+export interface ExcerptReview {
+  id: string;
+  excerpt_id: string;
+  action: ExcerptAction;
+  /** The card written, for `card` actions (one row per excerpt it used). */
+  card_id: string | null;
+  reviewed_at: number;
+}
+
+/** Which excerpt(s) a card was written from — many-to-many for combined cards. */
+export interface CardExcerpt {
+  card_id: string;
+  excerpt_id: string;
+}
+
+/**
+ * The tasks table DDL, parameterised by name so SqliteStore can rebuild it
+ * when the type CHECK grows (SQLite can't ALTER a CHECK constraint).
+ */
+export function tasksTableSql(name: string): string {
+  return `CREATE TABLE IF NOT EXISTS ${name} (
+  id                TEXT PRIMARY KEY NOT NULL,
+  type              TEXT NOT NULL CHECK (type IN ('flashcard','youtube','reading','excerpt')),
+  title             TEXT NOT NULL,
+  source_ref        TEXT,
+  cadence           INTEGER NOT NULL DEFAULT 1,
+  makes_cards_count INTEGER NOT NULL DEFAULT 0,
+  reading_target    REAL,
+  active            INTEGER NOT NULL DEFAULT 1,
+  created_at        INTEGER NOT NULL,
+  meta              TEXT
+);`;
+}
+
+/**
  * DDL applied at startup. `due` is indexed because computeToday's hot path is
  * "cards due on/before now"; everything else is keyed by id or task_id.
  */
@@ -257,18 +353,7 @@ CREATE TABLE IF NOT EXISTS decks (
   created_at INTEGER NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS tasks (
-  id                TEXT PRIMARY KEY NOT NULL,
-  type              TEXT NOT NULL CHECK (type IN ('flashcard','youtube','reading')),
-  title             TEXT NOT NULL,
-  source_ref        TEXT,
-  cadence           INTEGER NOT NULL DEFAULT 1,
-  makes_cards_count INTEGER NOT NULL DEFAULT 0,
-  reading_target    REAL,
-  active            INTEGER NOT NULL DEFAULT 1,
-  created_at        INTEGER NOT NULL,
-  meta              TEXT
-);
+${tasksTableSql("tasks")}
 
 CREATE TABLE IF NOT EXISTS notes (
   id             TEXT PRIMARY KEY NOT NULL,
@@ -371,4 +456,40 @@ CREATE TABLE IF NOT EXISTS loot_cards (
   b            INTEGER NOT NULL,
   collected_at INTEGER NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS excerpts (
+  id                TEXT PRIMARY KEY NOT NULL,
+  readwise_id       TEXT NOT NULL UNIQUE,
+  text              TEXT NOT NULL,
+  note              TEXT,
+  book_title        TEXT NOT NULL,
+  book_author       TEXT,
+  url               TEXT,
+  highlighted_at    INTEGER,
+  source_updated_at INTEGER NOT NULL,
+  source_deleted    INTEGER NOT NULL DEFAULT 0,
+  backlog           INTEGER NOT NULL DEFAULT 0,
+  status            TEXT NOT NULL,
+  due               INTEGER NOT NULL,
+  pass_count        INTEGER NOT NULL DEFAULT 0,
+  created_at        INTEGER NOT NULL,
+  resolved_at       INTEGER
+);
+CREATE INDEX IF NOT EXISTS idx_excerpts_status_due ON excerpts(status, due);
+
+CREATE TABLE IF NOT EXISTS excerpt_reviews (
+  id          TEXT PRIMARY KEY NOT NULL,
+  excerpt_id  TEXT NOT NULL REFERENCES excerpts(id),
+  action      TEXT NOT NULL,
+  card_id     TEXT,
+  reviewed_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_excerpt_reviews_at ON excerpt_reviews(reviewed_at);
+
+CREATE TABLE IF NOT EXISTS card_excerpts (
+  card_id    TEXT NOT NULL REFERENCES cards(id),
+  excerpt_id TEXT NOT NULL REFERENCES excerpts(id),
+  PRIMARY KEY (card_id, excerpt_id)
+);
+CREATE INDEX IF NOT EXISTS idx_card_excerpts_excerpt ON card_excerpts(excerpt_id);
 `;

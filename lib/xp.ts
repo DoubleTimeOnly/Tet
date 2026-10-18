@@ -2,10 +2,12 @@ import type { Completion } from "../db/schema";
 
 /**
  * XP & levels — light gamification, fully DERIVED from existing activity and
- * never persisted (same philosophy as lib/streak). XP comes from two sources:
+ * never persisted (same philosophy as lib/streak). XP comes from three sources:
  *   - flashcards: 1 XP per card reviewed (one row in the reviews table), and
  *   - youtube: 1 XP per minute of content (captured from the player at watch
- *     time and stored in the completion's evidence).
+ *     time and stored in the completion's evidence), and
+ *   - excerpts: 1 XP per point of excerpt review (lib/excerpts.excerptPoints —
+ *     a triage decision is 1, a card written is more).
  *
  * Deriving rather than storing means a backup restore reconstructs the bar
  * exactly, and there's no counter to drift out of sync with reality.
@@ -21,11 +23,13 @@ export interface XpInput {
   reviews: number;
   /** Every completion; only youtube ones contribute (their minutes). */
   completions: Completion[];
+  /** All-time excerpt review points. Optional: 0 when absent. */
+  excerptPoints?: number;
 }
 
 export function totalXp(input: XpInput): number {
   const ytMinutes = input.completions.reduce((sum, c) => sum + youtubeMinutes(c), 0);
-  return input.reviews + ytMinutes;
+  return input.reviews + ytMinutes + (input.excerptPoints ?? 0);
 }
 
 /**

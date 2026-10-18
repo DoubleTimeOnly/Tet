@@ -12,6 +12,9 @@ import type {
   PromptItem,
   PromptPractice,
   PromptDraw,
+  Excerpt,
+  ExcerptReview,
+  CardExcerpt,
 } from "./schema";
 import type { BackupData } from "../lib/backup";
 
@@ -29,6 +32,9 @@ export class MemoryStore implements Store {
   private promptItems: PromptItem[] = [];
   private promptPractices: PromptPractice[] = [];
   private promptDraws: PromptDraw[] = [];
+  private excerpts: Excerpt[] = [];
+  private excerptReviews: ExcerptReview[] = [];
+  private cardExcerpts: CardExcerpt[] = [];
 
   async init(): Promise<void> {}
 
@@ -105,6 +111,7 @@ export class MemoryStore implements Store {
   }
   async deleteCard(id: string): Promise<void> {
     this.cards = this.cards.filter((c) => c.id !== id);
+    this.cardExcerpts = this.cardExcerpts.filter((l) => l.card_id !== id);
   }
   async setCardIgnored(id: string, ignored: boolean): Promise<void> {
     const c = this.cards.find((x) => x.id === id);
@@ -260,6 +267,9 @@ export class MemoryStore implements Store {
       promptItems: this.promptItems.map((i) => ({ ...i })),
       promptPractices: this.promptPractices.map((p) => ({ ...p })),
       promptDraws: this.promptDraws.map((d) => ({ ...d })),
+      excerpts: this.excerpts.map((e) => ({ ...e })),
+      excerptReviews: this.excerptReviews.map((r) => ({ ...r })),
+      cardExcerpts: this.cardExcerpts.map((l) => ({ ...l })),
     };
   }
   async replaceAll(data: BackupData): Promise<void> {
@@ -276,6 +286,9 @@ export class MemoryStore implements Store {
     this.promptItems = (data.promptItems ?? []).map((i) => ({ ...i }));
     this.promptPractices = (data.promptPractices ?? []).map((p) => ({ ...p }));
     this.promptDraws = (data.promptDraws ?? []).map((d) => ({ ...d }));
+    this.excerpts = (data.excerpts ?? []).map((e) => ({ ...e }));
+    this.excerptReviews = (data.excerptReviews ?? []).map((r) => ({ ...r }));
+    this.cardExcerpts = (data.cardExcerpts ?? []).map((l) => ({ ...l }));
   }
   async insertMany(decks: Deck[], cards: Card[], notes: Note[] = []): Promise<void> {
     this.decks.push(...decks.map((d) => ({ ...d })));
@@ -288,5 +301,51 @@ export class MemoryStore implements Store {
   }
   async listLootCards(): Promise<LootCard[]> {
     return this.lootCards.map((c) => ({ ...c }));
+  }
+
+  async insertExcerpts(excerpts: Excerpt[]): Promise<void> {
+    const ids = new Set(this.excerpts.map((e) => e.readwise_id));
+    for (const e of excerpts) {
+      // Mirror the UNIQUE(readwise_id) constraint SqliteStore enforces.
+      if (ids.has(e.readwise_id)) throw new Error(`duplicate readwise_id ${e.readwise_id}`);
+      ids.add(e.readwise_id);
+    }
+    this.excerpts.push(...excerpts.map((e) => ({ ...e })));
+  }
+  async updateExcerpts(excerpts: Excerpt[]): Promise<void> {
+    for (const next of excerpts) {
+      const i = this.excerpts.findIndex((e) => e.id === next.id);
+      if (i >= 0) this.excerpts[i] = { ...next };
+    }
+  }
+  async getExcerpt(id: string): Promise<Excerpt | null> {
+    const e = this.excerpts.find((x) => x.id === id);
+    return e ? { ...e } : null;
+  }
+  async listExcerpts(): Promise<Excerpt[]> {
+    return this.excerpts.map((e) => ({ ...e }));
+  }
+  async insertExcerptReviews(reviews: ExcerptReview[]): Promise<void> {
+    this.excerptReviews.push(...reviews.map((r) => ({ ...r })));
+  }
+  async deleteExcerptReview(id: string): Promise<void> {
+    this.excerptReviews = this.excerptReviews.filter((r) => r.id !== id);
+  }
+  async listExcerptReviewsSince(sinceMs: number): Promise<ExcerptReview[]> {
+    return this.excerptReviews
+      .filter((r) => r.reviewed_at >= sinceMs)
+      .map((r) => ({ ...r }));
+  }
+  async insertCardExcerpts(links: CardExcerpt[]): Promise<void> {
+    this.cardExcerpts.push(...links.map((l) => ({ ...l })));
+  }
+  async listCardExcerpts(): Promise<CardExcerpt[]> {
+    return this.cardExcerpts.map((l) => ({ ...l }));
+  }
+  async listExcerptsForCard(cardId: string): Promise<Excerpt[]> {
+    const ids = new Set(
+      this.cardExcerpts.filter((l) => l.card_id === cardId).map((l) => l.excerpt_id),
+    );
+    return this.excerpts.filter((e) => ids.has(e.id)).map((e) => ({ ...e }));
   }
 }

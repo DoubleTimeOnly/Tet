@@ -6,6 +6,7 @@ import { updateNote } from "../services/authoring";
 import { countClozeSpans, makeFields, noteFields, clozeText } from "../lib/notes";
 import { Card as CardView, Subtitle, Muted, Button } from "./components";
 import { MathText } from "./MathText";
+import { ExcerptSources } from "./ExcerptView";
 import { colors, radius, space } from "./theme";
 import {
   buildTaskMap,
@@ -31,10 +32,13 @@ const LIST_LIMIT = 100;
 export function CardBrowser({
   cards,
   tasks,
+  excerptCardIds,
   onChanged,
 }: {
   cards: Card[];
   tasks: Task[];
+  /** Cards written from Readwise excerpts (the Excerpts category). */
+  excerptCardIds?: ReadonlySet<string>;
   onChanged: () => void;
 }) {
   const [category, setCategory] = useState<LibCategory | null>(null);
@@ -44,7 +48,10 @@ export function CardBrowser({
 
   const taskById = useMemo(() => buildTaskMap(tasks), [tasks]);
   const active = useMemo(() => cards.filter((c) => !c.ignored), [cards]);
-  const counts = useMemo(() => categoryCounts(active, taskById), [active, taskById]);
+  const counts = useMemo(
+    () => categoryCounts(active, taskById, excerptCardIds),
+    [active, taskById, excerptCardIds],
+  );
 
   const goRoot = () => {
     setCategory(null);
@@ -99,7 +106,7 @@ export function CardBrowser({
   }
 
   // Card list (Obsidian, YouTube, or a chosen Readwise document).
-  let list = active.filter((c) => cardCategory(c, taskById) === category);
+  let list = active.filter((c) => cardCategory(c, taskById, excerptCardIds) === category);
   let title = CATEGORY_LABELS[category];
   let back = goRoot;
   if (category === "readwise") {
@@ -150,7 +157,12 @@ export function CardBrowser({
       </Muted>
 
       {shown.map((c) => (
-        <CardRow key={c.id} card={c} onChanged={onChanged} />
+        <CardRow
+          key={c.id}
+          card={c}
+          fromExcerpts={excerptCardIds?.has(c.id) ?? false}
+          onChanged={onChanged}
+        />
       ))}
     </>
   );
@@ -165,9 +177,18 @@ function BrowseHeader({ title, onBack }: { title: string; onBack: () => void }) 
   );
 }
 
-function CardRow({ card, onChanged }: { card: Card; onChanged: () => void }) {
+function CardRow({
+  card,
+  fromExcerpts,
+  onChanged,
+}: {
+  card: Card;
+  fromExcerpts: boolean;
+  onChanged: () => void;
+}) {
   const { store } = useStore();
   const [editing, setEditing] = useState(false);
+  const [showSource, setShowSource] = useState(false);
   // The owning note (loaded on edit) — null for a standalone basic card.
   const [note, setNote] = useState<Note | null>(null);
   const [front, setFront] = useState(card.front);
@@ -257,7 +278,17 @@ function CardRow({ card, onChanged }: { card: Card; onChanged: () => void }) {
       <MathText value={card.front} kind="subtitle" />
       <View style={styles.divider} />
       <MathText value={card.back} kind="body" />
+      {showSource && <ExcerptSources cardId={card.id} />}
       <View style={styles.row}>
+        {fromExcerpts && (
+          <View style={{ flex: 1 }}>
+            <Button
+              label={showSource ? "Hide source" : "Source"}
+              kind="neutral"
+              onPress={() => setShowSource((v) => !v)}
+            />
+          </View>
+        )}
         <View style={{ flex: 1 }}>
           <Button label="Edit" kind="neutral" onPress={startEdit} />
         </View>

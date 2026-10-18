@@ -121,7 +121,7 @@ The thing Tet is built around — do this once to see it work end to end:
 All business logic is covered by a fast headless test suite (no device needed):
 
 ```bash
-npm test           # jest — 360 tests
+npm test           # jest — 406 tests
 npm run typecheck  # tsc, whole app
 ```
 
@@ -132,11 +132,12 @@ backup round-trip, and `.apkg` import against an in-memory store.
 
 ```
 app/            expo-router screens (Today, Review, Library, Settings, task/*,
-                prompts/*)
+                prompts/*, excerpts/*)
 ui/             React components (StoreProvider, shared widgets, theme)
 services/       orchestration: Store + lib glue (learning, authoring, backup, notifications)
 lib/            pure, tested logic (dayKey, dailySlice, fsrs, completion, streak,
-                readwise, backup, ankiImport, notifications, youtube, prompts)
+                readwise, excerpts, backup, ankiImport, notifications, youtube,
+                prompts)
 db/             schema + Store interface; SqliteStore (native) / MemoryStore (web & tests)
 adapters/       device plumbing (secure-store token, .apkg reader)
 ```
@@ -144,6 +145,59 @@ adapters/       device plumbing (secure-store token, .apkg reader)
 Persistence is behind a `Store` interface: `SqliteStore` on device, `MemoryStore` on
 web and in tests — which is why the web preview and the test suite run without native
 SQLite.
+
+## Excerpt review (Readwise highlights → cards)
+
+Incremental reading over your Readwise highlights. With a Readwise token in
+Settings, highlights sync into an excerpt queue on their own (on app open and
+when the app returns to the foreground, at most every 30 minutes; **Library →
+Excerpts → Sync now** forces one). The first sync that brings in highlights
+also adds a daily **Review excerpts** task (10/day; edit it like any task).
+
+Each excerpt is shown alone, with its book, author and an **Open ↗** link to
+the highlight on Readwise. Four choices, in a footer under your thumb:
+
+- **Ignore**: never shown again.
+- **Pass**: comes back in 3, then 10, then 30 days. After 3 passes, Pass is
+  no longer offered, so you have to card it, set it aside or ignore it.
+- **Set aside**: parks it in the **set-aside pile**. There, tap several
+  excerpts and write one card from all of them, or send one back to the
+  queue.
+- **Make card**: write a plain front/back card. It joins your normal
+  flashcard reviews (deck "Readwise excerpts"), and the excerpt is done.
+
+A mis-tap is one **Undo** away.
+
+You write every card yourself. Nothing is generated or suggested. The card
+fields are plain multiline inputs, so the keyboard's own mic dictates into
+them. A card written from excerpts has a **Source** button (in review after
+the answer is shown, and in **Library → Browse cards → Excerpts**) that shows
+the excerpt(s) it came from.
+
+How the open questions were settled:
+
+- **Counting toward the daily task.** Each triage decision counts 1, and each
+  card written counts 3 (`CARD_POINTS`), so writing cards isn't penalised
+  against quick passes. A combined card counts 3 once. Like flashcards, the
+  goal is capped to what's available, so a thin queue completes at what's
+  there and an empty one completes on its own. The cap counts excerpts, not
+  points, so it doesn't move during the day.
+- **Edited or deleted in Readwise.** An edit updates the stored excerpt in
+  place, whatever its state. A card already written from it is never
+  touched. A deleted (or discarded) highlight drops out of the queue and the
+  pile. If it was already carded, the card stays and its source shows
+  "Deleted in Readwise".
+- **The backlog.** On the very first sync, highlights older than 7 days are
+  marked backlog. Recent highlights and passed excerpts that have come due are
+  shown first, then the backlog in a stable shuffled order (so books are mixed
+  rather than served one at a time). The daily goal is the only limit on how
+  many you see. "Keep going" after the goal is optional.
+- **Duplicates.** The Readwise highlight id is unique. The same text in the
+  same book from a second source (e.g. Kindle and Reader) is also skipped.
+
+Logic is in `lib/excerpts.ts` (pure, tested), sync and decisions are in
+`services/excerpts.ts`, and the Readwise v2 export client is in
+`lib/readwiseHighlights.ts`.
 
 ## Improv practice
 

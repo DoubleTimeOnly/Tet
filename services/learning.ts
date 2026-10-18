@@ -11,6 +11,8 @@ import { startOfTetDay, localDayKey } from "../lib/dayKey";
 import { grade } from "../lib/fsrs";
 import { recordCompletion } from "../lib/completion";
 import { totalXp, levelForXp, type LevelProgress } from "../lib/xp";
+import { excerptPoints, excerptSlice, type ExcerptSlice } from "../lib/excerpts";
+import type { ExcerptReview } from "../db/schema";
 
 /**
  * Orchestration: Store reads/writes + pure lib logic. Screens call these and
@@ -48,14 +50,19 @@ export async function getTodayView(
   // Credit any flashcard task whose goal is already met (e.g. zero cards due)
   // before reading completions, so it auto-completes without needing a grade.
   await creditFlashcardTasks(store, now, tz);
-  const [tasks, dueCards, allCompletions, reviews, reviewedDeckIds] =
+  await creditExcerptTasks(store, now, tz);
+  const [tasks, dueCards, allCompletions, reviews, reviewedDeckIds, excerpts, excerptReviews] =
     await Promise.all([
       store.listTasks({ activeOnly: true }),
       store.listDueCards(now),
       store.listCompletions(),
       store.countReviews(),
       reviewedDeckIdsToday(store, now, tz),
+      store.listExcerpts(),
+      store.listExcerptReviewsSince(0),
     ]);
+  const dayStart = startOfTetDay(now, tz);
+  const excerptReviewsToday = excerptReviews.filter((r) => r.reviewed_at >= dayStart);
   // computeToday derives the dayKey itself and filters completions to today.
   const slice = computeToday({
     tasks,
@@ -64,10 +71,13 @@ export async function getTodayView(
     now,
     tz,
     reviewedDeckIds,
+    excerpts: { excerpts, reviewsToday: excerptReviewsToday },
   });
   const streak = currentStreak({ completions: allCompletions, now, tz });
   const maxStreak = longestStreak({ completions: allCompletions });
-  const xp = levelForXp(totalXp({ reviews, completions: allCompletions }));
+  const xp = levelForXp(
+    totalXp({ reviews, completions: allCompletions, excerptPoints: excerptPoints(excerptReviews) }),
+  );
 
   const dayKey = localDayKey(now, tz);
   const todayDoneIds = new Set(
@@ -80,6 +90,10 @@ export async function getTodayView(
         : reviewedDeckIds.length;
       const fc = flashcardSlice(task, dueCards, reviewed);
       return { task, filledSegments: fc.reviewedToday, totalSegments: fc.goal };
+    }
+    if (task.type === "excerpt") {
+      const ex = excerptSlice(task, excerpts, excerptReviewsToday, now);
+      return { task, filledSegments: Math.min(ex.pointsToday, ex.goal), totalSegments: ex.goal };
     }
     return { task, filledSegments: todayDoneIds.has(task.id) ? 1 : 0, totalSegments: 1 };
   });
@@ -185,6 +199,59 @@ export async function creditFlashcardTasks(
         now,
         tz,
       ),
+    ),
+  );
+}
+
+/** Excerpt decisions made since today's 4am boundary. */
+export async function excerptReviewsToday(
+  store: Store,
+  now: number,
+  tz: string,
+): Promise<ExcerptReview[]> {
+  return store.listExcerptReviewsSince(startOfTetDay(now, tz));
+}
+
+/** The review state for one excerpt task: today's queue, capped to the goal. */
+export async function getExcerptSlice(
+  store: Store,
+  task: Task,
+  now: number,
+  tz: string,
+): Promise<ExcerptSlice> {
+  const [excerpts, todays] = await Promise.all([
+    store.listExcerpts(),
+    excerptReviewsToday(store, now, tz),
+  ]);
+  return excerptSlice(task, excerpts, todays, now);
+}
+
+/**
+ * Record a verified completion for each active excerpt task whose goal today's
+ * decisions have met — the excerpt twin of creditFlashcardTasks, and idempotent
+ * the same way. All excerpt tasks share the one queue and the one point tally.
+ */
+export async function creditExcerptTasks(
+  store: Store,
+  now: number,
+  tz: string,
+): Promise<void> {
+  const [tasks, excerpts, todaysReviews, todaysCompletions] = await Promise.all([
+    store.listTasks({ activeOnly: true }),
+    store.listExcerpts(),
+    excerptReviewsToday(store, now, tz),
+    store.listCompletionsForDay(localDayKey(now, tz)),
+  ]);
+  const alreadyDone = new Set(
+    todaysCompletions.filter((c) => c.verified).map((c) => c.task_id),
+  );
+  const toCredit = tasks
+    .filter((t) => t.type === "excerpt" && !alreadyDone.has(t.id))
+    .map((task) => ({ task, ex: excerptSlice(task, excerpts, todaysReviews, now) }))
+    .filter(({ ex }) => ex.done);
+  await Promise.all(
+    toCredit.map(({ task, ex }) =>
+      completeTask(store, task, { type: "excerpt", points: ex.pointsToday, goal: ex.goal }, now, tz),
     ),
   );
 }

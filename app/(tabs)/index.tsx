@@ -11,6 +11,7 @@ import { localDayKey } from "../../lib/dayKey";
 import type { LootCard } from "../../db/schema";
 import type { TaskSliceItem } from "../../lib/dailySlice";
 import { newId } from "../../lib/id";
+import { CARD_POINTS } from "../../lib/excerpts";
 
 export default function TodayScreen() {
   const { store, tz, version } = useStore();
@@ -127,18 +128,23 @@ export default function TodayScreen() {
 
 function TaskRow({ item }: { item: TaskSliceItem }) {
   const router = useRouter();
-  const { task, count, flashcards } = item;
+  const { task, count, flashcards, excerpts } = item;
 
   const go = () => {
     if (task.type === "youtube") router.push(`/task/youtube?taskId=${task.id}`);
     else if (task.type === "reading") router.push(`/task/reading?taskId=${task.id}`);
+    else if (task.type === "excerpt") router.push(`/excerpts/review?taskId=${task.id}`);
     else router.push(`/review?taskId=${task.id}`);
   };
 
-  const noneDue = task.type === "flashcard" && (flashcards?.queue.length ?? 0) === 0;
+  const noneDue =
+    (task.type === "flashcard" && (flashcards?.queue.length ?? 0) === 0) ||
+    (task.type === "excerpt" && (excerpts?.queue.length ?? 0) === 0);
 
   const subtitle =
-    task.type === "flashcard"
+    task.type === "excerpt"
+      ? `${count} left${excerpts?.setAsideCount ? ` · ${excerpts.setAsideCount} set aside` : ""}`
+      : task.type === "flashcard"
       ? noneDue
         ? "no cards due right now"
         : `${count} card${count === 1 ? "" : "s"} left`
@@ -153,16 +159,27 @@ function TaskRow({ item }: { item: TaskSliceItem }) {
       {flashcards && (
         <Muted>{`${flashcards.reviewedToday} of ${flashcards.goal} done today`}</Muted>
       )}
+      {excerpts && (
+        <Muted>{`${excerpts.pointsToday} of ${excerpts.goal} done today · a card counts ${CARD_POINTS}`}</Muted>
+      )}
       <Button
-        label={task.type === "flashcard" ? "Review" : "Open"}
+        label={task.type === "flashcard" || task.type === "excerpt" ? "Review" : "Open"}
         kind="neutral"
         onPress={go}
         disabled={noneDue}
       />
+      {excerpts && excerpts.setAsideCount > 0 && (
+        <Button
+          label={`Set-aside pile (${excerpts.setAsideCount})`}
+          kind="neutral"
+          onPress={() => router.push("/excerpts/pile")}
+        />
+      )}
     </Card>
   );
 }
 
 function labelFor(type: string): string {
+  if (type === "excerpt") return "Excerpts";
   return type === "youtube" ? "Watch" : type === "reading" ? "Read" : "Flashcards";
 }

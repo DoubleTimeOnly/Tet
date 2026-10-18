@@ -7,6 +7,7 @@ import { updateNote } from "../services/authoring";
 import { countClozeSpans, makeFields, noteFields, clozeText } from "../lib/notes";
 import { Screen, Card, Title, Body, Muted, Button } from "../ui/components";
 import { MathText } from "../ui/MathText";
+import { ExcerptSources } from "../ui/ExcerptView";
 import type { Card as CardRow, Note, Rating } from "../db/schema";
 import { colors, radius, space } from "../ui/theme";
 
@@ -30,6 +31,13 @@ export default function ReviewScreen() {
   const [editFront, setEditFront] = useState("");
   const [editBack, setEditBack] = useState("");
   const [editText, setEditText] = useState(""); // cloze source
+  // Cards written from Readwise excerpts can show where they came from.
+  const [excerptCardIds, setExcerptCardIds] = useState<Set<string>>(new Set());
+  const [showSource, setShowSource] = useState(false);
+
+  useEffect(() => {
+    store.listCardExcerpts().then((links) => setExcerptCardIds(new Set(links.map((l) => l.card_id))));
+  }, [store]);
 
   useEffect(() => {
     // Pull this flashcard task's deck-scoped queue: due cards in its deck,
@@ -49,6 +57,7 @@ export default function ReviewScreen() {
 
   const advance = useCallback(() => {
     setRevealed(false);
+    setShowSource(false);
     setEditing(false);
     setEditNote(null);
     setIndex((i) => i + 1);
@@ -178,6 +187,7 @@ export default function ReviewScreen() {
           </>
         )}
       </Card>
+      {showSource && <ExcerptSources cardId={card.id} />}
 
       {!revealed ? (
         <Button label="Show answer" onPress={() => setRevealed(true)} />
@@ -198,6 +208,16 @@ export default function ReviewScreen() {
         <View style={{ flex: 1 }}>
           <Button label="Ignore" kind="neutral" onPress={onIgnore} />
         </View>
+        {/* After reveal only: the excerpt usually gives the answer away. */}
+        {revealed && excerptCardIds.has(card.id) && (
+          <View style={{ flex: 1 }}>
+            <Button
+              label={showSource ? "Hide source" : "Source"}
+              kind="neutral"
+              onPress={() => setShowSource((v) => !v)}
+            />
+          </View>
+        )}
       </View>
     </Screen>
   );

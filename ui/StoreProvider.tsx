@@ -14,6 +14,7 @@ import { seedObsidianFlashcards } from "../services/seedObsidian";
 import { seedPromptPools } from "../services/prompts";
 import { runAutoBackup } from "../services/autoBackupService";
 import { backupFiles } from "../adapters/backupFiles";
+import { autoSyncExcerpts } from "../services/readwiseService";
 
 interface StoreContextValue {
   store: Store;
@@ -59,6 +60,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       // so a slow or failing write is never visible here. It no-ops unless a
       // day has passed since the last one.
       void runAutoBackup(s, backupFiles);
+      // New Readwise highlights flow into the excerpt queue on their own.
+      // Also not awaited, and silent on failure; refetch screens if it added any.
+      void autoSyncExcerpts(s).then((r) => {
+        if (r && (r.added > 0 || r.removed > 0) && !cancelled) setVersion((v) => v + 1);
+      });
     })();
     return () => {
       cancelled = true;
@@ -78,7 +84,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!store) return;
     const sub = AppState.addEventListener("change", (next) => {
-      if (next === "active") void runAutoBackup(store, backupFiles);
+      if (next !== "active") return;
+      void runAutoBackup(store, backupFiles);
+      void autoSyncExcerpts(store).then((r) => {
+        if (r && (r.added > 0 || r.removed > 0)) setVersion((v) => v + 1);
+      });
     });
     return () => sub.remove();
   }, [store]);

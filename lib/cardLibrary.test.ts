@@ -29,6 +29,11 @@ describe("cardCategory", () => {
     expect(cardCategory(makeCard({ source_task_id: "gone" }), taskById)).toBe("obsidian");
     expect(cardCategory(makeCard({ source_task_id: "fc1" }), taskById)).toBe("obsidian");
   });
+  it("buckets a card written from excerpts as excerpts", () => {
+    const fromExcerpt = new Set(["x"]);
+    expect(cardCategory(makeCard({ id: "x" }), taskById, fromExcerpt)).toBe("excerpts");
+    expect(cardCategory(makeCard({ id: "y" }), taskById, fromExcerpt)).toBe("obsidian");
+  });
 });
 
 describe("categoryCounts", () => {
@@ -39,7 +44,10 @@ describe("categoryCounts", () => {
       makeCard({ id: "c", source_task_id: "yt2" }),
       makeCard({ id: "d", source_task_id: "rd1" }),
     ];
-    expect(categoryCounts(cards, taskById)).toEqual({ obsidian: 1, youtube: 2, readwise: 1 });
+    expect(categoryCounts(cards, taskById)).toEqual({ obsidian: 1, youtube: 2, readwise: 1, excerpts: 0 });
+    expect(categoryCounts(cards, taskById, new Set(["a"]))).toEqual({
+      obsidian: 0, youtube: 2, readwise: 1, excerpts: 1,
+    });
   });
 });
 

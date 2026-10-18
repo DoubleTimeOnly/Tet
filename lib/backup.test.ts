@@ -1,5 +1,5 @@
 import { exportAll, importAll, BackupImportError, BACKUP_VERSION, type BackupData } from "./backup";
-import { makeTask, makeCard, makeCompletion } from "./testFixtures";
+import { makeTask, makeCard, makeCompletion, makeExcerpt } from "./testFixtures";
 import type { Deck, Review } from "../db/schema";
 
 function sampleData(): BackupData {
@@ -52,6 +52,14 @@ function sampleData(): BackupData {
         drawn_at: 8,
       },
     ],
+    excerpts: [
+      makeExcerpt({ id: "ex1", status: "carded", pass_count: 2, resolved_at: 9 }),
+      makeExcerpt({ id: "ex2", readwise_id: "rw-2", status: "set_aside", backlog: true }),
+    ],
+    excerptReviews: [
+      { id: "er1", excerpt_id: "ex1", action: "card", card_id: "card-1", reviewed_at: 9 },
+    ],
+    cardExcerpts: [{ card_id: "card-1", excerpt_id: "ex1" }],
   };
 }
 
@@ -69,7 +77,7 @@ describe("exportAll / importAll round-trip", () => {
   });
 
   it("round-trips an empty dataset", () => {
-    const empty: BackupData = { decks: [], tasks: [], notes: [], cards: [], reviews: [], completions: [], habits: [], habitLogs: [], lootCards: [], promptItems: [], promptPractices: [], promptDraws: [] };
+    const empty: BackupData = { decks: [], tasks: [], notes: [], cards: [], reviews: [], completions: [], habits: [], habitLogs: [], lootCards: [], promptItems: [], promptPractices: [], promptDraws: [], excerpts: [], excerptReviews: [], cardExcerpts: [] };
     expect(importAll(exportAll(empty))).toEqual(empty);
   });
 
@@ -107,6 +115,9 @@ describe("exportAll / importAll round-trip", () => {
       promptItems: [],
       promptPractices: [],
       promptDraws: [],
+      excerpts: [],
+      excerptReviews: [],
+      cardExcerpts: [],
     };
     const restored = importAll(exportAll(data, 1000));
     expect(restored).toEqual(data);

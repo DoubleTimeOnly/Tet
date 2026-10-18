@@ -9,6 +9,7 @@ import {
   View,
   type ViewStyle,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors, radius, space } from "./theme";
 
 export function Screen({ children }: { children: React.ReactNode }) {
@@ -20,6 +21,37 @@ export function Screen({ children }: { children: React.ReactNode }) {
       <ScrollView style={styles.screen} contentContainerStyle={styles.screenContent}>
         {children}
       </ScrollView>
+    </KeyboardAvoidingView>
+  );
+}
+
+/**
+ * A Screen with a footer pinned to the bottom edge — for one-handed flows where
+ * the actions must sit under the thumb however long the content above runs.
+ * The footer rides above the keyboard while typing.
+ */
+export function ActionScreen({
+  children,
+  footer,
+}: {
+  children: React.ReactNode;
+  footer: React.ReactNode;
+}) {
+  const insets = useSafeAreaInsets();
+  return (
+    <KeyboardAvoidingView
+      style={{ flex: 1, backgroundColor: colors.bg }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
+    >
+      <ScrollView
+        style={styles.screen}
+        contentContainerStyle={styles.screenContent}
+        keyboardShouldPersistTaps="handled"
+      >
+        {children}
+      </ScrollView>
+      <View style={[styles.footer, { paddingBottom: space.md + insets.bottom }]}>{footer}</View>
     </KeyboardAvoidingView>
   );
 }
@@ -114,6 +146,14 @@ export function Button({
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
   screenContent: { padding: space.lg, gap: space.md },
+  footer: {
+    backgroundColor: colors.surface,
+    borderTopColor: colors.border,
+    borderTopWidth: 1,
+    paddingHorizontal: space.lg,
+    paddingTop: space.md,
+    gap: space.sm,
+  },
   card: {
     backgroundColor: colors.surface,
     borderColor: colors.border,

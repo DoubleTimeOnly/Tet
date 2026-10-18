@@ -10,6 +10,8 @@ import { createYoutubeApiKeyStore } from "../../adapters/tokenStore";
 import { Screen, Card, Title, Subtitle, Body, Muted, Button } from "../../ui/components";
 import { ReadwiseDocPicker } from "../../ui/ReadwiseDocPicker";
 import { CardBrowser } from "../../ui/CardBrowser";
+import { ExcerptLibrarySection } from "../../ui/ExcerptLibrarySection";
+import { DEFAULT_EXCERPT_CADENCE } from "../../lib/excerpts";
 import { colors, radius, space } from "../../ui/theme";
 import type { Deck, Task, TaskType, NoteKind, Card as CardRow } from "../../db/schema";
 
@@ -20,6 +22,7 @@ export default function LibraryScreen() {
   const [allTasks, setAllTasks] = useState<Task[]>([]);
   const [allCards, setAllCards] = useState<CardRow[]>([]);
   const [ignored, setIgnored] = useState<CardRow[]>([]);
+  const [excerptCardIds, setExcerptCardIds] = useState<Set<string>>(new Set());
 
   const load = useCallback(() => {
     let active = true;
@@ -31,6 +34,7 @@ export default function LibraryScreen() {
       setAllTasks(snap.tasks); // includes removed tasks, needed to label sources
       setAllCards(snap.cards);
       setIgnored(snap.cards.filter((c) => c.ignored));
+      setExcerptCardIds(new Set(snap.cardExcerpts.map((l) => l.card_id)));
     })();
     return () => {
       active = false;
@@ -55,7 +59,14 @@ export default function LibraryScreen() {
     <Screen>
       <Title>Library</Title>
 
-      <CardBrowser cards={allCards} tasks={allTasks} onChanged={reload} />
+      <CardBrowser
+        cards={allCards}
+        tasks={allTasks}
+        excerptCardIds={excerptCardIds}
+        onChanged={reload}
+      />
+
+      <ExcerptLibrarySection />
 
       <AddCardForm decks={decks} onDone={reload} />
 
@@ -191,9 +202,25 @@ function AddTaskForm({ decks, onDone }: { decks: Deck[]; onDone: () => void }) {
   // source_ref means different things per type: the Readwise doc id (reading),
   // the deck to review or null=all (flashcard), or the entered URL (youtube).
   const resolvedSourceRef: string | null =
-    type === "reading" ? (pickedDoc?.id ?? "") : type === "flashcard" ? deckId : sourceRef;
+    type === "reading"
+      ? (pickedDoc?.id ?? "")
+      : type === "flashcard"
+        ? deckId
+        : type === "excerpt"
+          ? null
+          : sourceRef;
 
   const isPlaylist = type === "youtube" && parsePlaylistId(sourceRef) !== null;
+
+  // An excerpt task is "review N excerpts" — default the goal and the name
+  // unless you've already typed your own.
+  const pickType = (t: TaskType) => {
+    setType(t);
+    if (t === "excerpt") {
+      if (cadence === "1") setCadence(String(DEFAULT_EXCERPT_CADENCE));
+      if (!title.trim()) setTitle("Review excerpts");
+    }
+  };
 
   // Pull a title from the URL once it parses (YouTube tasks). A playlist needs
   // the API key to resolve its name; fall back to a generic label. Only fills an
@@ -233,8 +260,8 @@ function AddTaskForm({ decks, onDone }: { decks: Deck[]; onDone: () => void }) {
     <Card>
       <Subtitle>New task</Subtitle>
       <View style={styles.row}>
-        {(["flashcard", "youtube", "reading"] as TaskType[]).map((t) => (
-          <Button key={t} label={t} kind={t === type ? "primary" : "neutral"} onPress={() => setType(t)} />
+        {(["flashcard", "youtube", "reading", "excerpt"] as TaskType[]).map((t) => (
+          <Button key={t} label={t} kind={t === type ? "primary" : "neutral"} onPress={() => pickType(t)} />
         ))}
       </View>
       <Field placeholder="Title" value={title} onChangeText={setTitle} />
@@ -257,6 +284,9 @@ function AddTaskForm({ decks, onDone }: { decks: Deck[]; onDone: () => void }) {
           <Muted>Deck to review</Muted>
           <DeckPicker decks={decks} value={deckId} onChange={setDeckId} />
         </>
+      )}
+      {type === "excerpt" && (
+        <Muted>Triage Readwise highlights into cards. Each decision counts 1; a card you write counts more.</Muted>
       )}
       {type === "reading" && (
         <ReadwiseDocPicker
@@ -335,6 +365,8 @@ function TaskCard({
   const summary =
     task.type === "flashcard"
       ? `flashcard · ${deckLabel(decks, task.source_ref)} · ${task.cadence}/day`
+      : task.type === "excerpt"
+        ? `excerpts · ${task.cadence}/day`
       : `${task.type} · cadence ${task.cadence}${task.makes_cards_count ? ` · make ${task.makes_cards_count}` : ""}`;
 
   if (editing) {

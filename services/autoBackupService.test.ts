@@ -252,6 +252,7 @@ describe("restoreAutoBackup", () => {
       decks: [], tasks: [], notes: [], cards: [], reviews: [],
       completions: [], habits: [], habitLogs: [], lootCards: [],
       promptItems: [], promptPractices: [], promptDraws: [],
+      excerpts: [], excerptReviews: [], cardExcerpts: [],
     });
     expect(await store.listHabits()).toEqual([]);
 

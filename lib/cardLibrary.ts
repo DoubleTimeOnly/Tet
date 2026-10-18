@@ -8,23 +8,31 @@ import type { Card, Task } from "../db/schema";
  *   - no source task            -> Obsidian (the imported deck, manual + Anki cards)
  *   - source task is `youtube`  -> YouTube  (one bucket, filterable by video)
  *   - source task is `reading`  -> Readwise (one sub-deck per document/task)
+ *   - written from excerpts     -> Excerpts (known from the card_excerpts links,
+ *                                  passed in as a set of card ids)
  *
  * Pure + unit-tested so the browser UI (ui/CardBrowser) stays declarative.
  */
 
-export type LibCategory = "obsidian" | "youtube" | "readwise";
+export type LibCategory = "obsidian" | "youtube" | "readwise" | "excerpts";
 
 export const CATEGORY_LABELS: Record<LibCategory, string> = {
   obsidian: "Obsidian",
   youtube: "YouTube",
   readwise: "Readwise",
+  excerpts: "Excerpts",
 };
 
 export function buildTaskMap(tasks: Task[]): Map<string, Task> {
   return new Map(tasks.map((t) => [t.id, t]));
 }
 
-export function cardCategory(card: Card, taskById: Map<string, Task>): LibCategory {
+export function cardCategory(
+  card: Card,
+  taskById: Map<string, Task>,
+  excerptCardIds?: ReadonlySet<string>,
+): LibCategory {
+  if (excerptCardIds?.has(card.id)) return "excerpts";
   if (!card.source_task_id) return "obsidian";
   const t = taskById.get(card.source_task_id);
   if (t?.type === "youtube") return "youtube";
@@ -36,9 +44,10 @@ export function cardCategory(card: Card, taskById: Map<string, Task>): LibCatego
 export function categoryCounts(
   cards: Card[],
   taskById: Map<string, Task>,
+  excerptCardIds?: ReadonlySet<string>,
 ): Record<LibCategory, number> {
-  const counts: Record<LibCategory, number> = { obsidian: 0, youtube: 0, readwise: 0 };
-  for (const c of cards) counts[cardCategory(c, taskById)]++;
+  const counts: Record<LibCategory, number> = { obsidian: 0, youtube: 0, readwise: 0, excerpts: 0 };
+  for (const c of cards) counts[cardCategory(c, taskById, excerptCardIds)]++;
   return counts;
 }
 

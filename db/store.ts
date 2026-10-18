@@ -11,6 +11,9 @@ import type {
   PromptItem,
   PromptPractice,
   PromptDraw,
+  Excerpt,
+  ExcerptReview,
+  CardExcerpt,
 } from "./schema";
 import type { BackupData } from "../lib/backup";
 
@@ -142,4 +145,23 @@ export interface Store {
   // loot cards (collection)
   insertLootCard(card: LootCard): Promise<void>;
   listLootCards(): Promise<LootCard[]>;
+
+  // excerpts (Readwise highlights under incremental review)
+  /** Append newly synced excerpts (readwise_id is UNIQUE). */
+  insertExcerpts(excerpts: Excerpt[]): Promise<void>;
+  /** Overwrite excerpts' stored rows in place (triage decisions, upstream edits). */
+  updateExcerpts(excerpts: Excerpt[]): Promise<void>;
+  getExcerpt(id: string): Promise<Excerpt | null>;
+  /** Every excerpt, any status (callers filter; see lib/excerpts). */
+  listExcerpts(): Promise<Excerpt[]>;
+  insertExcerptReviews(reviews: ExcerptReview[]): Promise<void>;
+  /** Undo of a triage decision removes its row so it stops counting. */
+  deleteExcerptReview(id: string): Promise<void>;
+  /** Decisions made at/after `sinceMs` (today's progress; 0 for all, for XP). */
+  listExcerptReviewsSince(sinceMs: number): Promise<ExcerptReview[]>;
+  insertCardExcerpts(links: CardExcerpt[]): Promise<void>;
+  /** Every card<->excerpt link (Library browsing). */
+  listCardExcerpts(): Promise<CardExcerpt[]>;
+  /** The excerpts a card was written from. */
+  listExcerptsForCard(cardId: string): Promise<Excerpt[]>;
 }

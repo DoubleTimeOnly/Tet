@@ -11,14 +11,17 @@ import type {
   PromptItem,
   PromptPractice,
   PromptDraw,
+  Excerpt,
+  ExcerptReview,
+  CardExcerpt,
 } from "../db/schema";
 import { backfillNotes } from "./notesBackfill";
 
 /**
  * Complete JSON export/import — the whole instance in one file. Every table
  * round-trips: decks, cards (with FSRS schedule + ignored flag), tasks (with
- * playlist `meta` progress), reviews, completions, habits + their logs, and
- * collected loot cards. Derived state isn't stored and so isn't listed here —
+ * playlist `meta` progress), reviews, completions, habits + their logs,
+ * collected loot cards, and excerpts with their triage history. Derived state isn't stored and so isn't listed here —
  * XP/levels (lib/xp) and streaks (lib/streak) recompute from reviews +
  * completions, so a restore reconstructs them exactly.
  *
@@ -35,8 +38,10 @@ import { backfillNotes } from "./notesBackfill";
 // carried at all, so a Collection could never survive a move to a new device.
 // v4 adds improv prompt pools + practice history, so a curated word list isn't
 // lost on reinstall (the whole point of having curated it).
+// v5 adds excerpts (Readwise highlights under review), their triage history,
+// and the card<->excerpt links, so a restore keeps where every excerpt stands.
 // Older backups simply restore with none of these.
-export const BACKUP_VERSION = 4;
+export const BACKUP_VERSION = 5;
 
 export interface BackupData {
   decks: Deck[];
@@ -51,6 +56,9 @@ export interface BackupData {
   promptItems: PromptItem[];
   promptPractices: PromptPractice[];
   promptDraws: PromptDraw[];
+  excerpts: Excerpt[];
+  excerptReviews: ExcerptReview[];
+  cardExcerpts: CardExcerpt[];
 }
 
 export interface Backup extends BackupData {
@@ -85,6 +93,9 @@ export function exportAll(
     promptItems: data.promptItems,
     promptPractices: data.promptPractices,
     promptDraws: data.promptDraws,
+    excerpts: data.excerpts,
+    excerptReviews: data.excerptReviews,
+    cardExcerpts: data.cardExcerpts,
   };
   return JSON.stringify(backup);
 }
@@ -117,7 +128,7 @@ export function importAll(json: string): BackupData {
   }
   const obj = parsed as Record<string, unknown>;
 
-  const SUPPORTED = [1, 2, 3, BACKUP_VERSION];
+  const SUPPORTED = [1, 2, 3, 4, BACKUP_VERSION];
   if (!SUPPORTED.includes(obj.version as number)) {
     throw new BackupImportError(
       `Unsupported backup version ${String(obj.version)} (expected ${SUPPORTED.join(", ")})`,
@@ -148,6 +159,9 @@ export function importAll(json: string): BackupData {
       promptItems: [],
       promptPractices: [],
       promptDraws: [],
+      excerpts: [],
+      excerptReviews: [],
+      cardExcerpts: [],
     };
   }
 
@@ -167,6 +181,9 @@ export function importAll(json: string): BackupData {
     promptItems: optionalTable<PromptItem>(obj, "promptItems"),
     promptPractices: optionalTable<PromptPractice>(obj, "promptPractices"),
     promptDraws: optionalTable<PromptDraw>(obj, "promptDraws"),
+    excerpts: optionalTable<Excerpt>(obj, "excerpts"),
+    excerptReviews: optionalTable<ExcerptReview>(obj, "excerptReviews"),
+    cardExcerpts: optionalTable<CardExcerpt>(obj, "cardExcerpts"),
   };
 }
 

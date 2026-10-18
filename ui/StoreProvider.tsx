@@ -15,6 +15,7 @@ import { seedPromptPools } from "../services/prompts";
 import { runAutoBackup } from "../services/autoBackupService";
 import { backupFiles } from "../adapters/backupFiles";
 import { autoSyncExcerpts } from "../services/readwiseService";
+import { ensureExcerptSources } from "../services/excerpts";
 
 interface StoreContextValue {
   store: Store;
@@ -54,6 +55,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       // Idempotent and independent of the deck seed, so an install that
       // predates improv prompts picks up the bundled pools on next launch.
       await seedPromptPools(s);
+      // Excerpts imported before sources existed get one source per book.
+      await ensureExcerptSources(s);
       if (!cancelled) setStore(s);
       // Daily safety snapshot. Deliberately not awaited: the app renders as
       // soon as the store is ready, and runAutoBackup swallows its own errors,
@@ -63,7 +66,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       // New Readwise highlights flow into the excerpt queue on their own.
       // Also not awaited, and silent on failure; refetch screens if it added any.
       void autoSyncExcerpts(s).then((r) => {
-        if (r && (r.added > 0 || r.removed > 0) && !cancelled) setVersion((v) => v + 1);
+        if (r && (r.added > 0 || r.removed > 0 || r.newSources > 0) && !cancelled) {
+          setVersion((v) => v + 1);
+        }
       });
     })();
     return () => {
@@ -87,7 +92,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       if (next !== "active") return;
       void runAutoBackup(store, backupFiles);
       void autoSyncExcerpts(store).then((r) => {
-        if (r && (r.added > 0 || r.removed > 0)) setVersion((v) => v + 1);
+        if (r && (r.added > 0 || r.removed > 0 || r.newSources > 0)) setVersion((v) => v + 1);
       });
     });
     return () => sub.remove();

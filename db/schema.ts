@@ -252,11 +252,53 @@ export interface LootCard {
 }
 
 /**
+ * A Readwise source (book, article, tweet thread, podcast…) whose highlights
+ * can feed excerpt review. Only `checked` sources are synced and queued —
+ * nothing is fetched until you check it.
+ *
+ *   new       -> appeared since an earlier refresh; flagged until you act on it
+ *   unchecked -> known, not synced (the default for everything on first refresh)
+ *   checked   -> synced, and feeding the daily queue in `rank` order
+ *   hidden    -> decluttered out of the list; never flagged as new again
+ *   done      -> finished: no longer synced or queued, kept as a record
+ *
+ * `state` is a bare string without a CHECK constraint, like excerpt status.
+ */
+export type SourceState = "new" | "unchecked" | "checked" | "hidden" | "done";
+
+export interface ExcerptSource {
+  id: string;
+  /**
+   * Readwise's user_book_id. Null only for a source reconstructed from
+   * excerpts imported before sources existed, until a refresh matches it by
+   * title.
+   */
+  readwise_book_id: string | null;
+  title: string;
+  author: string | null;
+  /** Readwise category: books, articles, tweets, podcasts, supplementals… */
+  category: string | null;
+  /** Highlight count as Readwise reports it (shown before you check a source). */
+  num_highlights: number;
+  last_highlight_at: number | null;
+  state: SourceState;
+  /**
+   * Daily-queue priority among checked sources, ascending: the queue takes
+   * every ready excerpt of the top source before the next (block order).
+   */
+  rank: number;
+  created_at: number;
+  /** When it was marked done; null otherwise. */
+  done_at: number | null;
+}
+
+/**
  * Excerpts — Readwise highlights imported for incremental reading. Each one is
  * triaged in a daily review until it is resolved: ignored, or turned into a
  * card (alone or combined with others from the set-aside pile).
  *
- *   queued    -> in the review queue, shown once `due` has passed
+ *   queued    -> undecided; in the daily queue once `due` has passed (and its
+ *                source is checked)
  *   set_aside -> parked in the pile, waiting to be combined into one card
  *   carded    -> a card was written from it (resolved)
  *   ignored   -> never shown again (resolved)
@@ -270,6 +312,10 @@ export interface Excerpt {
   id: string;
   /** Readwise highlight id — UNIQUE, the dedup key across syncs. */
   readwise_id: string;
+  /** The ExcerptSource it belongs to (null only before a legacy backfill). */
+  source_id: string | null;
+  /** Position within the source (Readwise `location`), for book order. */
+  location: number | null;
   text: string;
   /** The note you attached to the highlight in Readwise, if any. */
   note: string | null;
@@ -285,16 +331,10 @@ export interface Excerpt {
    * out of the queue and pile; a carded one keeps its card and its link.
    */
   source_deleted: boolean;
-  /**
-   * Imported as part of the initial backlog rather than highlighted recently.
-   * Backlog excerpts queue behind everything else, in a stable shuffled order,
-   * so day one isn't a wall of old highlights and fresh ones aren't buried.
-   */
-  backlog: boolean;
   status: ExcerptStatus;
-  /** Epoch ms after which a queued excerpt is shown (pushed out by Pass). */
+  /** Epoch ms after which a queued excerpt is shown in daily review (pushed out by Later). */
   due: number;
-  /** Times passed — capped (lib/excerpts.MAX_PASSES) so nothing loops forever. */
+  /** Times deferred with Later — capped (lib/excerpts.MAX_PASSES) so nothing loops forever. */
   pass_count: number;
   created_at: number;
   /** When it was carded or ignored; null while unresolved. */
@@ -460,6 +500,8 @@ CREATE TABLE IF NOT EXISTS loot_cards (
 CREATE TABLE IF NOT EXISTS excerpts (
   id                TEXT PRIMARY KEY NOT NULL,
   readwise_id       TEXT NOT NULL UNIQUE,
+  source_id         TEXT,
+  location          REAL,
   text              TEXT NOT NULL,
   note              TEXT,
   book_title        TEXT NOT NULL,
@@ -468,7 +510,6 @@ CREATE TABLE IF NOT EXISTS excerpts (
   highlighted_at    INTEGER,
   source_updated_at INTEGER NOT NULL,
   source_deleted    INTEGER NOT NULL DEFAULT 0,
-  backlog           INTEGER NOT NULL DEFAULT 0,
   status            TEXT NOT NULL,
   due               INTEGER NOT NULL,
   pass_count        INTEGER NOT NULL DEFAULT 0,
@@ -476,6 +517,20 @@ CREATE TABLE IF NOT EXISTS excerpts (
   resolved_at       INTEGER
 );
 CREATE INDEX IF NOT EXISTS idx_excerpts_status_due ON excerpts(status, due);
+
+CREATE TABLE IF NOT EXISTS excerpt_sources (
+  id                TEXT PRIMARY KEY NOT NULL,
+  readwise_book_id  TEXT UNIQUE,
+  title             TEXT NOT NULL,
+  author            TEXT,
+  category          TEXT,
+  num_highlights    INTEGER NOT NULL DEFAULT 0,
+  last_highlight_at INTEGER,
+  state             TEXT NOT NULL,
+  rank              INTEGER NOT NULL DEFAULT 0,
+  created_at        INTEGER NOT NULL,
+  done_at           INTEGER
+);
 
 CREATE TABLE IF NOT EXISTS excerpt_reviews (
   id          TEXT PRIMARY KEY NOT NULL,

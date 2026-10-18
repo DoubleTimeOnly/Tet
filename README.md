@@ -121,7 +121,7 @@ The thing Tet is built around — do this once to see it work end to end:
 All business logic is covered by a fast headless test suite (no device needed):
 
 ```bash
-npm test           # jest — 406 tests
+npm test           # jest — 427 tests
 npm run typecheck  # tsc, whole app
 ```
 
@@ -148,21 +148,52 @@ SQLite.
 
 ## Excerpt review (Readwise highlights → cards)
 
-Incremental reading over your Readwise highlights. With a Readwise token in
-Settings, highlights sync into an excerpt queue on their own (on app open and
-when the app returns to the foreground, at most every 30 minutes; **Library →
-Excerpts → Sync now** forces one). The first sync that brings in highlights
-also adds a daily **Review excerpts** task (10/day; edit it like any task).
+Incremental reading over your Readwise highlights. You choose which sources
+(books, articles, …) feed it. Nothing is synced until you check a source.
 
-Each excerpt is shown alone, with its book, author and an **Open ↗** link to
-the highlight on Readwise. Four choices, in a footer under your thumb:
+**Sources** (**Library → Excerpts → Sources**, after adding your Readwise token
+in Settings):
+
+| Tab       | What's there |
+|-----------|--------------|
+| Active    | Checked sources. They sync, and the daily queue works through them top to bottom. Reorder with ↑/↓. |
+| Available | Everything else, sorted by highlight count. Sources that appeared since your last refresh are flagged **NEW** (also shown on Today) until you **Check**, **Hide** or choose **Not now**. |
+| Done      | Sources you finished, with what you made of them. **Reopen** to pick one back up. |
+| Hidden    | Clutter you don't care about (one-line articles). Never flagged new again. **Unhide** returns it to Available. |
+
+- **Refresh:** pulls only the list of sources. **Checking** a source fetches
+  its highlights, and from then on each sync (app open, foreground, at most
+  every 30 minutes, or **Sync now**) picks up its new highlights, edits and
+  deletions.
+- **Unchecking:** stops syncing. Imported excerpts are kept, so rechecking
+  loses nothing.
+- **Done:** when a source still has undecided excerpts, you're asked to
+  **Ignore all** (no points), **Leave them** (out of the queue, still reachable
+  by Focus), or **Cancel**.
+
+The first check also adds a daily **Review excerpts** task (10/day; edit it
+like any task).
+
+There are two separate ways to work through excerpts:
+
+- **Daily review** (the Today task): a points goal per day, drawn in **block
+  order**. Every ready excerpt of your top Active source comes first, in book
+  order, then the next source. Nothing is mixed.
+- **Focus** (a source's **Focus** button): every undecided excerpt of that one
+  source, in book order, including ones put off with Later. Rank and schedule
+  don't apply. It ends when nothing is left.
+
+Each excerpt is shown alone, with its source and an **Open ↗** link to
+Readwise. The choices sit in a footer under your thumb:
 
 - **Ignore**: never shown again.
-- **Pass**: comes back in 3, then 10, then 30 days. After 3 passes, Pass is
-  no longer offered, so you have to card it, set it aside or ignore it.
+- **Later** (daily review): comes back in 2, then 5, then 7 days (about two
+  weeks in all). It slots back in by its source's rank, not ahead of it, so
+  blocks stay intact. After 3 Laters it must be decided.
+- **Skip** (focus mode): moves it to the end of this session. Nothing is
+  stored and it earns no points.
 - **Set aside**: parks it in the **set-aside pile**. There, tap several
-  excerpts and write one card from all of them, or send one back to the
-  queue.
+  excerpts and write one card from all of them, or send one back to the queue.
 - **Make card**: write a plain front/back card. It joins your normal
   flashcard reviews (deck "Readwise excerpts"), and the excerpt is done.
 
@@ -174,30 +205,23 @@ them. A card written from excerpts has a **Source** button (in review after
 the answer is shown, and in **Library → Browse cards → Excerpts**) that shows
 the excerpt(s) it came from.
 
-How the open questions were settled:
+Rules worth knowing:
 
-- **Counting toward the daily task.** Each triage decision counts 1, and each
-  card written counts 3 (`CARD_POINTS`), so writing cards isn't penalised
-  against quick passes. A combined card counts 3 once. Like flashcards, the
-  goal is capped to what's available, so a thin queue completes at what's
-  there and an empty one completes on its own. The cap counts excerpts, not
-  points, so it doesn't move during the day.
-- **Edited or deleted in Readwise.** An edit updates the stored excerpt in
-  place, whatever its state. A card already written from it is never
-  touched. A deleted (or discarded) highlight drops out of the queue and the
-  pile. If it was already carded, the card stays and its source shows
-  "Deleted in Readwise".
-- **The backlog.** On the very first sync, highlights older than 7 days are
-  marked backlog. Recent highlights and passed excerpts that have come due are
-  shown first, then the backlog in a stable shuffled order (so books are mixed
-  rather than served one at a time). The daily goal is the only limit on how
-  many you see. "Keep going" after the goal is optional.
-- **Duplicates.** The Readwise highlight id is unique. The same text in the
-  same book from a second source (e.g. Kindle and Reader) is also skipped.
+- **Points:** each decision counts 1 and each card counts 3 (`CARD_POINTS`),
+  so writing cards isn't penalised against quick deferrals. A combined card
+  counts 3 once. Decisions in focus mode count too. Like flashcards, the
+  daily goal is capped to what's available, so a thin queue completes at
+  what's there.
+- **Edited or deleted in Readwise:** an edit updates the stored excerpt in
+  place. A card already written from it is never touched. A deleted highlight
+  drops out of the queue and pile. If it was carded, the card stays and its
+  source shows "Deleted in Readwise".
+- **Duplicates:** the highlight id is unique, and the same text in the same
+  book from a second source (e.g. Kindle and Reader) is skipped.
 
-Logic is in `lib/excerpts.ts` (pure, tested), sync and decisions are in
-`services/excerpts.ts`, and the Readwise v2 export client is in
-`lib/readwiseHighlights.ts`.
+Logic is in `lib/excerpts.ts` (pure, tested), sync and source actions are in
+`services/excerpts.ts`, and the Readwise v2 client (`/books/` and `/export/`)
+is in `lib/readwiseHighlights.ts`.
 
 ## Improv practice
 

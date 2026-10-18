@@ -1,7 +1,7 @@
 import { localDayKey, type Instant } from "./dayKey";
 import { burySiblings } from "./siblings";
 import { excerptSlice, type ExcerptSlice } from "./excerpts";
-import type { Task, Card, Completion, Excerpt, ExcerptReview } from "../db/schema";
+import type { Task, Card, Completion, Excerpt, ExcerptReview, ExcerptSource } from "../db/schema";
 
 /**
  * computeToday — the day's to-do list: each active task that isn't yet done.
@@ -38,11 +38,11 @@ export interface DailySliceInput {
    */
   reviewedDeckIds?: string[];
   /**
-   * Every excerpt plus today's decisions on them, for excerpt tasks. Absent ->
+   * Every excerpt and source plus today's decisions, for excerpt tasks. Absent ->
    * an excerpt task sees an empty queue (and so auto-completes, like a
    * flashcard task with nothing due).
    */
-  excerpts?: { excerpts: Excerpt[]; reviewsToday: ExcerptReview[] };
+  excerpts?: { excerpts: Excerpt[]; sources: ExcerptSource[]; reviewsToday: ExcerptReview[] };
 }
 
 /** Deck-scoped daily review state for a flashcard task. */
@@ -150,6 +150,7 @@ export function computeToday(input: DailySliceInput): DailySlice {
       const ex = excerptSlice(
         task,
         input.excerpts?.excerpts ?? [],
+        input.excerpts?.sources ?? [],
         input.excerpts?.reviewsToday ?? [],
         now,
       );

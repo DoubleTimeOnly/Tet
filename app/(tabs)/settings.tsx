@@ -99,7 +99,7 @@ export default function SettingsScreen() {
 
       <Card>
         <Subtitle>Readwise</Subtitle>
-        <Muted>API token (stored in {Platform.OS === "web" ? "localStorage" : "secure storage"}). Used for reading tasks, and to sync your highlights into the excerpt queue (Library → Excerpts).</Muted>
+        <Muted>API token (stored in {Platform.OS === "web" ? "localStorage" : "secure storage"}). Used for reading tasks, and to sync highlights from the sources you choose in Library → Excerpts → Sources.</Muted>
         <TextInput
           value={token}
           onChangeText={setToken}

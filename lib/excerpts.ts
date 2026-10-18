@@ -1,35 +1,42 @@
 import { DateTime } from "luxon";
 import { startOfTetDay, type Instant } from "./dayKey";
 import { newId } from "./id";
-import type { Excerpt, ExcerptReview, Task } from "../db/schema";
-import type { ReadwiseHighlight } from "./readwiseHighlights";
+import type { Excerpt, ExcerptReview, ExcerptSource, Task } from "../db/schema";
+import type { ReadwiseBook, ReadwiseHighlight } from "./readwiseHighlights";
 
 /**
  * Excerpt review — incremental reading over Readwise highlights. Pure and
  * unit-tested; services/excerpts wires it to the Store.
  *
- * Each excerpt is triaged until it is resolved:
+ * Highlights come only from sources you check. Each excerpt is triaged until
+ * it is resolved:
  *   - Ignore     -> never shown again.
- *   - Pass       -> shown again later, at a growing interval (PASS_INTERVAL_DAYS).
+ *   - Later      -> (daily review) back in 2, then 5, then 7 days.
+ *   - Skip       -> (focus mode) to the end of this session; nothing stored.
  *   - Set aside  -> parked in a pile to combine with others into one card.
  *   - Make card  -> a front/back card is written from it; it leaves the queue.
+ *
+ * Two ways to work through excerpts, kept separate:
+ *   - Daily review: a points goal per day, drawn from checked sources in rank
+ *     order, one source at a time (block order), each in book order.
+ *   - Focus mode: every undecided excerpt of one source, in book order,
+ *     regardless of schedule or rank, until none are left.
  */
 
 // ---------------------------------------------------------------------------
-// Pass: growing interval, capped
+// Later: growing interval, capped
 
 /**
- * Days until a passed excerpt comes back, indexed by how many times it had
- * already been passed. Grows roughly x3 per pass, like an SRS interval, but
- * there is no recall to grade here, so a fixed ladder stands in for FSRS.
+ * Days until an excerpt deferred with Later comes back, indexed by how many
+ * times it had already been deferred. About two weeks in total — long enough
+ * to come back to it fresh, short enough not to lose track of it.
  */
-export const PASS_INTERVAL_DAYS = [3, 10, 30] as const;
+export const PASS_INTERVAL_DAYS = [2, 5, 7] as const;
 
 /**
- * After this many passes an excerpt must be resolved (carded or ignored) or
- * set aside — Pass is no longer offered. Without a cap a highlight you keep
- * shrugging at would come back forever; three looks spread over ~6 weeks is
- * enough to know whether it's worth a card.
+ * After this many Laters an excerpt must be decided (carded, set aside or
+ * ignored) — Later is no longer offered. Without a cap a highlight you keep
+ * shrugging at would come back forever.
  */
 export const MAX_PASSES = PASS_INTERVAL_DAYS.length;
 
@@ -38,9 +45,9 @@ export function canPass(excerpt: Excerpt): boolean {
 }
 
 /**
- * Apply a Pass: push `due` out to the start of the Tet day `n` days from now
- * (so it's waiting first thing that morning rather than at an arbitrary hour),
- * bump the pass count, and lift it out of the backlog so it queues by date.
+ * Apply a Later: push `due` out to the start of the Tet day `n` days from now
+ * (so it's waiting first thing that morning rather than at an arbitrary hour)
+ * and bump the count.
  */
 export function passExcerpt(excerpt: Excerpt, now: Instant, tz: string): Excerpt {
   if (!canPass(excerpt)) {
@@ -51,51 +58,90 @@ export function passExcerpt(excerpt: Excerpt, now: Instant, tz: string): Excerpt
   const later = DateTime.fromMillis(startOfTetDay(nowMs, tz), { zone: tz })
     .plus({ days })
     .toMillis();
-  return { ...excerpt, due: later, pass_count: excerpt.pass_count + 1, backlog: false };
+  return { ...excerpt, due: later, pass_count: excerpt.pass_count + 1 };
 }
 
 // ---------------------------------------------------------------------------
 // Queue order
 
-/** Unresolved, not deleted in Readwise, and in the given status. */
+/** In the given status and not deleted in Readwise. */
 function live(e: Excerpt, status: Excerpt["status"]): boolean {
   return e.status === status && !e.source_deleted;
 }
 
-/**
- * Stable pseudo-random rank from an id (FNV-1a). Backlog excerpts are shown in
- * this order so a 3,000-highlight import mixes books instead of serving one
- * book's highlights in a row, and the order doesn't reshuffle between opens.
- */
-export function shuffleRank(id: string): number {
-  let h = 0x811c9dc5;
-  for (let i = 0; i < id.length; i++) {
-    h ^= id.charCodeAt(i);
-    h = Math.imul(h, 0x01000193);
-  }
-  return h >>> 0;
+/** Undecided: still waiting for Ignore / Set aside / Make card. */
+export function isUndecided(e: Excerpt): boolean {
+  return live(e, "queued");
+}
+
+/** Book order within a source: Readwise location, then when highlighted. */
+export function bookOrder(a: Excerpt, b: Excerpt): number {
+  return (
+    nullsLast(a.location, b.location) ||
+    nullsLast(a.highlighted_at, b.highlighted_at) ||
+    a.created_at - b.created_at ||
+    a.id.localeCompare(b.id)
+  );
+}
+
+function nullsLast(a: number | null, b: number | null): number {
+  if (a === b) return 0;
+  if (a === null) return 1;
+  if (b === null) return -1;
+  return a - b;
+}
+
+/** Checked sources, top priority first. */
+export function rankedSources(sources: ExcerptSource[]): ExcerptSource[] {
+  return sources
+    .filter((s) => s.state === "checked")
+    .sort((a, b) => a.rank - b.rank || a.created_at - b.created_at);
 }
 
 /**
- * Queued excerpts ready to review now, in the order they should be shown:
- * recent highlights and passed excerpts that have come due first (oldest due
- * first), then the backlog in its stable shuffled order.
+ * The daily queue: undecided excerpts whose time has come, from checked
+ * sources only, in block order — every ready excerpt of the top-ranked source,
+ * then the next source, each in book order. An excerpt deferred with Later
+ * slots back in by its source's rank, not ahead of it, so blocks stay intact.
  */
-export function excerptQueue(excerpts: Excerpt[], now: Instant): Excerpt[] {
+export function excerptQueue(
+  excerpts: Excerpt[],
+  sources: ExcerptSource[],
+  now: Instant,
+): Excerpt[] {
   const nowMs = now instanceof Date ? now.getTime() : now;
-  const ready = excerpts.filter((e) => live(e, "queued") && e.due <= nowMs);
-  const fresh = ready.filter((e) => !e.backlog).sort((a, b) => a.due - b.due);
-  const backlog = ready
-    .filter((e) => e.backlog)
-    .sort((a, b) => shuffleRank(a.id) - shuffleRank(b.id));
-  return [...fresh, ...backlog];
+  const position = new Map(rankedSources(sources).map((s, i) => [s.id, i]));
+  return excerpts
+    .filter((e) => isUndecided(e) && e.due <= nowMs && e.source_id !== null && position.has(e.source_id))
+    .sort((a, b) => position.get(a.source_id!)! - position.get(b.source_id!)! || bookOrder(a, b));
+}
+
+/**
+ * Focus mode: every undecided excerpt of one source, in book order — including
+ * ones deferred with Later whose date hasn't come. Ignores rank and schedule.
+ */
+export function focusQueue(excerpts: Excerpt[], sourceId: string): Excerpt[] {
+  return excerpts.filter((e) => e.source_id === sourceId && isUndecided(e)).sort(bookOrder);
+}
+
+/**
+ * Apply a focus session's skips: skipped excerpts move to the end, in the
+ * order they were skipped. Skips live only in the session — nothing is stored.
+ */
+export function withSkipsLast(queue: Excerpt[], skipped: string[]): Excerpt[] {
+  const skippedSet = new Set(skipped);
+  const byId = new Map(queue.map((e) => [e.id, e]));
+  return [
+    ...queue.filter((e) => !skippedSet.has(e.id)),
+    ...skipped.map((id) => byId.get(id)).filter((e): e is Excerpt => e !== undefined),
+  ];
 }
 
 /** The set-aside pile, grouped by book so related excerpts sit together. */
 export function setAsidePile(excerpts: Excerpt[]): Excerpt[] {
   return excerpts
     .filter((e) => live(e, "set_aside"))
-    .sort((a, b) => a.book_title.localeCompare(b.book_title) || a.created_at - b.created_at);
+    .sort((a, b) => a.book_title.localeCompare(b.book_title) || bookOrder(a, b));
 }
 
 // ---------------------------------------------------------------------------
@@ -104,18 +150,19 @@ export function setAsidePile(excerpts: Excerpt[]): Excerpt[] {
 /**
  * Writing a card is worth this many points toward the daily excerpt goal; any
  * other decision is worth 1. A card takes several times longer than a triage
- * tap, and counting it as 1 would quietly reward passing over carding — the
+ * tap, and counting it as 1 would quietly reward deferring over carding — the
  * one outcome the whole feature exists to produce.
  */
 export const CARD_POINTS = 3;
 
-/** Default daily goal for a new excerpt task ("review 10 excerpts"). */
+/** Default daily goal for a new excerpt task. */
 export const DEFAULT_EXCERPT_CADENCE = 10;
 
 /**
  * Points earned by a set of decisions. A combined card writes one `card` row
  * per excerpt it used, so cards are counted by distinct card_id. Pulling an
- * excerpt back out of the pile is housekeeping and earns nothing.
+ * excerpt back out of the pile is housekeeping and earns nothing (and a focus
+ * Skip writes no row at all).
  */
 export function excerptPoints(reviews: ExcerptReview[]): number {
   const cards = new Set<string>();
@@ -139,16 +186,18 @@ export function excerptsHandled(reviews: ExcerptReview[]): Set<string> {
 export interface ExcerptSlice {
   /** Daily goal: the task's cadence, capped to what's achievable today. */
   goal: number;
-  /** Points earned today. */
+  /** Points earned today (daily review and focus sessions alike). */
   pointsToday: number;
   /** max(0, goal - pointsToday). */
   remaining: number;
   /** Excerpts to show now, in order, length <= remaining. */
   queue: Excerpt[];
-  /** Every queued excerpt ready now (the queue is a prefix of this). */
+  /** Every excerpt in the daily queue now (the queue is a prefix of this). */
   readyCount: number;
   /** Size of the set-aside pile. */
   setAsideCount: number;
+  /** Sources flagged new since an earlier refresh, awaiting a decision. */
+  newSourceCount: number;
   done: boolean;
 }
 
@@ -165,10 +214,11 @@ export interface ExcerptSlice {
 export function excerptSlice(
   task: Task,
   excerpts: Excerpt[],
+  sources: ExcerptSource[],
   todaysReviews: ExcerptReview[],
   now: Instant,
 ): ExcerptSlice {
-  const ready = excerptQueue(excerpts, now);
+  const ready = excerptQueue(excerpts, sources, now);
   const pointsToday = excerptPoints(todaysReviews);
   const handled = excerptsHandled(todaysReviews).size;
   const goal = Math.min(task.cadence, handled + ready.length);
@@ -180,19 +230,202 @@ export function excerptSlice(
     queue: ready.slice(0, remaining),
     readyCount: ready.length,
     setAsideCount: setAsidePile(excerpts).length,
+    newSourceCount: sources.filter((s) => s.state === "new").length,
     done: pointsToday >= goal,
   };
 }
 
 // ---------------------------------------------------------------------------
-// Readwise sync
+// Sources
+
+export interface SourceStats {
+  undecided: number;
+  setAside: number;
+  carded: number;
+  ignored: number;
+}
+
+/** Per-source tallies, for the Sources screen and the done-source record. */
+export function sourceStats(excerpts: Excerpt[]): Map<string, SourceStats> {
+  const out = new Map<string, SourceStats>();
+  for (const e of excerpts) {
+    if (!e.source_id || e.source_deleted) continue;
+    let s = out.get(e.source_id);
+    if (!s) {
+      s = { undecided: 0, setAside: 0, carded: 0, ignored: 0 };
+      out.set(e.source_id, s);
+    }
+    if (e.status === "queued") s.undecided++;
+    else if (e.status === "set_aside") s.setAside++;
+    else if (e.status === "carded") s.carded++;
+    else if (e.status === "ignored") s.ignored++;
+  }
+  return out;
+}
+
+/** Rank for a source joining the checked list: at the bottom. */
+export function nextRank(sources: ExcerptSource[]): number {
+  const ranks = sources.filter((s) => s.state === "checked").map((s) => s.rank);
+  return ranks.length === 0 ? 0 : Math.max(...ranks) + 1;
+}
 
 /**
- * On the very first import, highlights older than this are the backlog; newer
- * ones are treated as fresh so what you highlighted this week comes up first.
+ * Move one checked source up or down a place. Returns the checked sources with
+ * ranks rewritten 0..n-1 in the new order (only the ones whose rank changed
+ * need saving, but writing them all keeps ranks dense).
  */
-export const BACKLOG_GRACE_DAYS = 7;
-const DAY_MS = 24 * 60 * 60 * 1000;
+export function moveSource(
+  sources: ExcerptSource[],
+  id: string,
+  direction: "up" | "down",
+): ExcerptSource[] {
+  const ordered = rankedSources(sources);
+  const i = ordered.findIndex((s) => s.id === id);
+  const j = direction === "up" ? i - 1 : i + 1;
+  if (i >= 0 && j >= 0 && j < ordered.length) {
+    [ordered[i], ordered[j]] = [ordered[j]!, ordered[i]!];
+  }
+  return ordered.map((s, rank) => ({ ...s, rank }));
+}
+
+function normTitle(s: string): string {
+  return s.toLowerCase().replace(/\s+/g, " ").trim();
+}
+
+export interface SourcePlan {
+  inserts: ExcerptSource[];
+  /** Existing sources whose stored row changed (title, counts, adopted book id). */
+  updates: ExcerptSource[];
+  /** Of `inserts`, how many were flagged new (vs. unchecked on first refresh). */
+  newCount: number;
+}
+
+/**
+ * Merge a refreshed Readwise book list into the local sources.
+ *
+ *   - Unknown book         -> inserted unchecked on the very first refresh
+ *                             (nothing is synced until you choose), and flagged
+ *                             `new` on every refresh after that.
+ *   - Known book           -> title/author/counts refreshed; state untouched,
+ *                             so a hidden source stays hidden however many
+ *                             highlights it gains.
+ *   - Legacy source (no book id, rebuilt from excerpts imported before sources
+ *     existed) -> adopts the book id of the book with the same title.
+ *
+ * A book that disappears from the list is left alone.
+ */
+export function planSources(
+  existing: ExcerptSource[],
+  books: ReadwiseBook[],
+  now: number,
+  opts: { newId?: () => string } = {},
+): SourcePlan {
+  const makeId = opts.newId ?? newId;
+  const firstRefresh = !existing.some((s) => s.readwise_book_id !== null);
+  const byBookId = new Map(
+    existing.filter((s) => s.readwise_book_id !== null).map((s) => [s.readwise_book_id!, s]),
+  );
+  const legacyByTitle = new Map(
+    existing.filter((s) => s.readwise_book_id === null).map((s) => [normTitle(s.title), s]),
+  );
+  const inserts: ExcerptSource[] = [];
+  const updates: ExcerptSource[] = [];
+
+  for (const b of books) {
+    const current = byBookId.get(b.id) ?? legacyByTitle.get(normTitle(b.title));
+    if (current) {
+      legacyByTitle.delete(normTitle(current.title));
+      const next: ExcerptSource = {
+        ...current,
+        readwise_book_id: b.id,
+        title: b.title,
+        author: b.author,
+        category: b.category,
+        num_highlights: b.numHighlights,
+        last_highlight_at: b.lastHighlightAt,
+      };
+      byBookId.set(b.id, next);
+      if (!sameSource(current, next)) updates.push(next);
+      continue;
+    }
+    const s: ExcerptSource = {
+      id: makeId(),
+      readwise_book_id: b.id,
+      title: b.title,
+      author: b.author,
+      category: b.category,
+      num_highlights: b.numHighlights,
+      last_highlight_at: b.lastHighlightAt,
+      state: firstRefresh ? "unchecked" : "new",
+      rank: 0,
+      created_at: now,
+      done_at: null,
+    };
+    inserts.push(s);
+    byBookId.set(b.id, s);
+  }
+  return {
+    inserts,
+    updates,
+    newCount: inserts.filter((s) => s.state === "new").length,
+  };
+}
+
+function sameSource(a: ExcerptSource, b: ExcerptSource): boolean {
+  return (
+    a.readwise_book_id === b.readwise_book_id &&
+    a.title === b.title &&
+    a.author === b.author &&
+    a.category === b.category &&
+    a.num_highlights === b.num_highlights &&
+    a.last_highlight_at === b.last_highlight_at
+  );
+}
+
+/**
+ * Excerpts imported before sources existed carry no source_id. Rebuild one
+ * checked source per book title (reusing a source of that title if there is
+ * one) so they stay in the queue; the next refresh adopts the Readwise id.
+ */
+export function backfillSources(
+  excerpts: Excerpt[],
+  sources: ExcerptSource[],
+  now: number,
+  opts: { newId?: () => string } = {},
+): { sources: ExcerptSource[]; excerpts: Excerpt[] } {
+  const orphans = excerpts.filter((e) => e.source_id === null);
+  if (orphans.length === 0) return { sources: [], excerpts: [] };
+  const makeId = opts.newId ?? newId;
+  const byTitle = new Map(sources.map((s) => [normTitle(s.title), s]));
+  const created: ExcerptSource[] = [];
+  let rank = nextRank(sources);
+  const updated = orphans.map((e) => {
+    const key = normTitle(e.book_title);
+    let s = byTitle.get(key);
+    if (!s) {
+      s = {
+        id: makeId(),
+        readwise_book_id: null,
+        title: e.book_title,
+        author: e.book_author,
+        category: null,
+        num_highlights: 0,
+        last_highlight_at: null,
+        state: "checked",
+        rank: rank++,
+        created_at: now,
+        done_at: null,
+      };
+      byTitle.set(key, s);
+      created.push(s);
+    }
+    return { ...e, source_id: s.id };
+  });
+  return { sources: created, excerpts: updated };
+}
+
+// ---------------------------------------------------------------------------
+// Highlight sync
 
 /** Normalised text+book key: catches one highlight synced in from two sources. */
 export function dedupKey(bookTitle: string, text: string): string {
@@ -211,13 +444,12 @@ export interface SyncPlan {
 /**
  * Merge a batch of Readwise highlights into the local excerpts.
  *
- *   - New highlight            -> queued, due now. On the first import (no
- *                                 excerpts yet) anything older than
- *                                 BACKLOG_GRACE_DAYS is flagged backlog.
- *   - Same readwise id again   -> never a second excerpt. If the text, note or
- *                                 source changed, the stored copy is updated in
- *                                 place, whatever its status — a card already
- *                                 written from it is yours and is not touched.
+ *   - New highlight            -> queued, due now, under its source. Skipped
+ *                                 if its book isn't a known source.
+ *   - Same readwise id again   -> never a second excerpt. If the text, note,
+ *                                 position or source changed, the stored copy
+ *                                 is updated in place, whatever its status — a
+ *                                 card already written from it is not touched.
  *   - Deleted / discarded      -> marked source_deleted: drops out of the queue
  *                                 and pile; a carded excerpt keeps its card.
  *   - Same text in same book   -> skipped (one highlight synced from two
@@ -226,11 +458,11 @@ export interface SyncPlan {
 export function planSync(
   existing: Excerpt[],
   incoming: ReadwiseHighlight[],
+  sourceByBookId: Map<string, ExcerptSource>,
   now: number,
   opts: { newId?: () => string } = {},
 ): SyncPlan {
   const makeId = opts.newId ?? newId;
-  const firstImport = existing.length === 0;
   const byReadwiseId = new Map(existing.map((e) => [e.readwise_id, e]));
   const seenText = new Set(
     existing.filter((e) => !e.source_deleted).map((e) => dedupKey(e.book_title, e.text)),
@@ -239,10 +471,12 @@ export function planSync(
   const updates = new Map<string, Excerpt>();
 
   for (const h of incoming) {
-    const current = updates.get(h.id) ?? byReadwiseId.get(h.id);
+    const current = byReadwiseId.get(h.id);
     if (current) {
       const next: Excerpt = {
         ...current,
+        source_id: sourceByBookId.get(h.bookId)?.id ?? current.source_id,
+        location: h.location ?? current.location,
         text: h.deleted ? current.text : h.text,
         note: h.deleted ? current.note : h.note,
         book_title: h.bookTitle,
@@ -257,15 +491,17 @@ export function planSync(
       }
       continue;
     }
-    if (h.deleted || !h.text.trim()) continue;
+    const source = sourceByBookId.get(h.bookId);
+    if (!source || h.deleted || !h.text.trim()) continue;
     const key = dedupKey(h.bookTitle, h.text);
     if (seenText.has(key)) continue;
     seenText.add(key);
 
-    const highlightedAt = h.highlightedAt ?? h.updatedAt;
     const e: Excerpt = {
       id: makeId(),
       readwise_id: h.id,
+      source_id: source.id,
+      location: h.location,
       text: h.text,
       note: h.note,
       book_title: h.bookTitle,
@@ -274,7 +510,6 @@ export function planSync(
       highlighted_at: h.highlightedAt,
       source_updated_at: h.updatedAt,
       source_deleted: false,
-      backlog: firstImport && highlightedAt < now - BACKLOG_GRACE_DAYS * DAY_MS,
       status: "queued",
       due: now,
       pass_count: 0,
@@ -299,6 +534,8 @@ export function planSync(
 
 function sameStored(a: Excerpt, b: Excerpt): boolean {
   return (
+    a.source_id === b.source_id &&
+    a.location === b.location &&
     a.text === b.text &&
     a.note === b.note &&
     a.book_title === b.book_title &&
@@ -310,11 +547,17 @@ function sameStored(a: Excerpt, b: Excerpt): boolean {
 }
 
 /**
- * Incremental-sync cursor: the newest Readwise updated_at already stored.
- * Derived rather than persisted, so a backup restore carries it for free.
- * Null when nothing is stored yet (fetch the full export).
+ * Incremental-sync cursor for one source: the newest Readwise updated_at
+ * stored for it. Derived rather than persisted, so a backup restore carries it
+ * for free, and unchecking then rechecking a source resumes where it left off.
+ * Null when nothing of it is stored yet (fetch all of its highlights).
  */
-export function syncCursor(excerpts: Excerpt[]): number | null {
-  if (excerpts.length === 0) return null;
-  return excerpts.reduce((max, e) => Math.max(max, e.source_updated_at), 0);
+export function syncCursor(excerpts: Excerpt[], sourceId: string): number | null {
+  let max: number | null = null;
+  for (const e of excerpts) {
+    if (e.source_id === sourceId && (max === null || e.source_updated_at > max)) {
+      max = e.source_updated_at;
+    }
+  }
+  return max;
 }

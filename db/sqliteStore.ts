@@ -16,6 +16,7 @@ import type {
   PromptDraw,
   Excerpt,
   ExcerptReview,
+  ExcerptSource,
   CardExcerpt,
 } from "./schema";
 import { SCHEMA_SQL, tasksTableSql } from "./schema";
@@ -78,6 +79,14 @@ export class SqliteStore implements Store {
     );
     if (tasksDdl && !tasksDdl.sql.includes("'excerpt'")) {
       await this.rebuildTasksTable();
+    }
+    // Excerpt sources. An excerpts table created before them lacks the source
+    // link and book position; the rows are backfilled into one source per
+    // book title by services/excerpts.ensureExcerptSources on launch.
+    const excerptCols = await this.conn.getAllAsync<{ name: string }>("PRAGMA table_info(excerpts)");
+    if (!excerptCols.some((c) => c.name === "source_id")) {
+      await this.conn.execAsync("ALTER TABLE excerpts ADD COLUMN source_id TEXT");
+      await this.conn.execAsync("ALTER TABLE excerpts ADD COLUMN location REAL");
     }
   }
 
@@ -421,6 +430,7 @@ export class SqliteStore implements Store {
       excerpts,
       excerptReviews,
       cardExcerpts,
+      excerptSources,
     ] = await Promise.all([
       this.listDecks(),
       this.listTasks(),
@@ -437,6 +447,7 @@ export class SqliteStore implements Store {
       this.listExcerpts(),
       this.listExcerptReviewsSince(0),
       this.listCardExcerpts(),
+      this.listExcerptSources(),
     ]);
     return {
       decks,
@@ -454,6 +465,7 @@ export class SqliteStore implements Store {
       excerpts,
       excerptReviews,
       cardExcerpts,
+      excerptSources,
     };
   }
   async replaceAll(data: BackupData): Promise<void> {
@@ -465,6 +477,7 @@ export class SqliteStore implements Store {
         "card_excerpts",
         "excerpt_reviews",
         "excerpts",
+        "excerpt_sources",
         "completions",
         "reviews",
         "cards",
@@ -511,6 +524,7 @@ export class SqliteStore implements Store {
       await this.writeExcerpts(data.excerpts ?? []);
       await this.writeExcerptReviews(data.excerptReviews ?? []);
       await this.writeCardExcerpts(data.cardExcerpts ?? []);
+      await this.writeExcerptSources(data.excerptSources ?? []);
     });
   }
   async insertLootCard(card: LootCard): Promise<void> {
@@ -532,13 +546,13 @@ export class SqliteStore implements Store {
     await this.conn.withTransactionAsync(async () => {
       for (const e of excerpts) {
         await this.conn.runAsync(
-          `UPDATE excerpts SET text = ?, note = ?, book_title = ?, book_author = ?, url = ?,
-             highlighted_at = ?, source_updated_at = ?, source_deleted = ?, backlog = ?,
-             status = ?, due = ?, pass_count = ?, resolved_at = ?
+          `UPDATE excerpts SET source_id = ?, location = ?, text = ?, note = ?, book_title = ?,
+             book_author = ?, url = ?, highlighted_at = ?, source_updated_at = ?,
+             source_deleted = ?, status = ?, due = ?, pass_count = ?, resolved_at = ?
            WHERE id = ?`,
           [
-            e.text, e.note, e.book_title, e.book_author, e.url, e.highlighted_at,
-            e.source_updated_at, e.source_deleted ? 1 : 0, e.backlog ? 1 : 0, e.status,
+            e.source_id, e.location, e.text, e.note, e.book_title, e.book_author, e.url,
+            e.highlighted_at, e.source_updated_at, e.source_deleted ? 1 : 0, e.status,
             e.due, e.pass_count, e.resolved_at, e.id,
           ],
         );
@@ -587,18 +601,57 @@ export class SqliteStore implements Store {
   private async writeExcerpts(excerpts: Excerpt[]): Promise<void> {
     for (const e of excerpts) {
       await this.conn.runAsync(
-        `INSERT INTO excerpts (id, readwise_id, text, note, book_title, book_author, url,
-           highlighted_at, source_updated_at, source_deleted, backlog, status, due,
+        `INSERT INTO excerpts (id, readwise_id, source_id, location, text, note, book_title,
+           book_author, url, highlighted_at, source_updated_at, source_deleted, status, due,
            pass_count, created_at, resolved_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
-          e.id, e.readwise_id, e.text, e.note, e.book_title, e.book_author, e.url,
-          e.highlighted_at, e.source_updated_at, e.source_deleted ? 1 : 0, e.backlog ? 1 : 0,
-          e.status, e.due, e.pass_count, e.created_at, e.resolved_at,
+          e.id, e.readwise_id, e.source_id ?? null, e.location ?? null, e.text, e.note,
+          e.book_title, e.book_author, e.url, e.highlighted_at, e.source_updated_at,
+          e.source_deleted ? 1 : 0, e.status, e.due, e.pass_count, e.created_at, e.resolved_at,
         ],
       );
     }
   }
+  async insertExcerptSources(sources: ExcerptSource[]): Promise<void> {
+    if (sources.length === 0) return;
+    await this.conn.withTransactionAsync(() => this.writeExcerptSources(sources));
+  }
+  async updateExcerptSources(sources: ExcerptSource[]): Promise<void> {
+    if (sources.length === 0) return;
+    await this.conn.withTransactionAsync(async () => {
+      for (const s of sources) {
+        await this.conn.runAsync(
+          `UPDATE excerpt_sources SET readwise_book_id = ?, title = ?, author = ?, category = ?,
+             num_highlights = ?, last_highlight_at = ?, state = ?, rank = ?, done_at = ?
+           WHERE id = ?`,
+          [
+            s.readwise_book_id, s.title, s.author, s.category, s.num_highlights,
+            s.last_highlight_at, s.state, s.rank, s.done_at, s.id,
+          ],
+        );
+      }
+    });
+  }
+  async listExcerptSources(): Promise<ExcerptSource[]> {
+    return this.conn.getAllAsync<ExcerptSource>(
+      "SELECT * FROM excerpt_sources ORDER BY created_at",
+    );
+  }
+  private async writeExcerptSources(sources: ExcerptSource[]): Promise<void> {
+    for (const s of sources) {
+      await this.conn.runAsync(
+        `INSERT INTO excerpt_sources (id, readwise_book_id, title, author, category,
+           num_highlights, last_highlight_at, state, rank, created_at, done_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          s.id, s.readwise_book_id, s.title, s.author, s.category, s.num_highlights,
+          s.last_highlight_at, s.state, s.rank, s.created_at, s.done_at,
+        ],
+      );
+    }
+  }
+
   private async writeExcerptReviews(reviews: ExcerptReview[]): Promise<void> {
     for (const r of reviews) {
       await this.conn.runAsync(
@@ -691,12 +744,14 @@ function rowToPromptItem(r: PromptItemRow): PromptItem {
   return { ...r, builtin: r.builtin === 1 };
 }
 
-interface ExcerptRow extends Omit<Excerpt, "source_deleted" | "backlog"> {
+interface ExcerptRow extends Omit<Excerpt, "source_deleted"> {
   source_deleted: number;
-  backlog: number;
+  /** Leftover column from before sources existed; not part of Excerpt. */
+  backlog?: number;
 }
 function rowToExcerpt(r: ExcerptRow): Excerpt {
-  return { ...r, source_deleted: r.source_deleted === 1, backlog: r.backlog === 1 };
+  const { backlog: _legacy, ...rest } = r;
+  return { ...rest, source_deleted: r.source_deleted === 1 };
 }
 
 interface CompletionRow extends Omit<Completion, "verified" | "evidence"> {

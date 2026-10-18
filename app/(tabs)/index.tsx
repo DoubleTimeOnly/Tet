@@ -168,6 +168,13 @@ function TaskRow({ item }: { item: TaskSliceItem }) {
         onPress={go}
         disabled={noneDue}
       />
+      {excerpts && excerpts.newSourceCount > 0 && (
+        <Button
+          label={`${excerpts.newSourceCount} new source${excerpts.newSourceCount === 1 ? "" : "s"} in Readwise`}
+          kind="neutral"
+          onPress={() => router.push("/excerpts/sources?tab=available")}
+        />
+      )}
       {excerpts && excerpts.setAsideCount > 0 && (
         <Button
           label={`Set-aside pile (${excerpts.setAsideCount})`}

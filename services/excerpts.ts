@@ -1,10 +1,15 @@
 import type { Store } from "../db/store";
-import type { Card, Excerpt, ExcerptReview } from "../db/schema";
-import type { ReadwiseHighlightsClient } from "../lib/readwiseHighlights";
+import type { Card, Excerpt, ExcerptReview, ExcerptSource } from "../db/schema";
+import type { ReadwiseHighlight, ReadwiseHighlightsClient } from "../lib/readwiseHighlights";
 import {
   planSync,
+  planSources,
+  backfillSources,
   syncCursor,
   passExcerpt,
+  nextRank,
+  moveSource,
+  excerptQueue,
   DEFAULT_EXCERPT_CADENCE,
 } from "../lib/excerpts";
 import { newId } from "../lib/id";
@@ -12,9 +17,10 @@ import { addCard, createTask, findOrCreateDeck } from "./authoring";
 import { creditExcerptTasks } from "./learning";
 
 /**
- * Excerpt review orchestration: Readwise sync, triage decisions (with undo),
- * and writing a card from one or several excerpts. Pure rules live in
- * lib/excerpts; this file only sequences Store reads and writes.
+ * Excerpt review orchestration: Readwise sync, source choices, triage
+ * decisions (with undo), and writing a card from one or several excerpts.
+ * Pure rules live in lib/excerpts; this file only sequences Store reads and
+ * writes.
  */
 
 /** Cards written from excerpts land here, so an "all decks" review picks them up. */
@@ -26,22 +32,88 @@ export interface SyncResult {
   updated: number;
   /** Unresolved excerpts that dropped out because they were deleted upstream. */
   removed: number;
+  /** Sources that appeared in Readwise since the last refresh. */
+  newSources: number;
 }
 
 /**
- * Pull highlights changed since the last sync and merge them in (see
- * lib/excerpts.planSync for the rules). The first sync that brings in any
- * excerpts also creates the daily "Review excerpts" task, unless an excerpt
- * task already exists — including a removed one, so deleting it sticks.
+ * Give excerpts imported before sources existed a source each (one checked
+ * source per book title), so they keep showing up. Cheap no-op otherwise; run
+ * on launch and before every sync.
+ */
+export async function ensureExcerptSources(
+  store: Store,
+  now: number = Date.now(),
+): Promise<void> {
+  const [excerpts, sources] = await Promise.all([
+    store.listExcerpts(),
+    store.listExcerptSources(),
+  ]);
+  const plan = backfillSources(excerpts, sources, now);
+  await store.insertExcerptSources(plan.sources);
+  await store.updateExcerpts(plan.excerpts);
+}
+
+/**
+ * Refresh the source list from Readwise, then pull highlights for checked
+ * sources only. Nothing else is fetched: an unchecked, hidden or done source's
+ * highlights stay in Readwise.
  */
 export async function syncExcerpts(
   store: Store,
   client: ReadwiseHighlightsClient,
   now: number = Date.now(),
 ): Promise<SyncResult> {
+  await ensureExcerptSources(store, now);
+  const [books, existing] = await Promise.all([client.listBooks(), store.listExcerptSources()]);
+  const plan = planSources(existing, books, now);
+  await store.insertExcerptSources(plan.inserts);
+  await store.updateExcerptSources(plan.updates);
+
+  const sources = await store.listExcerptSources();
+  const result = await syncSourceHighlights(
+    store,
+    client,
+    sources.filter((s) => s.state === "checked"),
+    now,
+  );
+  return { ...result, newSources: plan.newCount };
+}
+
+/**
+ * Fetch and merge highlights for the given sources (see lib/excerpts.planSync
+ * for the rules). Sources never fetched get everything; the rest only what
+ * changed since the oldest of their cursors — at most two requests. The first
+ * time this brings in any excerpts it also creates the daily "Review
+ * excerpts" task, unless an excerpt task already exists (including a removed
+ * one, so deleting it sticks).
+ */
+export async function syncSourceHighlights(
+  store: Store,
+  client: ReadwiseHighlightsClient,
+  sources: ExcerptSource[],
+  now: number = Date.now(),
+): Promise<Omit<SyncResult, "newSources">> {
+  const withIds = sources.filter((s) => s.readwise_book_id !== null);
+  if (withIds.length === 0) return { added: 0, updated: 0, removed: 0 };
   const existing = await store.listExcerpts();
-  const incoming = await client.exportHighlights(syncCursor(existing));
-  const plan = planSync(existing, incoming, now);
+  const fresh: string[] = [];
+  const known: string[] = [];
+  let since: number | null = null;
+  for (const s of withIds) {
+    const cursor = syncCursor(existing, s.id);
+    if (cursor === null) fresh.push(s.readwise_book_id!);
+    else {
+      known.push(s.readwise_book_id!);
+      since = since === null ? cursor : Math.min(since, cursor);
+    }
+  }
+  const incoming: ReadwiseHighlight[] = [
+    ...(await client.exportHighlights(fresh, null)),
+    ...(await client.exportHighlights(known, since)),
+  ];
+  const byBookId = new Map(withIds.map((s) => [s.readwise_book_id!, s]));
+  const plan = planSync(existing, incoming, byBookId, now);
   await store.insertExcerpts(plan.inserts);
   await store.updateExcerpts(plan.updates);
 
@@ -58,6 +130,109 @@ export async function syncExcerpts(
   return { added: plan.inserts.length, updated: plan.updates.length, removed: plan.removed };
 }
 
+// ---------------------------------------------------------------------------
+// Source choices
+
+async function getSource(store: Store, id: string): Promise<ExcerptSource> {
+  const s = (await store.listExcerptSources()).find((x) => x.id === id);
+  if (!s) throw new Error(`no excerpt source ${id}`);
+  return s;
+}
+
+async function setState(
+  store: Store,
+  id: string,
+  patch: Partial<ExcerptSource>,
+): Promise<ExcerptSource> {
+  const next = { ...(await getSource(store, id)), ...patch };
+  await store.updateExcerptSources([next]);
+  return next;
+}
+
+/**
+ * Check a source: it joins the bottom of the daily-queue order and its
+ * highlights are fetched now. If the fetch fails the source stays checked and
+ * the next sync picks it up; the error is rethrown for the UI.
+ */
+export async function checkSource(
+  store: Store,
+  client: ReadwiseHighlightsClient,
+  id: string,
+  now: number = Date.now(),
+): Promise<Omit<SyncResult, "newSources">> {
+  const all = await store.listExcerptSources();
+  const source = await setState(store, id, { state: "checked", rank: nextRank(all), done_at: null });
+  return syncSourceHighlights(store, client, [source], now);
+}
+
+/** Stop syncing a source. Its imported excerpts are kept; undecided ones leave the queue. */
+export async function uncheckSource(store: Store, id: string): Promise<void> {
+  await setState(store, id, { state: "unchecked" });
+}
+
+/** "Not now" on a new source: clears the flag without syncing it. */
+export async function dismissNewSource(store: Store, id: string): Promise<void> {
+  await setState(store, id, { state: "unchecked" });
+}
+
+/** Declutter: out of the list, and never flagged as new again. */
+export async function hideSource(store: Store, id: string): Promise<void> {
+  await setState(store, id, { state: "hidden" });
+}
+
+/** Back from the hidden list, unchecked. */
+export async function unhideSource(store: Store, id: string): Promise<void> {
+  await setState(store, id, { state: "unchecked" });
+}
+
+/**
+ * Mark a source done: no longer synced or queued, kept in the done list.
+ * `leftovers` decides its undecided excerpts: "ignore" resolves them all
+ * (without earning points — it's one tap, not a decision each), "leave" keeps
+ * them undecided for focus mode or a reopen.
+ */
+export async function markSourceDone(
+  store: Store,
+  id: string,
+  leftovers: "ignore" | "leave",
+  now: number = Date.now(),
+): Promise<void> {
+  if (leftovers === "ignore") {
+    const undecided = (await store.listExcerpts()).filter(
+      (e) => e.source_id === id && e.status === "queued",
+    );
+    await store.updateExcerpts(
+      undecided.map((e) => ({ ...e, status: "ignored" as const, resolved_at: now })),
+    );
+  }
+  await setState(store, id, { state: "done", done_at: now });
+}
+
+/** Pick a done source back up: checked again, at the bottom of the order. */
+export async function reopenSource(
+  store: Store,
+  client: ReadwiseHighlightsClient | null,
+  id: string,
+  now: number = Date.now(),
+): Promise<void> {
+  if (client) {
+    await checkSource(store, client, id, now);
+  } else {
+    const all = await store.listExcerptSources();
+    await setState(store, id, { state: "checked", rank: nextRank(all), done_at: null });
+  }
+}
+
+/** Move a checked source one place up or down the daily-queue order. */
+export async function moveSourceRank(
+  store: Store,
+  id: string,
+  direction: "up" | "down",
+): Promise<void> {
+  const reordered = moveSource(await store.listExcerptSources(), id, direction);
+  await store.updateExcerptSources(reordered);
+}
+
 /** A triage decision that can be taken back (a mis-tap on a phone). */
 export interface UndoToken {
   previous: Excerpt;
@@ -66,7 +241,10 @@ export interface UndoToken {
 
 export type TriageAction = "ignore" | "pass" | "set_aside";
 
-/** Ignore, Pass, or Set aside one excerpt; logs the decision toward today's goal. */
+/**
+ * Ignore, Later ("pass"), or Set aside one excerpt; logs the decision toward
+ * today's goal. Focus mode's Skip never comes here — it is session-only.
+ */
 export async function decideExcerpt(
   store: Store,
   excerptId: string,
@@ -161,28 +339,33 @@ export async function cardFromExcerpts(
 }
 
 export interface ExcerptCounts {
-  /** Queued and ready now. */
+  /** In the daily queue now (undecided, due, from a checked source). */
   ready: number;
-  /** Queued but passed, waiting for their next showing. */
+  /** Undecided in checked sources but deferred with Later, not yet due. */
   waiting: number;
-  /** Of `ready`, how many are from the initial backlog. */
-  backlog: number;
   setAside: number;
   carded: number;
   ignored: number;
+  checkedSources: number;
+  newSources: number;
 }
 
 /** Totals for the Library's excerpt summary. Excludes upstream-deleted excerpts. */
 export async function excerptCounts(store: Store, now: number = Date.now()): Promise<ExcerptCounts> {
-  const live = (await store.listExcerpts()).filter((e) => !e.source_deleted);
-  const queued = live.filter((e) => e.status === "queued");
-  const ready = queued.filter((e) => e.due <= now);
+  const [all, sources] = await Promise.all([store.listExcerpts(), store.listExcerptSources()]);
+  const live = all.filter((e) => !e.source_deleted);
+  const checked = new Set(sources.filter((s) => s.state === "checked").map((s) => s.id));
+  const ready = excerptQueue(live, sources, now).length;
+  const inChecked = live.filter(
+    (e) => e.status === "queued" && e.source_id !== null && checked.has(e.source_id),
+  ).length;
   return {
-    ready: ready.length,
-    waiting: queued.length - ready.length,
-    backlog: ready.filter((e) => e.backlog).length,
+    ready,
+    waiting: inChecked - ready,
     setAside: live.filter((e) => e.status === "set_aside").length,
     carded: live.filter((e) => e.status === "carded").length,
     ignored: live.filter((e) => e.status === "ignored").length,
+    checkedSources: checked.size,
+    newSources: sources.filter((s) => s.state === "new").length,
   };
 }

@@ -13,6 +13,7 @@ import type {
   PromptDraw,
   Excerpt,
   ExcerptReview,
+  ExcerptSource,
   CardExcerpt,
 } from "./schema";
 import type { BackupData } from "../lib/backup";
@@ -164,4 +165,10 @@ export interface Store {
   listCardExcerpts(): Promise<CardExcerpt[]>;
   /** The excerpts a card was written from. */
   listExcerptsForCard(cardId: string): Promise<Excerpt[]>;
+
+  // excerpt sources (Readwise books/articles you choose to sync)
+  insertExcerptSources(sources: ExcerptSource[]): Promise<void>;
+  /** Overwrite sources' stored rows in place (state, rank, refreshed metadata). */
+  updateExcerptSources(sources: ExcerptSource[]): Promise<void>;
+  listExcerptSources(): Promise<ExcerptSource[]>;
 }

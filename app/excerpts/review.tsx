@@ -14,7 +14,9 @@ import {
   excerptPoints,
   excerptQueue,
   excerptSlice,
+  focusQueue,
   setAsidePile,
+  withSkipsLast,
   MAX_PASSES,
 } from "../../lib/excerpts";
 import { ActionScreen, Screen, Title, Body, Muted, Button } from "../../ui/components";
@@ -23,60 +25,92 @@ import type { Excerpt, Task } from "../../db/schema";
 
 const UNDO_LABELS: Record<TriageAction, string> = {
   ignore: "Ignored",
-  pass: "Passed",
+  pass: "Later",
   set_aside: "Set aside",
 };
+
+/** Undo a stored decision, or (focus mode) a session-only skip. */
+type Undo =
+  | { kind: "decision"; token: UndoToken; label: string }
+  | { kind: "skip"; excerptId: string };
 
 interface Session {
   current: Excerpt | null;
   points: number;
   goal: number;
-  /** Queued excerpts ready now, beyond today's goal included. */
-  ready: number;
+  /** Daily: excerpts in the daily queue now. Focus: undecided left in the source. */
+  left: number;
   setAside: number;
+  /** Focus mode: the source's title. */
+  sourceTitle: string | null;
 }
 
 /**
- * Daily excerpt triage: one highlight at a time, four choices. Opened from the
- * Today task (capped to the day's goal) or with no task from the Library
- * ("keep going" mode, uncapped). Actions sit in a footer under the thumb.
+ * Excerpt triage, one highlight at a time, in one of two modes:
+ *
+ *   - Daily (from the Today task, or uncapped "keep going"): the daily queue,
+ *     block-ordered by source rank. The deferral button is Later (2/5/7 days).
+ *   - Focus (?sourceId=…): every undecided excerpt of one source in book
+ *     order, schedule and rank ignored. The deferral button is Skip: to the
+ *     end of this session, nothing stored, no points.
+ *
+ * Actions sit in a footer under the thumb.
  */
 export default function ExcerptReviewScreen() {
   const { store, tz } = useStore();
   const router = useRouter();
-  const { taskId } = useLocalSearchParams<{ taskId?: string }>();
+  const { taskId, sourceId } = useLocalSearchParams<{ taskId?: string; sourceId?: string }>();
+  const focus = Boolean(sourceId);
   const [task, setTask] = useState<Task | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  // Past today's goal: keep serving from the whole ready queue.
+  // Daily mode past today's goal: keep serving from the whole daily queue.
   const [keepGoing, setKeepGoing] = useState(!taskId);
+  // Focus mode: excerpts skipped this session, in skip order.
+  const [skipped, setSkipped] = useState<string[]>([]);
   const [composing, setComposing] = useState(false);
   const [front, setFront] = useState("");
   const [back, setBack] = useState("");
-  const [undo, setUndo] = useState<{ token: UndoToken; label: string } | null>(null);
+  const [undo, setUndo] = useState<Undo | null>(null);
   const [busy, setBusy] = useState(false);
 
   const refresh = useCallback(
-    async (t: Task | null, more: boolean) => {
+    async (t: Task | null, more: boolean, skips: string[]) => {
       const now = Date.now();
-      const [list, todays] = await Promise.all([
+      const [list, sources, todays] = await Promise.all([
         store.listExcerpts(),
+        store.listExcerptSources(),
         excerptReviewsToday(store, now, tz),
       ]);
-      const ready = excerptQueue(list, now);
-      const slice = t ? excerptSlice(t, list, todays, now) : null;
+      const points = excerptPoints(todays);
+      const setAside = setAsidePile(list).length;
+      if (sourceId) {
+        const queue = withSkipsLast(focusQueue(list, sourceId), skips);
+        setSession({
+          current: queue[0] ?? null,
+          points,
+          goal: 0,
+          left: queue.length,
+          setAside,
+          sourceTitle: sources.find((s) => s.id === sourceId)?.title ?? null,
+        });
+        return;
+      }
+      const ready = excerptQueue(list, sources, now);
+      const slice = t ? excerptSlice(t, list, sources, todays, now) : null;
       setSession({
         current: (more || !slice ? ready[0] : slice.queue[0]) ?? null,
-        points: excerptPoints(todays),
+        points,
         goal: slice?.goal ?? 0,
-        ready: ready.length,
-        setAside: setAsidePile(list).length,
+        left: ready.length,
+        setAside,
+        sourceTitle: null,
       });
     },
-    [store, tz],
+    [store, tz, sourceId],
   );
 
   // On focus (so coming back from the pile refreshes its count) and whenever
-  // "keep going" flips.
+  // "keep going" flips or a skip reorders the focus session.
   useFocusEffect(
     useCallback(() => {
       let active = true;
@@ -84,12 +118,12 @@ export default function ExcerptReviewScreen() {
         const t = taskId ? await store.getTask(taskId) : null;
         if (!active) return;
         setTask(t);
-        await refresh(t, keepGoing);
+        await refresh(t, keepGoing, skipped);
       })();
       return () => {
         active = false;
       };
-    }, [store, taskId, refresh, keepGoing]),
+    }, [store, taskId, refresh, keepGoing, skipped]),
   );
 
   if (!session) return null;
@@ -109,16 +143,27 @@ export default function ExcerptReviewScreen() {
     run(async () => {
       if (!current) return;
       const token = await decideExcerpt(store, current.id, action, Date.now(), tz);
-      setUndo({ token, label: UNDO_LABELS[action] });
-      await refresh(task, keepGoing);
+      setUndo({ kind: "decision", token, label: UNDO_LABELS[action] });
+      await refresh(task, keepGoing, skipped);
     });
+
+  // Focus mode only: to the back of this session. Re-skipping moves it back again.
+  const skip = () => {
+    if (!current) return;
+    setSkipped((s) => [...s.filter((id) => id !== current.id), current.id]);
+    setUndo({ kind: "skip", excerptId: current.id });
+  };
 
   const undoLast = () =>
     run(async () => {
       if (!undo) return;
-      await undoExcerptDecision(store, undo.token);
+      if (undo.kind === "skip") {
+        setSkipped((s) => s.filter((id) => id !== undo.excerptId));
+      } else {
+        await undoExcerptDecision(store, undo.token);
+        await refresh(task, keepGoing, skipped);
+      }
       setUndo(null);
-      await refresh(task, keepGoing);
     });
 
   const saveCard = () =>
@@ -129,29 +174,33 @@ export default function ExcerptReviewScreen() {
       setBack("");
       setComposing(false);
       setUndo(null);
-      await refresh(task, keepGoing);
+      await refresh(task, keepGoing, skipped);
     });
 
-  const progressLine = keepGoing
-    ? `${session.points} point${session.points === 1 ? "" : "s"} today · ${session.ready} ready`
-    : `${Math.min(session.points, session.goal)} of ${session.goal} today`;
+  const undoLabel = undo ? (undo.kind === "skip" ? "Skipped" : undo.label) : "";
+  const pts = `${session.points} point${session.points === 1 ? "" : "s"} today`;
+  const progressLine = focus
+    ? `${session.sourceTitle ?? "Focus"} · ${session.left} left · ${pts}`
+    : keepGoing
+      ? `${pts} · ${session.left} in queue`
+      : `${Math.min(session.points, session.goal)} of ${session.goal} today`;
 
   if (!current) {
     return (
       <Screen>
-        <Title>{session.ready === 0 ? "Queue empty" : "Done for today 🎉"}</Title>
+        <Title>
+          {focus ? "Source finished 🎉" : session.left === 0 ? "Queue empty" : "Done for today 🎉"}
+        </Title>
         <Body>
-          {session.ready === 0
-            ? "No excerpts are waiting. New Readwise highlights show up here on their own."
-            : `${session.points} point${session.points === 1 ? "" : "s"} today. ${session.ready} more excerpt${session.ready === 1 ? "" : "s"} ready if you want them.`}
+          {focus
+            ? `Nothing undecided left in ${session.sourceTitle ?? "this source"}. ${pts}.`
+            : session.left === 0
+              ? "No excerpts are waiting. Check more sources in Library → Excerpts → Sources."
+              : `${pts}. ${session.left} more excerpt${session.left === 1 ? "" : "s"} in the queue if you want them.`}
         </Body>
-        {undo && <Button label={`Undo · ${undo.label}`} kind="neutral" onPress={undoLast} />}
-        {session.ready > 0 && (
-          <Button
-            label="Keep going"
-            kind="neutral"
-            onPress={() => setKeepGoing(true)}
-          />
+        {undo && <Button label={`Undo · ${undoLabel}`} kind="neutral" onPress={undoLast} />}
+        {!focus && session.left > 0 && (
+          <Button label="Keep going" kind="neutral" onPress={() => setKeepGoing(true)} />
         )}
         {session.setAside > 0 && (
           <Button
@@ -190,10 +239,19 @@ export default function ExcerptReviewScreen() {
     <ActionScreen
       footer={
         <>
-          {undo && <Button label={`Undo · ${undo.label}`} kind="neutral" onPress={undoLast} />}
+          {undo && <Button label={`Undo · ${undoLabel}`} kind="neutral" onPress={undoLast} />}
           <ButtonRow>
             <RowButton label="Ignore" kind="neutral" onPress={() => decide("ignore")} disabled={busy} />
-            <RowButton label="Pass" kind="neutral" onPress={() => decide("pass")} disabled={busy || !passable} />
+            {focus ? (
+              <RowButton label="Skip" kind="neutral" onPress={skip} disabled={busy} />
+            ) : (
+              <RowButton
+                label="Later"
+                kind="neutral"
+                onPress={() => decide("pass")}
+                disabled={busy || !passable}
+              />
+            )}
             <RowButton label="Set aside" kind="neutral" onPress={() => decide("set_aside")} disabled={busy} />
           </ButtonRow>
           <Button label="Make card" onPress={() => setComposing(true)} disabled={busy} />
@@ -202,13 +260,14 @@ export default function ExcerptReviewScreen() {
     >
       <Muted>{progressLine}</Muted>
       <ExcerptView excerpt={current} />
-      {current.pass_count > 0 && (
+      {!focus && current.pass_count > 0 && (
         <Muted>
           {passable
-            ? `Passed ${current.pass_count}× before.`
-            : `Passed ${MAX_PASSES}× — time to decide: card it, set it aside, or ignore it.`}
+            ? `Put off ${current.pass_count}× before.`
+            : `Put off ${MAX_PASSES}× — time to decide: card it, set it aside, or ignore it.`}
         </Muted>
       )}
+      {focus && skipped.includes(current.id) && <Muted>Skipped once this session.</Muted>}
       {session.setAside > 0 && (
         <Button
           label={`Set-aside pile (${session.setAside})`}

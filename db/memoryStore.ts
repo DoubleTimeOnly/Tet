@@ -14,6 +14,7 @@ import type {
   PromptDraw,
   Excerpt,
   ExcerptReview,
+  ExcerptSource,
   CardExcerpt,
 } from "./schema";
 import type { BackupData } from "../lib/backup";
@@ -35,6 +36,7 @@ export class MemoryStore implements Store {
   private excerpts: Excerpt[] = [];
   private excerptReviews: ExcerptReview[] = [];
   private cardExcerpts: CardExcerpt[] = [];
+  private excerptSources: ExcerptSource[] = [];
 
   async init(): Promise<void> {}
 
@@ -270,6 +272,7 @@ export class MemoryStore implements Store {
       excerpts: this.excerpts.map((e) => ({ ...e })),
       excerptReviews: this.excerptReviews.map((r) => ({ ...r })),
       cardExcerpts: this.cardExcerpts.map((l) => ({ ...l })),
+      excerptSources: this.excerptSources.map((s) => ({ ...s })),
     };
   }
   async replaceAll(data: BackupData): Promise<void> {
@@ -289,6 +292,7 @@ export class MemoryStore implements Store {
     this.excerpts = (data.excerpts ?? []).map((e) => ({ ...e }));
     this.excerptReviews = (data.excerptReviews ?? []).map((r) => ({ ...r }));
     this.cardExcerpts = (data.cardExcerpts ?? []).map((l) => ({ ...l }));
+    this.excerptSources = (data.excerptSources ?? []).map((s) => ({ ...s }));
   }
   async insertMany(decks: Deck[], cards: Card[], notes: Note[] = []): Promise<void> {
     this.decks.push(...decks.map((d) => ({ ...d })));
@@ -347,5 +351,25 @@ export class MemoryStore implements Store {
       this.cardExcerpts.filter((l) => l.card_id === cardId).map((l) => l.excerpt_id),
     );
     return this.excerpts.filter((e) => ids.has(e.id)).map((e) => ({ ...e }));
+  }
+  async insertExcerptSources(sources: ExcerptSource[]): Promise<void> {
+    const ids = new Set(this.excerptSources.map((s) => s.readwise_book_id).filter((id) => id !== null));
+    for (const s of sources) {
+      // Mirror the UNIQUE(readwise_book_id) constraint SqliteStore enforces.
+      if (s.readwise_book_id !== null && ids.has(s.readwise_book_id)) {
+        throw new Error(`duplicate readwise_book_id ${s.readwise_book_id}`);
+      }
+      if (s.readwise_book_id !== null) ids.add(s.readwise_book_id);
+    }
+    this.excerptSources.push(...sources.map((s) => ({ ...s })));
+  }
+  async updateExcerptSources(sources: ExcerptSource[]): Promise<void> {
+    for (const next of sources) {
+      const i = this.excerptSources.findIndex((s) => s.id === next.id);
+      if (i >= 0) this.excerptSources[i] = { ...next };
+    }
+  }
+  async listExcerptSources(): Promise<ExcerptSource[]> {
+    return this.excerptSources.map((s) => ({ ...s }));
   }
 }

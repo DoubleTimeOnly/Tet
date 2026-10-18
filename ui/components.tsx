@@ -115,11 +115,14 @@ export function Button({
   onPress,
   kind = "primary",
   disabled,
+  small,
 }: {
   label: string;
   onPress: () => void;
   kind?: ButtonKind;
   disabled?: boolean;
+  /** Compact padding, for several actions on one list row. */
+  small?: boolean;
 }) {
   const bg = {
     primary: colors.accent,
@@ -134,11 +137,12 @@ export function Button({
       disabled={disabled}
       style={({ pressed }) => [
         styles.button,
+        small && styles.buttonSmall,
         { backgroundColor: bg, borderWidth: kind === "neutral" ? 1 : 0 },
         (pressed || disabled) && { opacity: 0.6 },
       ]}
     >
-      <Text style={styles.buttonText}>{label}</Text>
+      <Text style={[styles.buttonText, small && styles.buttonTextSmall]}>{label}</Text>
     </Pressable>
   );
 }
@@ -174,6 +178,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   buttonText: { color: colors.text, fontSize: 16, fontWeight: "600" },
+  buttonSmall: { paddingVertical: space.sm, paddingHorizontal: space.md },
+  buttonTextSmall: { fontSize: 14 },
   xpRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "baseline" },
   xpTrack: {
     height: 10,

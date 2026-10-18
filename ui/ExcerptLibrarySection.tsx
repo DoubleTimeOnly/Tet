@@ -28,11 +28,13 @@ export function ExcerptLibrarySection() {
     setStatus(null);
     try {
       const r = await syncExcerptsNow(store);
-      setStatus(
-        r.added === 0 && r.updated === 0
-          ? "Up to date."
-          : `${r.added} new · ${r.updated} updated${r.removed ? ` · ${r.removed} deleted in Readwise` : ""}`,
-      );
+      const parts = [
+        r.newSources ? `${r.newSources} new source${r.newSources === 1 ? "" : "s"}` : null,
+        r.added ? `${r.added} new excerpt${r.added === 1 ? "" : "s"}` : null,
+        r.updated ? `${r.updated} updated` : null,
+        r.removed ? `${r.removed} deleted in Readwise` : null,
+      ].filter(Boolean);
+      setStatus(parts.length ? parts.join(" · ") : "Up to date.");
       reload();
     } catch (e) {
       setStatus(
@@ -46,22 +48,24 @@ export function ExcerptLibrarySection() {
   };
 
   if (!counts) return null;
-  const total = counts.ready + counts.waiting + counts.setAside + counts.carded + counts.ignored;
 
   return (
     <Card>
       <Subtitle>Excerpts</Subtitle>
-      {total === 0 ? (
-        <Muted>Readwise highlights land here to triage into cards. They sync on their own once your token is in Settings.</Muted>
+      {counts.checkedSources === 0 ? (
+        <Muted>Turn Readwise highlights into cards. Choose which books and articles to sync under Sources — nothing is synced until you check it.</Muted>
       ) : (
         <>
-          <Muted>
-            {`${counts.ready} ready${counts.backlog ? ` (${counts.backlog} from the backlog)` : ""} · ${counts.waiting} passed, coming back later`}
-          </Muted>
+          <Muted>{`${counts.ready} in the daily queue · ${counts.waiting} put off until later`}</Muted>
           <Muted>{`${counts.carded} carded · ${counts.ignored} ignored · ${counts.setAside} set aside`}</Muted>
         </>
       )}
       {status && <Muted>{status}</Muted>}
+      <Button
+        label={`Sources · ${counts.checkedSources} active${counts.newSources ? ` · ${counts.newSources} new` : ""}`}
+        kind={counts.newSources ? "primary" : "neutral"}
+        onPress={() => router.push(counts.newSources ? "/excerpts/sources?tab=available" : "/excerpts/sources")}
+      />
       <Button label={syncing ? "Syncing…" : "Sync now"} kind="neutral" onPress={sync} disabled={syncing} />
       {counts.ready > 0 && (
         <Button label="Review excerpts" kind="neutral" onPress={() => router.push("/excerpts/review")} />

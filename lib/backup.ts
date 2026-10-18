@@ -13,6 +13,7 @@ import type {
   PromptDraw,
   Excerpt,
   ExcerptReview,
+  ExcerptSource,
   CardExcerpt,
 } from "../db/schema";
 import { backfillNotes } from "./notesBackfill";
@@ -40,8 +41,11 @@ import { backfillNotes } from "./notesBackfill";
 // lost on reinstall (the whole point of having curated it).
 // v5 adds excerpts (Readwise highlights under review), their triage history,
 // and the card<->excerpt links, so a restore keeps where every excerpt stands.
+// v6 adds excerpt sources (which Readwise books you sync, their order, and
+// which you've hidden or finished). A v5 backup restores without them; the
+// app rebuilds one checked source per book from the excerpts on next launch.
 // Older backups simply restore with none of these.
-export const BACKUP_VERSION = 5;
+export const BACKUP_VERSION = 6;
 
 export interface BackupData {
   decks: Deck[];
@@ -59,6 +63,7 @@ export interface BackupData {
   excerpts: Excerpt[];
   excerptReviews: ExcerptReview[];
   cardExcerpts: CardExcerpt[];
+  excerptSources: ExcerptSource[];
 }
 
 export interface Backup extends BackupData {
@@ -96,6 +101,7 @@ export function exportAll(
     excerpts: data.excerpts,
     excerptReviews: data.excerptReviews,
     cardExcerpts: data.cardExcerpts,
+    excerptSources: data.excerptSources,
   };
   return JSON.stringify(backup);
 }
@@ -128,7 +134,7 @@ export function importAll(json: string): BackupData {
   }
   const obj = parsed as Record<string, unknown>;
 
-  const SUPPORTED = [1, 2, 3, 4, BACKUP_VERSION];
+  const SUPPORTED = [1, 2, 3, 4, 5, BACKUP_VERSION];
   if (!SUPPORTED.includes(obj.version as number)) {
     throw new BackupImportError(
       `Unsupported backup version ${String(obj.version)} (expected ${SUPPORTED.join(", ")})`,
@@ -162,6 +168,7 @@ export function importAll(json: string): BackupData {
       excerpts: [],
       excerptReviews: [],
       cardExcerpts: [],
+      excerptSources: [],
     };
   }
 
@@ -184,6 +191,7 @@ export function importAll(json: string): BackupData {
     excerpts: optionalTable<Excerpt>(obj, "excerpts"),
     excerptReviews: optionalTable<ExcerptReview>(obj, "excerptReviews"),
     cardExcerpts: optionalTable<CardExcerpt>(obj, "cardExcerpts"),
+    excerptSources: optionalTable<ExcerptSource>(obj, "excerptSources"),
   };
 }
 

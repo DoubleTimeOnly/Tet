@@ -1,4 +1,4 @@
-import type { Task, Card, Completion, CompletionEvidence, Excerpt } from "../db/schema";
+import type { Task, Card, Completion, CompletionEvidence, Excerpt, ExcerptSource } from "../db/schema";
 
 /** Minimal builders so tests state only the fields they care about. */
 
@@ -56,6 +56,8 @@ export function makeExcerpt(over: Partial<Excerpt> = {}): Excerpt {
   return {
     id: "ex-1",
     readwise_id: "rw-1",
+    source_id: "src-1",
+    location: null,
     text: "A highlight",
     note: null,
     book_title: "A Book",
@@ -64,12 +66,28 @@ export function makeExcerpt(over: Partial<Excerpt> = {}): Excerpt {
     highlighted_at: 0,
     source_updated_at: 0,
     source_deleted: false,
-    backlog: false,
     status: "queued",
     due: 0,
     pass_count: 0,
     created_at: 0,
     resolved_at: null,
+    ...over,
+  };
+}
+
+export function makeSource(over: Partial<ExcerptSource> = {}): ExcerptSource {
+  return {
+    id: "src-1",
+    readwise_book_id: "book-1",
+    title: "A Book",
+    author: "An Author",
+    category: "books",
+    num_highlights: 0,
+    last_highlight_at: null,
+    state: "checked",
+    rank: 0,
+    created_at: 0,
+    done_at: null,
     ...over,
   };
 }

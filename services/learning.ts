@@ -51,7 +51,7 @@ export async function getTodayView(
   // before reading completions, so it auto-completes without needing a grade.
   await creditFlashcardTasks(store, now, tz);
   await creditExcerptTasks(store, now, tz);
-  const [tasks, dueCards, allCompletions, reviews, reviewedDeckIds, excerpts, excerptReviews] =
+  const [tasks, dueCards, allCompletions, reviews, reviewedDeckIds, excerpts, excerptReviews, sources] =
     await Promise.all([
       store.listTasks({ activeOnly: true }),
       store.listDueCards(now),
@@ -60,6 +60,7 @@ export async function getTodayView(
       reviewedDeckIdsToday(store, now, tz),
       store.listExcerpts(),
       store.listExcerptReviewsSince(0),
+      store.listExcerptSources(),
     ]);
   const dayStart = startOfTetDay(now, tz);
   const excerptReviewsToday = excerptReviews.filter((r) => r.reviewed_at >= dayStart);
@@ -71,7 +72,7 @@ export async function getTodayView(
     now,
     tz,
     reviewedDeckIds,
-    excerpts: { excerpts, reviewsToday: excerptReviewsToday },
+    excerpts: { excerpts, sources, reviewsToday: excerptReviewsToday },
   });
   const streak = currentStreak({ completions: allCompletions, now, tz });
   const maxStreak = longestStreak({ completions: allCompletions });
@@ -92,7 +93,7 @@ export async function getTodayView(
       return { task, filledSegments: fc.reviewedToday, totalSegments: fc.goal };
     }
     if (task.type === "excerpt") {
-      const ex = excerptSlice(task, excerpts, excerptReviewsToday, now);
+      const ex = excerptSlice(task, excerpts, sources, excerptReviewsToday, now);
       return { task, filledSegments: Math.min(ex.pointsToday, ex.goal), totalSegments: ex.goal };
     }
     return { task, filledSegments: todayDoneIds.has(task.id) ? 1 : 0, totalSegments: 1 };
@@ -219,11 +220,12 @@ export async function getExcerptSlice(
   now: number,
   tz: string,
 ): Promise<ExcerptSlice> {
-  const [excerpts, todays] = await Promise.all([
+  const [excerpts, sources, todays] = await Promise.all([
     store.listExcerpts(),
+    store.listExcerptSources(),
     excerptReviewsToday(store, now, tz),
   ]);
-  return excerptSlice(task, excerpts, todays, now);
+  return excerptSlice(task, excerpts, sources, todays, now);
 }
 
 /**
@@ -236,9 +238,10 @@ export async function creditExcerptTasks(
   now: number,
   tz: string,
 ): Promise<void> {
-  const [tasks, excerpts, todaysReviews, todaysCompletions] = await Promise.all([
+  const [tasks, excerpts, sources, todaysReviews, todaysCompletions] = await Promise.all([
     store.listTasks({ activeOnly: true }),
     store.listExcerpts(),
+    store.listExcerptSources(),
     excerptReviewsToday(store, now, tz),
     store.listCompletionsForDay(localDayKey(now, tz)),
   ]);
@@ -247,7 +250,7 @@ export async function creditExcerptTasks(
   );
   const toCredit = tasks
     .filter((t) => t.type === "excerpt" && !alreadyDone.has(t.id))
-    .map((task) => ({ task, ex: excerptSlice(task, excerpts, todaysReviews, now) }))
+    .map((task) => ({ task, ex: excerptSlice(task, excerpts, sources, todaysReviews, now) }))
     .filter(({ ex }) => ex.done);
   await Promise.all(
     toCredit.map(({ task, ex }) =>

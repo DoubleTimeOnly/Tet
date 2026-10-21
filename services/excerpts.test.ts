@@ -321,6 +321,20 @@ describe("cardFromExcerpts", () => {
     expect(fc.queue.map((x) => x.id)).toContain(card.id);
   });
 
+  it("lets one excerpt produce several cards, each linked and scored", async () => {
+    const { store, client, A } = await setup(2);
+    await checkSource(store, client, A.id, NOW);
+    const task = await excerptTask(store);
+    const [a] = (await getExcerptSlice(store, task, NOW, LA)).queue;
+    const one = await cardFromExcerpts(store, [a!.id], "Q1", "A1", NOW, LA);
+    const two = await cardFromExcerpts(store, [a!.id], "Q2", "A2", NOW + 5000, LA);
+    expect(two.id).not.toBe(one.id);
+    expect((await store.listExcerptsForCard(two.id)).map((e) => e.id)).toEqual([a!.id]);
+    const after = await store.getExcerpt(a!.id);
+    expect(after).toMatchObject({ status: "carded", resolved_at: NOW });
+    expect((await getExcerptSlice(store, task, NOW, LA)).pointsToday).toBe(2 * CARD_POINTS);
+  });
+
   it("requires both sides", async () => {
     const { store, client, A } = await setup(1);
     await checkSource(store, client, A.id, NOW);

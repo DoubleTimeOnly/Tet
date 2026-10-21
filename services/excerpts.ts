@@ -316,7 +316,8 @@ export async function returnToQueue(
  * Write one plain front/back card from one or more excerpts. The card joins
  * the regular flashcard reviews (in the "Readwise excerpts" deck), each
  * excerpt is marked carded and linked to the card, and the card counts toward
- * today's excerpt goal once, however many excerpts it combined.
+ * today's excerpt goal once, however many excerpts it combined. An excerpt can
+ * be carded again: each card is its own link and its own points.
  */
 export async function cardFromExcerpts(
   store: Store,
@@ -338,7 +339,12 @@ export async function cardFromExcerpts(
   const card = await addCard(store, { deckId: deck.id, front: f, back: b }, now);
   await store.insertCardExcerpts(excerptIds.map((id) => ({ card_id: card.id, excerpt_id: id })));
   await store.updateExcerpts(
-    excerpts.map((e) => ({ ...e!, status: "carded" as const, resolved_at: now })),
+    // A further card from an already-carded excerpt keeps its original resolved_at.
+    excerpts.map((e) => ({
+      ...e!,
+      status: "carded" as const,
+      resolved_at: e!.status === "carded" ? e!.resolved_at : now,
+    })),
   );
   await store.insertExcerptReviews(
     excerptIds.map((id) => ({

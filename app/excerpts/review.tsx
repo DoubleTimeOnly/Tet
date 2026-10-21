@@ -71,6 +71,8 @@ export default function ExcerptReviewScreen() {
   const [front, setFront] = useState("");
   const [back, setBack] = useState("");
   const [undo, setUndo] = useState<Undo | null>(null);
+  // After saving a card the excerpt stays up, so you can make another from it.
+  const [carded, setCarded] = useState<{ excerpt: Excerpt; cards: number } | null>(null);
   const [busy, setBusy] = useState(false);
 
   const refresh = useCallback(
@@ -168,12 +170,20 @@ export default function ExcerptReviewScreen() {
 
   const saveCard = () =>
     run(async () => {
-      if (!current || !front.trim() || !back.trim()) return;
-      await cardFromExcerpts(store, [current.id], front, back, Date.now(), tz);
+      const target = carded?.excerpt ?? current;
+      if (!target || !front.trim() || !back.trim()) return;
+      await cardFromExcerpts(store, [target.id], front, back, Date.now(), tz);
       setFront("");
       setBack("");
       setComposing(false);
       setUndo(null);
+      setCarded({ excerpt: target, cards: (carded?.cards ?? 0) + 1 });
+    });
+
+  // Leave the carded excerpt for the next one.
+  const doneCarding = () =>
+    run(async () => {
+      setCarded(null);
       await refresh(task, keepGoing, skipped);
     });
 
@@ -185,7 +195,23 @@ export default function ExcerptReviewScreen() {
       ? `${pts} · ${session.left} in queue`
       : `${Math.min(session.points, session.goal)} of ${session.goal} today`;
 
-  if (!current) {
+  if (carded && !composing) {
+    return (
+      <ActionScreen
+        footer={
+          <>
+            <Button label="Another card from this excerpt" onPress={() => setComposing(true)} disabled={busy} />
+            <Button label="Done" kind="neutral" onPress={doneCarding} disabled={busy} />
+          </>
+        }
+      >
+        <Muted>{`Saved · ${carded.cards} card${carded.cards === 1 ? "" : "s"} from this excerpt`}</Muted>
+        <ExcerptView excerpt={carded.excerpt} />
+      </ActionScreen>
+    );
+  }
+
+  if (!current && !carded) {
     return (
       <Screen>
         <Title>
@@ -215,6 +241,7 @@ export default function ExcerptReviewScreen() {
   }
 
   if (composing) {
+    const target = carded?.excerpt ?? current!;
     return (
       <ActionScreen
         footer={
@@ -228,12 +255,13 @@ export default function ExcerptReviewScreen() {
           </ButtonRow>
         }
       >
-        <ExcerptView excerpt={current} compact />
+        <ExcerptView excerpt={target} compact />
         <CardFields front={front} back={back} onChangeFront={setFront} onChangeBack={setBack} />
       </ActionScreen>
     );
   }
 
+  if (!current) return null;
   const passable = canPass(current);
   return (
     <ActionScreen

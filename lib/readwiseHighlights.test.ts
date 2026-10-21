@@ -59,6 +59,30 @@ describe("normalizeExportPage", () => {
     expect(c!.url).toBe("https://readwise.io/open/103");
   });
 
+  it("links to the Reader document, falling back to the book's, then the highlights page", () => {
+    const reader = "https://read.readwise.io/read/abc";
+    const out = normalizeExportPage({
+      results: [
+        {
+          ...BOOK,
+          unique_url: "https://read.readwise.io/read/book",
+          highlights: [
+            { id: 1, text: "a", url: reader, readwise_url: "https://readwise.io/open/1" },
+            { id: 2, text: "b", url: "https://example.com/post", readwise_url: "https://readwise.io/open/2" },
+            { id: 3, text: "c", url: null },
+          ],
+        },
+        { ...BOOK, highlights: [{ id: 4, text: "d", readwise_url: "https://readwise.io/open/4" }] },
+      ],
+    });
+    expect(out.map((h) => h.url)).toEqual([
+      reader,
+      "https://read.readwise.io/read/book", // non-Reader url ignored
+      "https://read.readwise.io/read/book",
+      "https://readwise.io/open/4", // no Reader link anywhere
+    ]);
+  });
+
   it("treats every highlight of a deleted book as deleted", () => {
     const out = normalizeExportPage({ results: [{ ...BOOK, is_deleted: true }] });
     expect(out.every((h) => h.deleted)).toBe(true);

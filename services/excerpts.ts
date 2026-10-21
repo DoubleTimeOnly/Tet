@@ -80,6 +80,21 @@ export async function syncExcerpts(
   return { ...result, newSources: plan.newCount };
 }
 
+const READER_CATEGORIES = new Set(["articles", "tweets", "pdfs", "emails"]);
+
+/**
+ * A Reader-type source still holding excerpts synced before we kept Reader
+ * links: refetch it whole once so they pick up the link (incremental syncs only
+ * return highlights that changed). Fixed up, it goes back to incremental.
+ */
+function needsReaderLinks(existing: Excerpt[], source: ExcerptSource): boolean {
+  return (
+    source.category !== null &&
+    READER_CATEGORIES.has(source.category) &&
+    existing.some((e) => e.source_id === source.id && !!e.url && !e.url.startsWith("https://read.readwise.io/"))
+  );
+}
+
 /**
  * Fetch and merge highlights for the given sources (see lib/excerpts.planSync
  * for the rules). Sources never fetched get everything; the rest only what
@@ -102,7 +117,7 @@ export async function syncSourceHighlights(
   let since: number | null = null;
   for (const s of withIds) {
     const cursor = syncCursor(existing, s.id);
-    if (cursor === null) fresh.push(s.readwise_book_id!);
+    if (cursor === null || needsReaderLinks(existing, s)) fresh.push(s.readwise_book_id!);
     else {
       known.push(s.readwise_book_id!);
       since = since === null ? cursor : Math.min(since, cursor);

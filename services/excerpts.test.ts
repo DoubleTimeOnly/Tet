@@ -136,6 +136,28 @@ describe("sources: nothing syncs until checked", () => {
   });
 });
 
+describe("Reader links", () => {
+  it("re-links excerpts synced before Reader links, once, then goes back to incremental", async () => {
+    const { store, client, A } = await setup(2);
+    client.books[0] = { ...client.books[0]!, category: "articles" };
+    await checkSource(store, client, A.id, NOW); // syncs with the old highlights-page links
+    expect((await store.listExcerpts()).map((e) => e.url)).toEqual([
+      "https://readwise.io/open/A-h1",
+      "https://readwise.io/open/A-h2",
+    ]);
+
+    // Readwise's export now carries Reader links (updated_at unchanged).
+    client.highlights = client.highlights.map((h) => ({ ...h, url: `https://read.readwise.io/read/${h.id}` }));
+    const r = await syncExcerpts(store, client, NOW + 1000);
+    expect(r.updated).toBe(2);
+    expect(client.calls.at(-1)).toEqual({ bookIds: ["A"], updatedAfter: null });
+    expect((await store.listExcerpts()).every((e) => e.url?.startsWith("https://read.readwise.io/"))).toBe(true);
+
+    await syncExcerpts(store, client, NOW + 2000);
+    expect(client.calls.at(-1)!.updatedAfter).not.toBeNull();
+  });
+});
+
 describe("daily queue: block order by source rank", () => {
   it("works through the top source before the next, in book order", async () => {
     const { store, client, A, B } = await setup(3);

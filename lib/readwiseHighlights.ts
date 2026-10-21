@@ -78,6 +78,8 @@ interface ExportHighlight {
   highlighted_at?: string | null;
   created_at?: string | null;
   updated_at?: string | null;
+  /** Reader deep link (read.readwise.io/read/<id>) for highlights made in Reader. */
+  url?: string | null;
   readwise_url?: string | null;
   is_deleted?: boolean;
   is_discard?: boolean;
@@ -88,6 +90,8 @@ interface ExportBook {
   title?: string;
   readable_title?: string;
   author?: string | null;
+  /** The whole document in Reader, for books whose highlights carry no link. */
+  unique_url?: string | null;
   is_deleted?: boolean;
   highlights?: ExportHighlight[];
 }
@@ -115,6 +119,11 @@ function parseTime(iso: string | null | undefined): number | null {
   return Number.isNaN(ms) ? null : ms;
 }
 
+/** Only a Reader link counts; other `url`s point at the original web page. */
+function readerUrl(url: string | null | undefined): string | null {
+  return url && url.startsWith("https://read.readwise.io/") ? url : null;
+}
+
 /** Flatten one export page into highlights. Exported for tests. */
 export function normalizeExportPage(body: ExportResponse): ReadwiseHighlight[] {
   const out: ReadwiseHighlight[] = [];
@@ -134,7 +143,8 @@ export function normalizeExportPage(body: ExportResponse): ReadwiseHighlight[] {
         note: h.note?.trim() || null,
         bookTitle,
         bookAuthor,
-        url: h.readwise_url || `https://readwise.io/open/${id}`,
+        // Prefer Reader (read in context) over Readwise's highlights-only page.
+        url: readerUrl(h.url) || readerUrl(book.unique_url) || h.readwise_url || `https://readwise.io/open/${id}`,
         location: typeof h.location === "number" ? h.location : null,
         highlightedAt: parseTime(h.highlighted_at) ?? parseTime(h.created_at),
         updatedAt,

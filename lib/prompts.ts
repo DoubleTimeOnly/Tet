@@ -197,3 +197,26 @@ function normalize(s: string): string {
 function capitalize(s: string): string {
   return s.length === 0 ? s : s[0]!.toUpperCase() + s.slice(1);
 }
+
+/** Which practice kinds have a run dealt on or after `since` (a day's start). */
+export interface ImprovDone {
+  words: boolean;
+  relationships: boolean;
+}
+
+/**
+ * Today's improv progress for the Today rings and the loot gate: a kind counts
+ * once any run of it was dealt since the start of the day. Runs record when
+ * they were dealt, not when the last prompt was reached, so opening a run is
+ * what counts.
+ */
+export function improvDoneSince(
+  practices: readonly { kind: string; started_at: number }[],
+  since: number,
+): ImprovDone {
+  const today = practices.filter((p) => p.started_at >= since);
+  return {
+    words: today.some((p) => p.kind === "words"),
+    relationships: today.some((p) => p.kind === "relationships"),
+  };
+}

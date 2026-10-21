@@ -100,6 +100,13 @@ describe("moveHabit", () => {
     expect(await names(store)).toEqual(["A", "B", "C"]);
   });
 
+  it("moves within an on-screen group, skipping habits outside it", async () => {
+    const { store, a, c } = await three();
+    // B is done today, so the undone group on screen is A, C.
+    await moveHabit(store, c.id, -1, [a.id, c.id]);
+    expect(await names(store)).toEqual(["C", "A", "B"]);
+  });
+
   it("ignores an unknown habit", async () => {
     const { store } = await three();
     await moveHabit(store, "nope", -1);

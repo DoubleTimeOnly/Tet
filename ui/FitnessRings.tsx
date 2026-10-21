@@ -93,4 +93,6 @@ export const RING_COLORS: Record<string, string> = {
   youtube:   "#30d158",
   reading:   "#ffd60a",
   excerpt:   "#bf5af2",
+  improv:    "#64d2ff",
+  habits:    "#ff9f0a",
 };

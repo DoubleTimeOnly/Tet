@@ -13,6 +13,7 @@ import { recordCompletion } from "../lib/completion";
 import { totalXp, levelForXp, type LevelProgress } from "../lib/xp";
 import { cardPointsOf, excerptPoints, excerptSlice, type ExcerptSlice } from "../lib/excerpts";
 import type { ExcerptReview } from "../db/schema";
+import { improvDoneSince, type ImprovDone } from "../lib/prompts";
 
 /**
  * Orchestration: Store reads/writes + pure lib logic. Screens call these and
@@ -40,6 +41,8 @@ export interface TodayView {
   xp: LevelProgress;
   /** True when there is at least one active task (distinguishes "all done" from "nothing set up"). */
   hasActiveTasks: boolean;
+  /** Which improv kinds have been practised today (Today ring + loot gate). */
+  improv: ImprovDone;
 }
 
 export async function getTodayView(
@@ -51,7 +54,7 @@ export async function getTodayView(
   // before reading completions, so it auto-completes without needing a grade.
   await creditFlashcardTasks(store, now, tz);
   await creditExcerptTasks(store, now, tz);
-  const [tasks, dueCards, allCompletions, reviews, reviewedDeckIds, excerpts, excerptReviews, sources] =
+  const [tasks, dueCards, allCompletions, reviews, reviewedDeckIds, excerpts, excerptReviews, sources, practices] =
     await Promise.all([
       store.listTasks({ activeOnly: true }),
       store.listDueCards(now),
@@ -61,6 +64,7 @@ export async function getTodayView(
       store.listExcerpts(),
       store.listExcerptReviewsSince(0),
       store.listExcerptSources(),
+      store.listPromptPractices(),
     ]);
   const dayStart = startOfTetDay(now, tz);
   const excerptReviewsToday = excerptReviews.filter((r) => r.reviewed_at >= dayStart);
@@ -99,7 +103,17 @@ export async function getTodayView(
     return { task, filledSegments: todayDoneIds.has(task.id) ? 1 : 0, totalSegments: 1 };
   });
 
-  return { slice, allTaskProgress, streak, maxStreak, xp, hasActiveTasks: tasks.length > 0 };
+  const improv = improvDoneSince(practices, startOfTetDay(now, tz));
+
+  return {
+    slice,
+    allTaskProgress,
+    streak,
+    maxStreak,
+    xp,
+    hasActiveTasks: tasks.length > 0,
+    improv,
+  };
 }
 
 /**

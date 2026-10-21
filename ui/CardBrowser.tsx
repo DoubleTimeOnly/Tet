@@ -186,7 +186,7 @@ function CardRow({
   fromExcerpts: boolean;
   onChanged: () => void;
 }) {
-  const { store } = useStore();
+  const { store, tz } = useStore();
   const [editing, setEditing] = useState(false);
   const [showSource, setShowSource] = useState(false);
   // The owning note (loaded on edit) — null for a standalone basic card.
@@ -226,7 +226,7 @@ function CardRow({
       const fields = isCloze
         ? makeFields("cloze", { text })
         : makeFields(note.kind, { front, back });
-      await updateNote(store, note.id, fields);
+      await updateNote(store, note.id, fields, Date.now(), tz);
     } else {
       await editCard(store, card.id, front, back);
     }

@@ -135,7 +135,7 @@ export default function ReviewScreen() {
       const fields = isCloze
         ? makeFields("cloze", { text: editText })
         : makeFields(editNote.kind, { front: editFront, back: editBack });
-      await updateNote(store, editNote.id, fields);
+      await updateNote(store, editNote.id, fields, Date.now(), tz);
       const refreshed = await store.listCardsByNote(editNote.id);
       const byId = new Map(refreshed.map((c) => [c.id, c]));
       setQueue((q) => q.map((c) => byId.get(c.id) ?? c));

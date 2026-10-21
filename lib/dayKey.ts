@@ -54,6 +54,17 @@ export function startOfTetDay(instant: Instant, tz: string): number {
   return start.toMillis();
 }
 
+/** Epoch ms of the 04:00 that starts the Tet day after `instant`'s. */
+export function startOfNextTetDay(instant: Instant, tz: string): number {
+  const next = DateTime.fromISO(localDayKey(instant, tz), { zone: tz })
+    .plus({ days: 1 })
+    .set({ hour: DAY_START_HOUR, minute: 0, second: 0, millisecond: 0 });
+  if (!next.isValid) {
+    throw new Error(`startOfNextTetDay: invalid zone or instant (${tz})`);
+  }
+  return next.toMillis();
+}
+
 /** Calendar date one Tet-day earlier, for walking streaks backwards. */
 export function previousDayKey(dayKey: string): string {
   const dt = DateTime.fromISO(dayKey);

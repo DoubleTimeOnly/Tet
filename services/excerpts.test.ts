@@ -19,7 +19,7 @@ import {
   EXCERPT_DECK_NAME,
 } from "./excerpts";
 import { getTodayView, getExcerptSlice, getFlashcardQueue } from "./learning";
-import { createTask } from "./authoring";
+import { createTask, updateTask } from "./authoring";
 import { exportBackup, restoreBackup } from "./backupService";
 import {
   FakeReadwiseHighlightsClient,
@@ -317,8 +317,24 @@ describe("cardFromExcerpts", () => {
     expect(slice.setAsideCount).toBe(0);
 
     const reviewTask = await createTask(store, { type: "flashcard", title: "Review", cadence: 30 }, NOW);
-    const fc = await getFlashcardQueue(store, reviewTask, NOW, LA);
-    expect(fc.queue.map((x) => x.id)).toContain(card.id);
+    // Just written, so not due today: it first comes up at tomorrow's 4am.
+    expect((await getFlashcardQueue(store, reviewTask, NOW, LA)).queue.map((x) => x.id)).not.toContain(card.id);
+    expect(card.due).toBe(at("2026-06-16T04:00"));
+    const tomorrow = at("2026-06-16T04:00");
+    expect((await getFlashcardQueue(store, reviewTask, tomorrow, LA)).queue.map((x) => x.id)).toContain(card.id);
+  });
+
+  it("scores a card at the task's own card value", async () => {
+    const { store, client, A } = await setup(3);
+    await checkSource(store, client, A.id, NOW);
+    const task = await excerptTask(store);
+    expect((await getExcerptSlice(store, task, NOW, LA)).cardPoints).toBe(CARD_POINTS);
+    await updateTask(store, task.id, { cardPoints: 5 });
+    const edited = await excerptTask(store);
+    const [a] = (await getExcerptSlice(store, edited, NOW, LA)).queue;
+    await cardFromExcerpts(store, [a!.id], "Q", "A", NOW, LA);
+    const slice = await getExcerptSlice(store, edited, NOW, LA);
+    expect(slice).toMatchObject({ cardPoints: 5, pointsToday: 5 });
   });
 
   it("lets one excerpt produce several cards, each linked and scored", async () => {

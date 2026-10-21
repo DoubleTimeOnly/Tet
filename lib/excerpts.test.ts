@@ -18,6 +18,8 @@ import {
   MAX_PASSES,
   PASS_INTERVAL_DAYS,
   CARD_POINTS,
+  cardPointsOf,
+  withCardPoints,
 } from "./excerpts";
 import { startOfTetDay } from "./dayKey";
 import { makeExcerpt, makeSource, makeTask } from "./testFixtures";
@@ -384,5 +386,17 @@ describe("syncCursor / dedupKey", () => {
 
   it("normalises case and whitespace", () => {
     expect(dedupKey("Book", "A  b\nc")).toBe(dedupKey("book ", "a b c"));
+  });
+});
+
+describe("card points setting", () => {
+  it("reads and writes the per-task value, defaulting to CARD_POINTS", () => {
+    expect(cardPointsOf({ meta: null })).toBe(CARD_POINTS);
+    expect(cardPointsOf({ meta: "garbage" })).toBe(CARD_POINTS);
+    expect(cardPointsOf({ meta: JSON.stringify({ cardPoints: 0 }) })).toBe(CARD_POINTS);
+    const meta = withCardPoints(JSON.stringify({ other: 1 }), 2);
+    expect(cardPointsOf({ meta })).toBe(2);
+    expect(JSON.parse(meta).other).toBe(1);
+    expect(cardPointsOf({ meta: withCardPoints(null, -4) })).toBe(1);
   });
 });

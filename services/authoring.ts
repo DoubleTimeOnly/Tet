@@ -3,6 +3,8 @@ import type { Deck, Task, Card, Note, NoteKind, TaskType } from "../db/schema";
 import { createCard } from "../lib/fsrs";
 import { generateCards, reconcileNoteCards } from "../lib/notes";
 import { newId } from "../lib/id";
+import { startOfNextTetDay } from "../lib/dayKey";
+import { withCardPoints } from "../lib/excerpts";
 import { DEFAULT_REVIEW_CADENCE } from "../lib/dailySlice";
 
 /** Find a deck by exact name, or create it. Used to land cards made from a task. */
@@ -26,9 +28,10 @@ export async function addCardFromTask(
   front: string,
   back: string,
   now: number = Date.now(),
+  tz?: string,
 ): Promise<Card> {
   const deck = await findOrCreateDeck(store, `From: ${task.title}`, now);
-  return addCard(store, { deckId: deck.id, front, back, sourceTaskId: task.id }, now);
+  return addCard(store, { deckId: deck.id, front, back, sourceTaskId: task.id, tz }, now);
 }
 
 /** Deck / task / card creation used by the editor screens and seeding. */
@@ -79,6 +82,8 @@ export interface EditTaskInput {
   cadence?: number;
   makesCardsCount?: number;
   readingTarget?: number | null;
+  /** Excerpt tasks: what a card you write counts toward the daily goal. */
+  cardPoints?: number;
 }
 
 /**
@@ -116,6 +121,10 @@ export async function updateTask(
   if (next.type === "youtube" && next.source_ref !== current.source_ref) {
     await store.updateTaskMeta(id, null);
   }
+  if (next.type === "excerpt" && input.cardPoints !== undefined) {
+    next.meta = withCardPoints(current.meta, input.cardPoints);
+    await store.updateTaskMeta(id, next.meta);
+  }
   return next;
 }
 
@@ -124,6 +133,13 @@ export interface NewCardInput {
   front: string;
   back: string;
   sourceTaskId?: string | null;
+  /** Zone to schedule in: given, the card first comes up the next Tet day. */
+  tz?: string;
+}
+
+/** A card you just wrote is fresh in your head — first review is tomorrow (4am), not now. */
+function firstDue(now: number, tz: string | undefined): number | undefined {
+  return tz === undefined ? undefined : startOfNextTetDay(now, tz);
 }
 
 export async function addCard(
@@ -137,6 +153,7 @@ export async function addCard(
     back: input.back,
     sourceTaskId: input.sourceTaskId ?? null,
     now,
+    due: firstDue(now, input.tz),
   });
   await store.insertCard(card);
   return card;
@@ -148,6 +165,8 @@ export interface NewNoteInput {
   /** Shared source as JSON (see lib/notes.makeFields). */
   fields: string;
   sourceTaskId?: string | null;
+  /** As NewCardInput.tz. */
+  tz?: string;
 }
 
 /**
@@ -178,6 +197,7 @@ export async function addNote(
       noteId: note.id,
       template: g.template,
       now,
+      due: firstDue(now, input.tz),
     }),
   );
   for (const c of cards) await store.insertCard(c);
@@ -195,6 +215,7 @@ export async function updateNote(
   noteId: string,
   fields: string,
   now: number = Date.now(),
+  tz?: string,
 ): Promise<void> {
   const note = await store.getNote(noteId);
   if (!note) throw new Error(`updateNote: no note ${noteId}`);
@@ -214,6 +235,7 @@ export async function updateNote(
         noteId: note.id,
         template: g.template,
         now,
+        due: firstDue(now, tz),
       }),
     );
   }

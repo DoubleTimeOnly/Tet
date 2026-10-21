@@ -155,6 +155,28 @@ export function setAsidePile(excerpts: Excerpt[]): Excerpt[] {
  */
 export const CARD_POINTS = 3;
 
+/** An excerpt task's own card value (Task.meta `cardPoints`), else CARD_POINTS. */
+export function cardPointsOf(task: Pick<Task, "meta"> | null | undefined): number {
+  try {
+    const n = Number(JSON.parse(task?.meta ?? "null")?.cardPoints);
+    return Number.isInteger(n) && n >= 1 ? n : CARD_POINTS;
+  } catch {
+    return CARD_POINTS;
+  }
+}
+
+/** Task.meta with `cardPoints` set (clamped to a whole number >= 1), other keys kept. */
+export function withCardPoints(meta: string | null, points: number): string {
+  let rest: Record<string, unknown> = {};
+  try {
+    const parsed = JSON.parse(meta ?? "null");
+    if (parsed && typeof parsed === "object") rest = parsed;
+  } catch {
+    // unreadable meta: start over
+  }
+  return JSON.stringify({ ...rest, cardPoints: Math.max(1, Math.round(points) || CARD_POINTS) });
+}
+
 /** Default daily goal for a new excerpt task. */
 export const DEFAULT_EXCERPT_CADENCE = 10;
 
@@ -164,14 +186,14 @@ export const DEFAULT_EXCERPT_CADENCE = 10;
  * excerpt back out of the pile is housekeeping and earns nothing (and a focus
  * Skip writes no row at all).
  */
-export function excerptPoints(reviews: ExcerptReview[]): number {
+export function excerptPoints(reviews: ExcerptReview[], cardPoints: number = CARD_POINTS): number {
   const cards = new Set<string>();
   let points = 0;
   for (const r of reviews) {
     if (r.action === "card") cards.add(r.card_id ?? r.id);
     else if (r.action !== "unset_aside") points += 1;
   }
-  return points + cards.size * CARD_POINTS;
+  return points + cards.size * cardPoints;
 }
 
 /**
@@ -186,6 +208,8 @@ export function excerptsHandled(reviews: ExcerptReview[]): Set<string> {
 export interface ExcerptSlice {
   /** Daily goal: the task's cadence, capped to what's achievable today. */
   goal: number;
+  /** What a card counts for this task. */
+  cardPoints: number;
   /** Points earned today (daily review and focus sessions alike). */
   pointsToday: number;
   /** max(0, goal - pointsToday). */
@@ -219,12 +243,14 @@ export function excerptSlice(
   now: Instant,
 ): ExcerptSlice {
   const ready = excerptQueue(excerpts, sources, now);
-  const pointsToday = excerptPoints(todaysReviews);
+  const cardPoints = cardPointsOf(task);
+  const pointsToday = excerptPoints(todaysReviews, cardPoints);
   const handled = excerptsHandled(todaysReviews).size;
   const goal = Math.min(task.cadence, handled + ready.length);
   const remaining = Math.max(0, goal - pointsToday);
   return {
     goal,
+    cardPoints,
     pointsToday,
     remaining,
     queue: ready.slice(0, remaining),

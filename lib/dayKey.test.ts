@@ -1,4 +1,4 @@
-import { localDayKey, previousDayKey, startOfTetDay, DAY_START_HOUR } from "./dayKey";
+import { localDayKey, previousDayKey, startOfTetDay, startOfNextTetDay, DAY_START_HOUR } from "./dayKey";
 import { DateTime } from "luxon";
 
 /** Build an epoch-ms instant from wall-clock components in a zone. */
@@ -117,5 +117,21 @@ describe("startOfTetDay", () => {
     const now = DateTime.fromISO("2026-06-15T12:00", { zone: LA }).toMillis();
     const start = startOfTetDay(now, LA);
     expect(now).toBeGreaterThanOrEqual(start);
+  });
+});
+
+describe("startOfNextTetDay", () => {
+  const LA = "America/Los_Angeles";
+  const ms = (iso: string) => DateTime.fromISO(iso, { zone: LA }).toMillis();
+
+  it("is the next 4am, and a late-night instant (before 4am) still counts as the prior day", () => {
+    expect(startOfNextTetDay(ms("2026-06-15T12:00"), LA)).toBe(ms("2026-06-16T04:00"));
+    expect(startOfNextTetDay(ms("2026-06-15T23:30"), LA)).toBe(ms("2026-06-16T04:00"));
+    expect(startOfNextTetDay(ms("2026-06-16T01:00"), LA)).toBe(ms("2026-06-16T04:00"));
+    expect(startOfNextTetDay(ms("2026-06-16T04:00"), LA)).toBe(ms("2026-06-17T04:00"));
+  });
+
+  it("holds across a DST change", () => {
+    expect(startOfNextTetDay(ms("2026-03-07T12:00"), LA)).toBe(ms("2026-03-08T04:00"));
   });
 });

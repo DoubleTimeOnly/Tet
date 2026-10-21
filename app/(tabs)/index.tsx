@@ -11,7 +11,6 @@ import { localDayKey } from "../../lib/dayKey";
 import type { LootCard } from "../../db/schema";
 import type { TaskSliceItem } from "../../lib/dailySlice";
 import { newId } from "../../lib/id";
-import { CARD_POINTS } from "../../lib/excerpts";
 
 export default function TodayScreen() {
   const { store, tz, version } = useStore();
@@ -160,7 +159,7 @@ function TaskRow({ item }: { item: TaskSliceItem }) {
         <Muted>{`${flashcards.reviewedToday} of ${flashcards.goal} done today`}</Muted>
       )}
       {excerpts && (
-        <Muted>{`${excerpts.pointsToday} of ${excerpts.goal} done today · a card counts ${CARD_POINTS}`}</Muted>
+        <Muted>{`${excerpts.pointsToday} of ${excerpts.goal} done today · a card counts ${excerpts.cardPoints}`}</Muted>
       )}
       <Button
         label={task.type === "flashcard" || task.type === "excerpt" ? "Review" : "Open"}

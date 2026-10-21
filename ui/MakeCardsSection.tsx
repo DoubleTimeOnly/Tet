@@ -18,7 +18,7 @@ export function MakeCardsSection({
   task: Task;
   onChange?: () => void;
 }) {
-  const { store } = useStore();
+  const { store, tz } = useStore();
   const [front, setFront] = useState("");
   const [back, setBack] = useState("");
   const [made, setMade] = useState(0);
@@ -31,7 +31,7 @@ export function MakeCardsSection({
 
   const add = async () => {
     if (!front.trim() || !back.trim()) return;
-    await addCardFromTask(store, task, front.trim(), back.trim());
+    await addCardFromTask(store, task, front.trim(), back.trim(), Date.now(), tz);
     setFront("");
     setBack("");
     refresh();

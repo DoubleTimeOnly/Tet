@@ -11,7 +11,7 @@ import { Screen, Card, Title, Subtitle, Body, Muted, Button } from "../../ui/com
 import { ReadwiseDocPicker } from "../../ui/ReadwiseDocPicker";
 import { CardBrowser } from "../../ui/CardBrowser";
 import { ExcerptLibrarySection } from "../../ui/ExcerptLibrarySection";
-import { DEFAULT_EXCERPT_CADENCE } from "../../lib/excerpts";
+import { CARD_POINTS, DEFAULT_EXCERPT_CADENCE, cardPointsOf } from "../../lib/excerpts";
 import { colors, radius, space } from "../../ui/theme";
 import type { Deck, Task, TaskType, NoteKind, Card as CardRow } from "../../db/schema";
 
@@ -100,7 +100,7 @@ const KIND_LABELS: Record<NoteKind, string> = {
 };
 
 function AddCardForm({ decks, onDone }: { decks: Deck[]; onDone: () => void }) {
-  const { store } = useStore();
+  const { store, tz } = useStore();
   const [kind, setKind] = useState<NoteKind>("basic");
   const [front, setFront] = useState("");
   const [back, setBack] = useState("");
@@ -120,10 +120,11 @@ function AddCardForm({ decks, onDone }: { decks: Deck[]; onDone: () => void }) {
 
     if (kind === "basic") {
       // A plain basic card stays note-less (its front/back are edited directly).
-      await addCard(store, { deckId: dest, front: front.trim(), back: back.trim() });
+      await addCard(store, { deckId: dest, front: front.trim(), back: back.trim(), tz });
     } else {
       await addNote(store, {
         deckId: dest,
+        tz,
         kind,
         fields:
           kind === "cloze"
@@ -286,7 +287,7 @@ function AddTaskForm({ decks, onDone }: { decks: Deck[]; onDone: () => void }) {
         </>
       )}
       {type === "excerpt" && (
-        <Muted>Triage Readwise highlights into cards. Each decision counts 1; a card you write counts more.</Muted>
+        <Muted>Triage Readwise highlights into cards. Each decision counts 1; a card you write counts more (set in Edit task).</Muted>
       )}
       {type === "reading" && (
         <ReadwiseDocPicker
@@ -417,6 +418,7 @@ function TaskEditor({
   const [deckId, setDeckId] = useState<string | null>(task.source_ref);
   const [cadence, setCadence] = useState(String(task.cadence));
   const [makes, setMakes] = useState(String(task.makes_cards_count));
+  const [cardPoints, setCardPoints] = useState(String(cardPointsOf(task)));
 
   const save = async () => {
     if (!title.trim()) return;
@@ -431,6 +433,8 @@ function TaskEditor({
       cadence: Math.max(1, parseInt(cadence, 10) || 1),
       makesCardsCount:
         task.type === "reading" ? Math.max(0, parseInt(makes, 10) || 0) : undefined,
+      cardPoints:
+        task.type === "excerpt" ? Math.max(1, parseInt(cardPoints, 10) || CARD_POINTS) : undefined,
     });
     onSaved();
   };
@@ -462,6 +466,17 @@ function TaskEditor({
           <View style={{ flex: 1 }}>
             <Muted>Make N cards</Muted>
             <Field placeholder="0" value={makes} onChangeText={setMakes} keyboardType="number-pad" />
+          </View>
+        )}
+        {task.type === "excerpt" && (
+          <View style={{ flex: 1 }}>
+            <Muted>Points per card</Muted>
+            <Field
+              placeholder={String(CARD_POINTS)}
+              value={cardPoints}
+              onChangeText={setCardPoints}
+              keyboardType="number-pad"
+            />
           </View>
         )}
       </View>

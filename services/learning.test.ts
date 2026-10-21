@@ -1,9 +1,10 @@
 import { MemoryStore } from "../db/memoryStore";
 import { getTodayView, gradeCard, completeTask, getFlashcardQueue } from "./learning";
-import { seedStarterDeck, createTask, addCard, createDeck, addCardFromTask, findOrCreateDeck, updateTask } from "./authoring";
+import { seedStarterDeck, createTask, addCard, addNote, createDeck, addCardFromTask, findOrCreateDeck, updateTask } from "./authoring";
 import { exportBackup, restoreBackup, importAnki } from "./backupService";
 import { DateTime } from "luxon";
 import type { AnkiNoteReader } from "../lib/ankiImport";
+import { makeFields } from "../lib/notes";
 
 const LA = "America/Los_Angeles";
 const day = (iso: string) => DateTime.fromISO(iso, { zone: LA }).toMillis();
@@ -311,5 +312,26 @@ describe("backup round-trip + anki import (Store-backed)", () => {
     const fc = await getFlashcardQueue(store, task, now, LA);
     expect(fc.queue.length).toBe(2);
     expect(fc.queue.map((c) => c.front)).toContain("Hola"); // HTML stripped
+  });
+});
+
+describe("cards you write first come up the next day", () => {
+  const tz = "America/Los_Angeles";
+  const noon = DateTime.fromISO("2026-06-15T12:00", { zone: tz }).toMillis();
+  const next4am = DateTime.fromISO("2026-06-16T04:00", { zone: tz }).toMillis();
+
+  it("applies to addCard and addNote when a zone is given, and not otherwise", async () => {
+    const store = new MemoryStore();
+    const deck = await createDeck(store, "D", noon);
+    const sameDay = await addCard(store, { deckId: deck.id, front: "a", back: "b" }, noon);
+    const later = await addCard(store, { deckId: deck.id, front: "c", back: "d", tz }, noon);
+    expect(sameDay.due).toBeLessThanOrEqual(noon);
+    expect(later.due).toBe(next4am);
+    const { cards } = await addNote(
+      store,
+      { deckId: deck.id, kind: "reversed", fields: makeFields("reversed", { front: "x", back: "y" }), tz },
+      noon,
+    );
+    expect(cards.map((c) => c.due)).toEqual([next4am, next4am]);
   });
 });

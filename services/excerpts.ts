@@ -336,7 +336,7 @@ export async function cardFromExcerpts(
   if (missing.length > 0) throw new Error(`cardFromExcerpts: no excerpt ${missing[0]}`);
 
   const deck = await findOrCreateDeck(store, EXCERPT_DECK_NAME, now);
-  const card = await addCard(store, { deckId: deck.id, front: f, back: b }, now);
+  const card = await addCard(store, { deckId: deck.id, front: f, back: b, tz }, now);
   await store.insertCardExcerpts(excerptIds.map((id) => ({ card_id: card.id, excerpt_id: id })));
   await store.updateExcerpts(
     // A further card from an already-carded excerpt keeps its original resolved_at.

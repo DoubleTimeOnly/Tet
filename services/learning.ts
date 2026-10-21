@@ -11,7 +11,7 @@ import { startOfTetDay, localDayKey } from "../lib/dayKey";
 import { grade } from "../lib/fsrs";
 import { recordCompletion } from "../lib/completion";
 import { totalXp, levelForXp, type LevelProgress } from "../lib/xp";
-import { excerptPoints, excerptSlice, type ExcerptSlice } from "../lib/excerpts";
+import { cardPointsOf, excerptPoints, excerptSlice, type ExcerptSlice } from "../lib/excerpts";
 import type { ExcerptReview } from "../db/schema";
 
 /**
@@ -77,7 +77,7 @@ export async function getTodayView(
   const streak = currentStreak({ completions: allCompletions, now, tz });
   const maxStreak = longestStreak({ completions: allCompletions });
   const xp = levelForXp(
-    totalXp({ reviews, completions: allCompletions, excerptPoints: excerptPoints(excerptReviews) }),
+    totalXp({ reviews, completions: allCompletions, excerptPoints: excerptPoints(excerptReviews, cardPointsOf(tasks.find((t) => t.type === "excerpt"))) }),
   );
 
   const dayKey = localDayKey(now, tz);

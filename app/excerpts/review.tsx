@@ -11,6 +11,7 @@ import {
 } from "../../services/excerpts";
 import {
   canPass,
+  cardPointsOf,
   excerptPoints,
   excerptQueue,
   excerptSlice,
@@ -83,7 +84,7 @@ export default function ExcerptReviewScreen() {
         store.listExcerptSources(),
         excerptReviewsToday(store, now, tz),
       ]);
-      const points = excerptPoints(todays);
+      const points = excerptPoints(todays, cardPointsOf(t ?? (await store.listTasks()).find((x) => x.type === "excerpt")));
       const setAside = setAsidePile(list).length;
       if (sourceId) {
         const queue = withSkipsLast(focusQueue(list, sourceId), skips);

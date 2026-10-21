@@ -79,13 +79,15 @@ export interface CreateCardInput {
   /** Owning note + which generated sibling, when the card belongs to a note. */
   noteId?: string | null;
   template?: number;
+  /** When it first comes up; defaults to `now` (immediately). */
+  due?: Date | number;
 }
 
 /** A brand-new card with a fresh FSRS state, due immediately. */
 export function createCard(input: CreateCardInput): Card {
-  const { deckId, front, back, now, sourceTaskId = null, id, noteId = null, template = 0 } = input;
+  const { deckId, front, back, now, sourceTaskId = null, id, noteId = null, template = 0, due } = input;
   const nowDate = now instanceof Date ? now : new Date(now);
-  const fresh = createEmptyCard(nowDate);
+  const fresh = createEmptyCard(due === undefined ? nowDate : new Date(due));
   const base: Card = {
     id: id ?? newId(),
     deck_id: deckId,

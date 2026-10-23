@@ -15,7 +15,9 @@ import { filenameFromUri, stripExtension } from "../lib/autoBackup";
  * a Dropbox or Drive folder is selectable but then fails every read and write.
  * patches/expo-file-system+*.patch widens that check to any document-provider
  * uri (applied by `postinstall`, so EAS builds get it too); re-check it when
- * upgrading expo-file-system. Cloud providers' own behaviour is theirs: a write
+ * upgrading expo-file-system. The module ships a prebuilt .aar that Gradle uses
+ * instead of its Kotlin source, so the patch only takes effect because
+ * package.json lists it under expo.autolinking.android.buildFromSource. Cloud providers' own behaviour is theirs: a write
  * can succeed locally and sync later.
  *
  * Until they pick one, snapshots still go to a private `backups/` folder inside

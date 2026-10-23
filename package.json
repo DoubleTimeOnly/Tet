@@ -53,5 +53,14 @@
     "patch-package": "^8.0.1",
     "ts-jest": "^29.2.5",
     "typescript": "^5.6.3"
+  },
+  "expo": {
+    "autolinking": {
+      "android": {
+        "buildFromSource": [
+          "expo-file-system"
+        ]
+      }
+    }
   }
 }

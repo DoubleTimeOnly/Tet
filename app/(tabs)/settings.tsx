@@ -11,6 +11,7 @@ import { createApkgReader } from "../../adapters/apkgReader";
 import { Screen, Card, Title, Subtitle, Muted, Button } from "../../ui/components";
 import { colors, radius, space } from "../../ui/theme";
 import { AutoBackupSection } from "../../ui/AutoBackupSection";
+import { DriveBackupSection } from "../../ui/DriveBackupSection";
 
 export default function SettingsScreen() {
   const { store, tz, reload } = useStore();
@@ -145,6 +146,7 @@ export default function SettingsScreen() {
       </Card>
 
       <AutoBackupSection />
+      <DriveBackupSection />
 
       <Card>
         <Subtitle>Flashcards only</Subtitle>

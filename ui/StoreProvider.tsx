@@ -14,6 +14,7 @@ import { seedObsidianFlashcards } from "../services/seedObsidian";
 import { seedPromptPools } from "../services/prompts";
 import { runAutoBackup } from "../services/autoBackupService";
 import { backupFiles } from "../adapters/backupFiles";
+import { driveBackup } from "../adapters/driveBackup";
 import { autoSyncExcerpts } from "../services/readwiseService";
 import { ensureExcerptSources } from "../services/excerpts";
 
@@ -33,6 +34,20 @@ function deviceTimeZone(): string {
   } catch {
     return "UTC";
   }
+}
+
+/**
+ * Daily snapshot to the local destination and, if the user has signed in, to
+ * Google Drive. Independent: each runs its own schedule against its own file
+ * list, and neither can throw (runAutoBackup reports failures instead), so a
+ * Drive outage — offline, revoked access — never costs the local snapshot.
+ */
+async function backUpEverywhere(store: Store): Promise<void> {
+  const local = runAutoBackup(store, backupFiles);
+  const cloud = (async () => {
+    if (await driveBackup.hasFolder()) await runAutoBackup(store, driveBackup);
+  })().catch((e) => console.warn("[driveBackup] skipped:", e));
+  await Promise.all([local, cloud]);
 }
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
@@ -62,7 +77,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       // soon as the store is ready, and runAutoBackup swallows its own errors,
       // so a slow or failing write is never visible here. It no-ops unless a
       // day has passed since the last one.
-      void runAutoBackup(s, backupFiles);
+      void backUpEverywhere(s);
       // New Readwise highlights flow into the excerpt queue on their own.
       // Also not awaited, and silent on failure; refetch screens if it added any.
       void autoSyncExcerpts(s).then((r) => {
@@ -90,7 +105,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     if (!store) return;
     const sub = AppState.addEventListener("change", (next) => {
       if (next !== "active") return;
-      void runAutoBackup(store, backupFiles);
+      void backUpEverywhere(store);
       void autoSyncExcerpts(store).then((r) => {
         if (r && (r.added > 0 || r.removed > 0 || r.newSources > 0)) setVersion((v) => v + 1);
       });

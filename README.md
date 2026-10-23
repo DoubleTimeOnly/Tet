@@ -128,6 +128,32 @@ npm run typecheck  # tsc, whole app
 The service-layer tests exercise the full read → make-cards → review loop, streak,
 backup round-trip, and `.apkg` import against an in-memory store.
 
+## Google Drive backup (one-time setup)
+
+Settings → **Google Drive backup** uploads each daily snapshot to a visible
+`Tet backups` folder in your own Drive. It signs in through the native Google
+account picker; there is no API key to paste or renew. Android only, and it
+needs a **new native build** (the sign-in library is native code — Expo Go and
+an old dev client won't have it).
+
+Google Cloud console, once:
+
+1. Create a project and enable the **Google Drive API**.
+2. **OAuth consent screen**: add yourself as a user, add the scope
+   `.../auth/drive.file` (non-sensitive, so no Google review), then
+   **Publish app → In production**. Leaving it in *Testing* makes Google expire
+   the session every 7 days.
+3. **Credentials → Create OAuth client ID → Android**, with package name
+   `com.doubletimeonly.tet` and the **SHA-1 of the key that signs the build you
+   install**. Get it with `eas credentials` (EAS builds) or
+   `keytool -list -v -keystore ~/.android/debug.keystore` (local debug builds).
+   Debug, EAS and Play-signed builds each have a different SHA-1 — create one
+   client per build you install from. A mismatch shows up as "Google rejected
+   this build" when signing in.
+
+Nothing from the console goes into the app: the Android client is matched by
+package name + signature at runtime.
+
 ## Project layout
 
 ```

@@ -11,6 +11,13 @@ import { filenameFromUri, stripExtension } from "../lib/autoBackup";
  * Drive folder — which is the whole point. The chosen tree uri is remembered in
  * adapters/tokenStore.
  *
+ * Stock expo-file-system only accepts the built-in storage provider's uris, so
+ * a Dropbox or Drive folder is selectable but then fails every read and write.
+ * patches/expo-file-system+*.patch widens that check to any document-provider
+ * uri (applied by `postinstall`, so EAS builds get it too); re-check it when
+ * upgrading expo-file-system. Cloud providers' own behaviour is theirs: a write
+ * can succeed locally and sync later.
+ *
  * Until they pick one, snapshots still go to a private `backups/` folder inside
  * the app's document directory. A user who never opens Settings must not end up
  * with no backups at all; private storage is worse than a real folder (it's
@@ -86,14 +93,6 @@ export const backupFiles: BackupFiles = {
   async chooseFolder() {
     const res = await SAF.requestDirectoryPermissionsAsync();
     if (!res.granted) return false;
-    // expo-file-system's SAF calls only accept the local storage provider; a
-    // Drive/Dropbox tree is selectable but every read and write then throws.
-    // Fail here, where the user can act on it, instead of at backup time.
-    if (!isLocalTree(res.directoryUri)) {
-      throw new Error(
-        "That folder is managed by a cloud app, which Tet can't write to directly. Pick a folder on this device (e.g. Download/Tet), or use “Google Drive backup” below.",
-      );
-    }
     await folderStore.setToken(res.directoryUri);
     return true;
   },
@@ -138,11 +137,6 @@ export const backupFiles: BackupFiles = {
     await FileSystem.deleteAsync(`${PRIVATE_DIR}${name}`, { idempotent: true });
   },
 };
-
-/** Tree uris from the built-in provider: the only ones expo's SAF helpers accept. */
-function isLocalTree(uri: string): boolean {
-  return /^content:\/\/com\.android\.externalstorage/.test(uri);
-}
 
 /**
  * "primary:Download/Tet" out of a tree uri, so Settings can name the folder the

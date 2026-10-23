@@ -40,14 +40,6 @@ export function backupFilename(now: number): string {
 }
 
 /**
- * The name without its extension — what SAF's createFileAsync wants, since it
- * appends the extension itself from the mime type.
- */
-export function stripExtension(filename: string): string {
-  return filename.endsWith(SUFFIX) ? filename.slice(0, -SUFFIX.length) : filename;
-}
-
-/**
  * Filename out of a SAF content:// uri. Android's Storage Access Framework
  * enumerates a directory as document uris whose id is a percent-encoded path,
  * e.g.

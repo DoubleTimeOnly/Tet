@@ -6,7 +6,6 @@ import {
   sortNewestFirst,
   shouldBackup,
   staleBackups,
-  stripExtension,
   filenameFromUri,
 } from "./autoBackup";
 import { DateTime } from "luxon";
@@ -77,23 +76,6 @@ describe("backupFilename / parseBackupTime", () => {
     expect(shouldBackup(names, DateTime.fromISO("2026-09-04T13:00:00Z").toMillis())).toBe(
       false,
     );
-  });
-});
-
-describe("stripExtension (SAF createFileAsync wants no extension)", () => {
-  it("drops the .json", () => {
-    expect(stripExtension("tet-auto-2026-09-04T183000.json")).toBe(
-      "tet-auto-2026-09-04T183000",
-    );
-  });
-
-  it("leaves a name that has no extension alone", () => {
-    expect(stripExtension("tet-auto-2026-09-04T183000")).toBe("tet-auto-2026-09-04T183000");
-  });
-
-  it("round-trips with backupFilename", () => {
-    const now = utc("2026-09-04T18:30:00");
-    expect(`${stripExtension(backupFilename(now))}.json`).toBe(backupFilename(now));
   });
 });
 

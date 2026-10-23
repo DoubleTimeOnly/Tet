@@ -5,7 +5,6 @@
   "description": "All-in-one daily learning tasks with verifiable completion",
   "main": "expo-router/entry",
   "scripts": {
-    "postinstall": "patch-package",
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
@@ -50,17 +49,7 @@
     "@types/luxon": "^3.4.2",
     "@types/node": "^22.10.0",
     "jest": "^29.7.0",
-    "patch-package": "^8.0.1",
     "ts-jest": "^29.2.5",
     "typescript": "^5.6.3"
-  },
-  "expo": {
-    "autolinking": {
-      "android": {
-        "buildFromSource": [
-          "expo-file-system"
-        ]
-      }
-    }
   }
 }

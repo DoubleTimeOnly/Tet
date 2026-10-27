@@ -1,4 +1,5 @@
 import { createCard, grade } from "./fsrs";
+import { startOfNextTetDay } from "./dayKey";
 import type { Rating } from "../db/schema";
 
 const NOW = new Date("2026-06-15T12:00:00Z");
@@ -119,5 +120,42 @@ describe("interval fuzz", () => {
     const card = schedule(NOW, NOW, 4);
     const at = new Date(card.due);
     expect(grade(card, "good", at).card.due).toBe(grade(card, "good", at).card.due);
+  });
+});
+
+describe("same-day deferral", () => {
+  const TZ = "UTC";
+  it.each(["again", "hard", "good", "easy"] as Rating[])(
+    "a %s on a new card never comes due again the same Tet day",
+    (rating) => {
+      const card = createCard({ deckId: "d1", front: "q", back: "a", now: NOW });
+      const { card: next } = grade(card, rating, NOW, { tz: TZ });
+      expect(next.due).toBeGreaterThanOrEqual(startOfNextTetDay(NOW, TZ));
+      expect(next.due).toBe(new Date(JSON.parse(next.fsrs_state).due).getTime());
+    },
+  );
+
+  it("without a zone, short learning steps are left alone", () => {
+    const card = createCard({ deckId: "d1", front: "q", back: "a", now: NOW });
+    const { card: next } = grade(card, "good", NOW);
+    expect(next.due).toBeLessThan(startOfNextTetDay(NOW, TZ));
+  });
+});
+
+describe("interval direction", () => {
+  it("Hard grows the interval less than Good, but does not shrink it (only Again does)", () => {
+    let card = createCard({ deckId: "d1", front: "q", back: "a", now: NOW });
+    let when = NOW;
+    for (let i = 0; i < 6; i++) {
+      card = grade(card, "good", when).card;
+      when = new Date(card.due);
+    }
+    const prevDays = JSON.parse(card.fsrs_state).scheduled_days;
+    const hard = grade(card, "hard", when).card;
+    const good = grade(card, "good", when).card;
+    const hardDays = JSON.parse(hard.fsrs_state).scheduled_days;
+    const goodDays = JSON.parse(good.fsrs_state).scheduled_days;
+    expect(hardDays).toBeGreaterThanOrEqual(prevDays);
+    expect(hardDays).toBeLessThan(goodDays);
   });
 });

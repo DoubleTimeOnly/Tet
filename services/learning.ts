@@ -167,7 +167,7 @@ export async function gradeCard(
 ): Promise<Card> {
   const card = await store.getCard(cardId);
   if (!card) throw new Error(`gradeCard: no card ${cardId}`);
-  const { card: next, review } = grade(card, rating, now);
+  const { card: next, review } = grade(card, rating, now, { tz });
   await store.updateCardScheduling(next);
   await store.insertReview(review);
   // Credit flashcard tasks from the day's cumulative review count, so a day's

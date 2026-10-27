@@ -8,6 +8,7 @@ import {
   type Grade,
 } from "ts-fsrs";
 import { newId } from "./id";
+import { startOfNextTetDay } from "./dayKey";
 import type { Card, Review, Rating, CardState } from "../db/schema";
 
 /**
@@ -118,7 +119,7 @@ export function grade(
   card: Card,
   rating: Rating,
   now: Date | number,
-  opts: { reviewId?: string } = {},
+  opts: { reviewId?: string; tz?: string } = {},
 ): GradeResult {
   const nowDate = now instanceof Date ? now : new Date(now);
   const fsrsCard = reviveFsrsCard(card.fsrs_state);
@@ -127,6 +128,16 @@ export function grade(
     nowDate,
     RATING_TO_FSRS[rating],
   );
+
+  // Learning/relearning steps are minutes long, so a card graded today could
+  // come due again today and resurface right after the day's queue emptied.
+  // With a zone known, defer anything landing before the next Tet day to its
+  // start. ts-fsrs derives elapsed time from last_review, not due, so the
+  // later steps are unaffected.
+  if (opts.tz !== undefined) {
+    const nextDay = startOfNextTetDay(nowDate, opts.tz);
+    if (new Date(nextCard.due).getTime() < nextDay) nextCard.due = new Date(nextDay);
+  }
 
   return {
     card: syncScheduling(card, nextCard),

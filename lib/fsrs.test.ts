@@ -125,7 +125,13 @@ describe("interval fuzz", () => {
 
 describe("same-day deferral", () => {
   const TZ = "UTC";
-  it.each(["again", "hard", "good", "easy"] as Rating[])(
+  it("Again stays in today's queue (due within minutes)", () => {
+    const card = createCard({ deckId: "d1", front: "q", back: "a", now: NOW });
+    const { card: next } = grade(card, "again", NOW, { tz: TZ });
+    expect(next.due).toBeLessThan(startOfNextTetDay(NOW, TZ));
+  });
+
+  it.each(["hard", "good", "easy"] as Rating[])(
     "a %s on a new card never comes due again the same Tet day",
     (rating) => {
       const card = createCard({ deckId: "d1", front: "q", back: "a", now: NOW });

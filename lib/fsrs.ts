@@ -132,9 +132,9 @@ export function grade(
   // Learning/relearning steps are minutes long, so a card graded today could
   // come due again today and resurface right after the day's queue emptied.
   // With a zone known, defer anything landing before the next Tet day to its
-  // start. ts-fsrs derives elapsed time from last_review, not due, so the
+  // start — except Again, which should stay in today's queue. ts-fsrs derives elapsed time from last_review, not due, so the
   // later steps are unaffected.
-  if (opts.tz !== undefined) {
+  if (opts.tz !== undefined && rating !== "again") {
     const nextDay = startOfNextTetDay(nowDate, opts.tz);
     if (new Date(nextCard.due).getTime() < nextDay) nextCard.due = new Date(nextDay);
   }
